@@ -10,7 +10,7 @@ export type StreamDataType = {
 }
 
 export const useSSE = (url: string, modelName: ModelConfigKey) => {
-  const [data, setData] = useState<StreamDataType>()
+  const [data, setData] = useState<StreamDataType | null>(null)
   const [error, setError] = useState<{
     message: string
     code: number
@@ -32,7 +32,7 @@ export const useSSE = (url: string, modelName: ModelConfigKey) => {
     messages: MessagesType[] // 只传入当前的内容，会去后端数据库查询上下文消息，如果内容有引用上文消息，传入到数组中
   ) => {
     // 初始化状态
-    setData({ content: null, type: 'content' })
+    setData(null)
     setError(null)
     setIsLoading(true)
     setIsDone(false)
@@ -56,18 +56,20 @@ export const useSSE = (url: string, modelName: ModelConfigKey) => {
         throw new Error('响应不支持流式传输')
       }
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json()
         throw new Error(errorData.error || response.statusText)
       }
       // 将二进制流转换为文本流
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
-      
+
       try {
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
           const chunk = decoder.decode(value, { stream: true })
+          console.log(chunk, 'chunk');
+          
           const parsedChunk = parseChunk(chunk)
           setData(parsedChunk)
         }

@@ -1,19 +1,17 @@
 'use client'
 import Editor from '@/components/Editor'
-import MarkdownRender from '@/components/MarkdownRender'
+import { MessageItem } from '@/components/MessageItem'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { useSSE } from '@/hooks/useSSE'
-import { useChatStore } from '@/store/chat'
 import { MessageRoleType } from '@/types'
-import { Copy, RefreshCw, SquarePen, Trash2 } from 'lucide-react'
+import { MessagesType } from '@/types/model/model-config'
 import { useTheme } from 'next-themes'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 // 聊天消息为空展示内容
 const ChatLoading = () => {
@@ -48,17 +46,19 @@ const ChatLoading = () => {
 }
 
 // 对话容器
-const ChatMessageWrapper = () => {
+const ChatMessageWrapper = ({ messages }: { messages: MessagesType[] }) => {
   return (
     <ScrollArea className='overflow-y-auto flex-1 w-full'>
       <div className='relative flex-1 p-4 pb-7 max-w-[800px] max-md:w-[100vw] mx-auto opacity-100'>
-        {new Array(10).fill(0).map((item, index) => (
-          <MessageItem
-            key={index}
-            role={'assistant'}
-            isLast={index === 9}
-          />
-        ))}
+        {messages.length > 0 &&
+          messages.map((message, index) => (
+            <MessageItem
+              key={index}
+              role={message.role as MessageRoleType}
+              content={message.content}
+              isLast={index === messages.length - 1}
+            />
+          ))}
       </div>
       {/* 占位 */}
       <div className='h-4'></div>
@@ -67,130 +67,52 @@ const ChatMessageWrapper = () => {
   )
 }
 
-// 渲染每一条message
-const MessageItem = ({
-  role,
-  isLast
-}: {
-  role: MessageRoleType
-  isLast: boolean
-}) => {
-  const isUser = role === 'user'
-  const isAI = role === 'assistant'
-  return (
-    <div className='w-full group'>
-      <div className='flex flex-col item-end gap-2 w-full mt-3'>
-        {isUser ? <UserMessage /> : <AIMessage />}
-        <div
-          className={`flex flex-col justify-start w-full h-[40px] select-none ${
-            !isLast && 'opacity-0'
-          } group-hover:opacity-100 transition-opacity duration-200`}
-        >
-          <div
-            className={`flex flex-row ${
-              isUser ? 'justify-end' : 'justify-start'
-            } w-full gap-[10px] text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]`}
-          >
-            <TooltipProvider>
-              {/* 修改按钮 -> 只有user才能修改 */}
-              {isUser && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className='w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px]'>
-                      <SquarePen size={16} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>修改</TooltipContent>
-                </Tooltip>
-              )}
-              {/* 复制按钮 */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className='w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px]'>
-                    <Copy size={16} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>复制</TooltipContent>
-              </Tooltip>
-              {/* 重新生成 -> 只有ai回复的消息并且是最后条消息才展示 */}
-              {isAI && isLast && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className='w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px]'>
-                      <RefreshCw size={16} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>重新生成</TooltipContent>
-                </Tooltip>
-              )}
-              {/* 删除按钮 */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className='w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px] text-red-500'>
-                    <Trash2 size={16} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>删除</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// 用户发出的消息
-const UserMessage = () => {
-  return (
-    <div className='bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] px-4 py-3 min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all ml-auto'>
-      helloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdashelloasdas
-    </div>
-  )
-}
-
-// AI回复的消息
-const AIMessage = () => {
-  return (
-    <div className='flex-wrap max-w-[90%] flex items-center py-3 min-w-2 rounded-[16px] whitespace-pre-wrap break-all mr-auto'>
-      {/* 渲染 Markdown */}
-      <MarkdownRender />
-      {/* 显示 loading 状态 */}
-      {/* {(
-          <div className='flex items-center mt-2'>
-            <div className='w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin'></div>
-            <span className='ml-2 text-blue-500'>AI 正在思考中...</span>
-          </div>
-        )} */}
-    </div>
-  )
-}
-
 const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
   const { data, error, isLoading, isDone, play, stop } = useSSE(
     '/api/chat',
-    'DeepSeek-R1'
+    'Qwen3'
   )
+  const [messages, setMessages] = useState<MessagesType[]>([])
+  const messagesRef = useRef<MessagesType[]>([])
+
+  // 保持 ref 与 state 同步
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
 
   useEffect(() => {
-    console.log(isDone)
-
-    if (isDone) {
-      set(false)
-    }
-  }, [isDone])
-
-  const { setLoading: set } = useChatStore()
-
-  useEffect(() => {
-    if (data) {
-      console.log(data)
+    if (data && data.content) {
+      const { type, content } = data
+      setMessages(prevMessages => {
+        // 使用 ref 获取最新状态
+        const currentMessages = messagesRef.current
+        const lastMessageIndex = currentMessages.length - 1
+        const lastMessage = currentMessages[lastMessageIndex]
+        if (!lastMessage) return currentMessages
+        const updatedLastMessage = {
+          ...lastMessage,
+          // type：'content' | 'reasoning'
+          [type]: (lastMessage[type] || '') + content
+        }
+        const newMessages = [
+          ...currentMessages.slice(0, lastMessageIndex),
+          updatedLastMessage,
+          ...currentMessages.slice(lastMessageIndex + 1)
+        ]
+        return newMessages
+      })
     }
   }, [data])
-  const handleSendMessage = () => {
-    play([{ role: 'user', content: 'hello' }])
-    set(true)
+
+  const handleSendMessage = (message: string) => {
+    const _messages = [
+      ...messages,
+      { role: 'user', content: message },
+      { role: 'assistant', content: '', reasoning: '' }
+    ] as MessagesType[]
+    setMessages(_messages)
+    play(_messages)
   }
 
   return (
@@ -239,7 +161,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         </div>
         {/* 聊天容器 */}
         {/* <ChatLoading /> */}
-        <ChatMessageWrapper />
+        <ChatMessageWrapper messages={messages} />
         {/* 输入框 */}
         <div className='rounded-xl w-full max-w-[800px] p-4 pt-0'>
           <Editor onSend={handleSendMessage} />

@@ -12,6 +12,7 @@ export type ModelConfigType = {
 export type MessagesType = {
   role: 'system' | 'user' | 'assistant'
   content: string
+  reasoning?: string
 }
 
 // 对话类型

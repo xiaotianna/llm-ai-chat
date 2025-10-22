@@ -8,7 +8,7 @@ import { ChatType } from '@/types/model/model-config'
 
 interface EditorProps {
   onInput?: (value: string) => void
-  onSend?: () => void,
+  onSend?: (message: string) => void,
   type?: ChatType // 对话类型，会进行模型的筛选
 }
 
@@ -43,7 +43,7 @@ const Editor = ({ onInput, onSend, type = 'chat' }: EditorProps) => {
           // contentEditable 元素不支持 onChange 事件
           onInput={(e) => {
             const el = e.currentTarget
-            setContent(el.textContent.trim())
+            setContent(el.textContent?.trim() || '')
             // 删除所有 <br> 和空白内容
             if (!el.textContent?.trim()) {
               el.innerHTML = ''
@@ -81,7 +81,17 @@ const Editor = ({ onInput, onSend, type = 'chat' }: EditorProps) => {
           data-slot='button'
           className="gap-2 whitespace-nowrap text-sm font-medium disabled:pointer-events-none disabled:opacity-45 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4.5 shrink-0 [&amp;_svg]:shrink-0 outline-none aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))] hover:bg-[rgba(var(--coze-brand-2),var(--coze-brand-2-alpha))] flex w-[48px] h-[32px] items-center border-none justify-center py-1 px-4 cursor-pointer rounded-full transition-all has-[>svg]:px-4 bg-[#5147FF]"
           disabled={content.length === 0 || isLoading}
-          onClick={onSend}
+          onClick={() => {
+            if (onSend && content.trim()) {
+              onSend(content.trim());
+              // 清空输入框
+              if (editableRef.current) {
+                editableRef.current.textContent = '';
+                editableRef.current.setAttribute('data-empty', 'true');
+              }
+              setContent('');
+            }
+          }}
         >
           {isLoading ? (
             <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>

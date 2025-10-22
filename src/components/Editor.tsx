@@ -1,0 +1,97 @@
+'use client'
+import React, { useEffect, useRef, useState } from 'react'
+import styles from './HomeDefault.module.css'
+import EditorFunctional from './EditorFunctional'
+import SendMessageIcon from './icon/sendMessage-icon'
+import { useChatStore } from '@/store/chat'
+import { ChatType } from '@/types/model/model-config'
+
+interface EditorProps {
+  onInput?: (value: string) => void
+  onSend?: () => void,
+  type?: ChatType // 对话类型，会进行模型的筛选
+}
+
+const Editor = ({ onInput, onSend, type = 'chat' }: EditorProps) => {
+  const editableRef = useRef<HTMLDivElement>(null)
+  const [ content, setContent ] = useState<string>('')
+  const isLoading = useChatStore.getState().isLoading
+  const setLoading = useChatStore.getState().setLoading
+
+  useEffect(() => {
+    if (onInput) {
+      onInput(content)
+    }
+  }, [content])
+
+  useEffect(() => {
+    if (isLoading) {
+      setLoading(false)
+    }
+  }, [])
+
+  return (
+    <div className='border w-full p-4 relative rounded-2xl bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] shadow-[0px_2px_6px_0px_rgba(var(--coze-shadow-0),.04),0px_4px_12px_0px_rgba(var(--coze-shadow-0),.02)] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))'>
+      <div className='p-0 pb-0 relative'>
+        <p
+          contentEditable={true}
+          data-placeholder='发送消息...'
+          data-tribute='true'
+          spellCheck={false}
+          className={`${styles['input-area']} w-full text-base text-[rgba(var(--coze-fg-3),var(--coze-fg-3-alpha))] min-h-[62px] max-h-[222px] transition-all overflow-y-auto whitespace-pre-wrap caret-[1px] border-none rounded-none outline-none resize-none p-0 focus:ring-0 focus-visible:border-ring focus-visible:ring-[0px] focus:shadow-none focus:outline-none shadow-none empty:before:content-[attr(data-placeholder)] empty:before:text-[var(--coz-fg-secondary,#2029459e)] empty:before:block`}
+          ref={editableRef}
+          // contentEditable 元素不支持 onChange 事件
+          onInput={(e) => {
+            const el = e.currentTarget
+            setContent(el.textContent.trim())
+            // 删除所有 <br> 和空白内容
+            if (!el.textContent?.trim()) {
+              el.innerHTML = ''
+              el.setAttribute('data-empty', 'true')
+            } else {
+              el.removeAttribute('data-empty')
+            }
+          }}
+          onFocus={(e) => {
+            const el = e.currentTarget
+            if (!el.textContent?.trim()) {
+              el.setAttribute('data-empty', 'true')
+            }
+          }}
+          onBlur={(e) => {
+            const el = e.currentTarget
+            if (!el.textContent?.trim()) {
+              el.setAttribute('data-empty', 'true')
+            }
+          }}
+          onPaste={(e) => {
+            e.preventDefault()
+            // 获取纯文本内容
+            const text = (e.clipboardData || window.Clipboard).getData('text')
+            // 插入纯文本
+            document.execCommand('insertText', false, text)
+          }}
+        ></p>
+      </div>
+      <div className='flex pt-2 items-center justify-between'>
+        {/* 左侧功能按钮 */}
+        <EditorFunctional type={type} />
+        {/* 右侧发送按钮 */}
+        <button
+          data-slot='button'
+          className="gap-2 whitespace-nowrap text-sm font-medium disabled:pointer-events-none disabled:opacity-45 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4.5 shrink-0 [&amp;_svg]:shrink-0 outline-none aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))] hover:bg-[rgba(var(--coze-brand-2),var(--coze-brand-2-alpha))] flex w-[48px] h-[32px] items-center border-none justify-center py-1 px-4 cursor-pointer rounded-full transition-all has-[>svg]:px-4 bg-[#5147FF]"
+          disabled={content.length === 0 || isLoading}
+          onClick={onSend}
+        >
+          {isLoading ? (
+            <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
+          ) : (
+            <SendMessageIcon />
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default Editor

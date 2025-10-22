@@ -1,0 +1,25 @@
+import React from 'react'
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+const CodingPage = () => {
+  return (
+    <div>
+
+      <Files>
+  <Folder name="app" defaultOpen>
+    <File name="layout.tsx" />
+    <File name="page.tsx" />
+    <File name="global.css" />
+  </Folder>
+  <Folder name="components">
+    <File name="button.tsx" />
+    <File name="tabs.tsx" />
+    <File name="dialog.tsx" />
+  </Folder>
+  <File name="package.json" />
+</Files>
+    </div>
+  )
+}
+
+export default CodingPage

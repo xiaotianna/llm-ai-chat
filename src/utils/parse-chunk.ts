@@ -36,25 +36,14 @@ import { OpenRouterChunkResponse } from '@/types/model/open-router-response'
  */
 // 结束的数据格式为：'data: [DONE]'
 export const parseChunk = (
-  chunk: string,
-  model: ModelType
+  chunk: string
 ): { content: string | null; type: 'content' | 'reasoning' } => {
   const lines = chunk.split('\n').filter((line) => line.trim())
   for (const line of lines) {
-    const prefix = model.prefix
+    const prefix = 'data: '
     if (line.startsWith(prefix)) {
       // 移除 'data: ' 前缀
       const data = line.substring(prefix.length).trim()
-      if (data === model.doneFlage) {
-        // 流结束信号
-        /**
-         * 这是大模型给的最后一条数据，由于考虑到不同大模型返回的结果不同
-         * 统一由 ReadableStream 来处理，const { done, value } = await reader.read()，
-         * 也就是这里的 done
-         */
-        // 在useSSE中做了done的处理
-        break
-      }
       try {
         const parsed: OpenRouterChunkResponse = JSON.parse(data)
         // 思考内容
@@ -72,8 +61,9 @@ export const parseChunk = (
             return { type: 'content', content }
           }
         }
-      } catch (parseError) {
+      } catch (parseError: any) {
         console.error('Error parsing SSE data:', data)
+        throw new Error('Error parsing SSE data: ' + parseError.message)
       }
     }
   }

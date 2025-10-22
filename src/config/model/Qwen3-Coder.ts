@@ -21,9 +21,5 @@ export const Qwen3CoderModel = {
     content: 'You are a helpful assistant.'
   },
   // 模型提供商
-  provider: 'open-router',
-  // sse数据标识
-  prefix: 'data: ',
-  // 结束标识
-  doneFlage: '[DONE]'
+  provider: 'open-router'
 } as const

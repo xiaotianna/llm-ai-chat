@@ -169,7 +169,7 @@ const AIMessage = () => {
 const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
   const { data, error, isLoading, isDone, play, stop } = useSSE(
-    '/api/sse/chat-v1',
+    '/api/chat',
     'DeepSeek-R1'
   )
 

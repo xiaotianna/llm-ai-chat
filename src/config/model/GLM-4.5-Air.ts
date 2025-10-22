@@ -22,8 +22,4 @@ export const GLMAirModel = {
   },
   // 模型提供商
   provider: 'open-router',
-  // sse数据标识
-  prefix: 'data: ',
-  // 结束标识
-  doneFlage: '[DONE]'
 } as const

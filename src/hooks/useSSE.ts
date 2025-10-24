@@ -68,8 +68,6 @@ export const useSSE = (url: string, modelName: ModelConfigKey) => {
           const { done, value } = await reader.read()
           if (done) break
           const chunk = decoder.decode(value, { stream: true })
-          console.log(chunk, 'chunk');
-          
           const parsedChunk = parseChunk(chunk)
           setData(parsedChunk)
         }

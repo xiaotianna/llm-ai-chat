@@ -71,36 +71,33 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
   const { data, error, isLoading, isDone, play, stop } = useSSE(
     '/api/chat',
-    'Qwen3'
+    'DeepSeek-R1'
   )
   const [messages, setMessages] = useState<MessagesType[]>([])
-  const messagesRef = useRef<MessagesType[]>([])
-
-  // 保持 ref 与 state 同步
-  useEffect(() => {
-    messagesRef.current = messages
-  }, [messages])
 
   useEffect(() => {
     if (data && data.content) {
       const { type, content } = data
-      setMessages(prevMessages => {
-        // 使用 ref 获取最新状态
-        const currentMessages = messagesRef.current
-        const lastMessageIndex = currentMessages.length - 1
-        const lastMessage = currentMessages[lastMessageIndex]
-        if (!lastMessage) return currentMessages
+      // 关键：使用函数参数 prevMessages（React 保证是最新状态）
+      setMessages((prevMessages) => {
+        // 直接基于最新的 prevMessages 操作，而非 ref
+        const lastMessageIndex = prevMessages.length - 1
+        const lastMessage = prevMessages[lastMessageIndex]
+        // 边界处理：若没有最后一条消息（理论上不会出现，因 send 时已添加 assistant 消息）
+        if (!lastMessage || lastMessage.role !== 'assistant') {
+          return prevMessages
+        }
+        // 拼接当前 type（content/reasoning）的内容
         const updatedLastMessage = {
           ...lastMessage,
-          // type：'content' | 'reasoning'
           [type]: (lastMessage[type] || '') + content
         }
-        const newMessages = [
-          ...currentMessages.slice(0, lastMessageIndex),
+        // 替换最后一条消息，返回新数组（保证不可变性）
+        return [
+          ...prevMessages.slice(0, lastMessageIndex),
           updatedLastMessage,
-          ...currentMessages.slice(lastMessageIndex + 1)
+          ...prevMessages.slice(lastMessageIndex + 1)
         ]
-        return newMessages
       })
     }
   }, [data])

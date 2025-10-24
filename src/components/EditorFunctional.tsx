@@ -1,14 +1,9 @@
-import React, { useState } from 'react'
+import React from 'react'
 import AIModelIcon from './icon/aiModel-icon'
 import FunctionalDropdown from './FunctionalDropdown'
 import { models } from '@/config/model'
-import { ChatType } from '@/types/model/model-config'
 
-interface EditorFunctionalProps {
-  type?: ChatType
-}
-
-const EditorFunctional: React.FC<EditorFunctionalProps> = () => {
+const EditorFunctional: React.FC = () => {
   return (
     <div className='flex space-x-2'>
       {/* 模型切换 */}

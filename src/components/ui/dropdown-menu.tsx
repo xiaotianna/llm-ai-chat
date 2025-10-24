@@ -42,6 +42,9 @@ function DropdownMenuTrigger({
 function DropdownMenuContent({
   className,
   sideOffset = 6,
+  // 避免被遮挡
+  avoidCollisions = true,
+  collisionPadding = 8,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
   return (

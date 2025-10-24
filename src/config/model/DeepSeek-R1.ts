@@ -15,10 +15,7 @@ export const DeepSeekR1Model = {
       stream: true
     })
   },
-  system_message: {
-    role: 'system',
-    content: 'You are a helpful assistant.'
-  },
+  system_message: {},
   // 模型提供商
   provider: 'open-router'
 } as const

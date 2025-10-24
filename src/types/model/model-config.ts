@@ -14,6 +14,3 @@ export type MessagesType = {
   content: string
   reasoning?: string
 }
-
-// 对话类型
-export type ChatType = 'chat' | 'image' | 'code'

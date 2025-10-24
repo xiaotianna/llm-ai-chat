@@ -4,15 +4,13 @@ import styles from './HomeDefault.module.css'
 import EditorFunctional from './EditorFunctional'
 import SendMessageIcon from './icon/sendMessage-icon'
 import { useChatStore } from '@/store/chat'
-import { ChatType } from '@/types/model/model-config'
 
 interface EditorProps {
   onInput?: (value: string) => void
   onSend?: (message: string) => void,
-  type?: ChatType // 对话类型，会进行模型的筛选
 }
 
-const Editor = ({ onInput, onSend, type = 'chat' }: EditorProps) => {
+const Editor = ({ onInput, onSend }: EditorProps) => {
   const editableRef = useRef<HTMLDivElement>(null)
   const [ content, setContent ] = useState<string>('')
   const isLoading = useChatStore.getState().isLoading
@@ -75,7 +73,7 @@ const Editor = ({ onInput, onSend, type = 'chat' }: EditorProps) => {
       </div>
       <div className='flex pt-2 items-center justify-between'>
         {/* 左侧功能按钮 */}
-        <EditorFunctional type={type} />
+        <EditorFunctional />
         {/* 右侧发送按钮 */}
         <button
           data-slot='button'

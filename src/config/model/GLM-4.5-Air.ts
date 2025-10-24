@@ -4,7 +4,6 @@ export const GLMAirModel = {
   description: '智谱AI轻量级大模型，推理效率高，中文对话质量优秀',
   url: 'https://openrouter.ai/api/v1/chat/completions',
   model: 'z-ai/glm-4.5-air:free',
-  type: 'chat',
   requestConfig: {
     method: 'POST',
     headers: {

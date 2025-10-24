@@ -18,7 +18,6 @@ import {
 
 import Image from 'next/image'
 import MobileMenu from './MobileMenu'
-import DesktopMenu from './DesktopMenu'
 import { useUserStore } from '@/store/user'
 import { toast } from 'sonner'
 import { USER_TYPE_MAP } from '@/constant/common'
@@ -167,10 +166,6 @@ export default function Navbar() {
               <span>AI Chat</span>
             </div>
           </Link>
-        </div>
-        {/* 桌面端菜单 */}
-        <div className='ml-8 mr-auto hidden md:block'>
-          <DesktopMenu navMenus={navMenus} />
         </div>
         {/* 右侧按钮容器 */}
         <div className='flex items-center gap-4'>

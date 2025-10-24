@@ -4,7 +4,6 @@ export const Qwen3CoderModel = {
   description: '通义千问代码专家模型，专为编程任务优化，代码生成能力突出',
   url: 'https://openrouter.ai/api/v1/chat/completions',
   model: 'qwen/qwen3-coder:free',
-  type: 'chat',
   requestConfig: {
     method: 'POST',
     headers: {

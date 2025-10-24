@@ -4,7 +4,6 @@ export const TencentHunYuanModel = {
   description: '腾讯混元大模型，中文理解能力强，适合复杂指令执行',
   url: 'https://openrouter.ai/api/v1/chat/completions',
   model: 'tencent/hunyuan-a13b-instruct:free',
-  type: 'chat',
   requestConfig: {
     method: 'POST',
     headers: {

@@ -81,10 +81,6 @@ const SettingDropdown = ({ children }: SettingDropdownProps) => {
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>
-        <DropdownMenuItem className='cursor-pointer'>
-          <Bolt className='text-[18px] w-[18px] h-[18px]' color={'rgba(var(--coze-fg-3),var(--coze-fg-3-alpha))'} />
-          <span>通用设置</span>
-        </DropdownMenuItem>
         <DropdownMenuItem className='cursor-pointer' onClick={handleLogout}>
           <LogOut className='text-[18px] w-[18px] h-[18px]' color={'rgba(var(--coze-fg-3),var(--coze-fg-3-alpha))'} />
           <span>退出登录</span>

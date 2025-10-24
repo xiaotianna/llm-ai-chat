@@ -56,36 +56,55 @@ const Aside = () => {
         {/* 历史记录列表 */}
         <History />
       </div>
-      {/* 设置 */}
-      <SettingDropdown>
-        <div className='p-3 flex gap-2 cursor-pointer items-center mt-auto'>
+      {/* 设置区域 */}
+      {user ? (
+        <SettingDropdown>
+          <div className='p-3 flex gap-2 cursor-pointer items-center mt-auto'>
+            {/* 头像 */}
+            <div className='size-8 rounded-sm overflow-hidden'>
+              {avatarLoaded && user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt='user-pic'
+                  width={32}
+                  height={32}
+                  className='w-full h-full'
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.src = '/logo.png'
+                    setAvatarLoaded(false)
+                  }}
+                />
+              ) : (
+                <div className='w-full h-full flex justify-center items-center bg-[#4080ff]'>
+                  <CircleUserRound className='w-5 h-5 text-white' />
+                </div>
+              )}
+            </div>
+            {/* 用户名 */}
+            <div className='flex-1 truncate text-left text-sm'>
+              {user?.name || '用户名'}
+            </div>
+          </div>
+        </SettingDropdown>
+      ) : (
+        // 未登录时显示的内容
+        <div 
+          className='p-3 flex gap-2 cursor-pointer items-center mt-auto'
+          onClick={() => router.push('/login')}
+        >
           {/* 头像 */}
           <div className='size-8 rounded-sm overflow-hidden'>
-            {avatarLoaded && user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt='user-pic'
-                width={32}
-                height={32}
-                className='w-full h-full'
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.src = '/logo.png'
-                  setAvatarLoaded(false)
-                }}
-              />
-            ) : (
-              <div className='w-full h-full flex justify-center items-center bg-[#4080ff]'>
-                <CircleUserRound className='w-5 h-5 text-white' />
-              </div>
-            )}
+            <div className='w-full h-full flex justify-center items-center bg-[#4080ff]'>
+              <CircleUserRound className='w-5 h-5 text-white' />
+            </div>
           </div>
-          {/* 用户名 */}
+          {/* 未登录提示 */}
           <div className='flex-1 truncate text-left text-sm'>
-            {user?.name || '未登录'}
+            未登录
           </div>
         </div>
-      </SettingDropdown>
+      )}
     </div>
   )
 }

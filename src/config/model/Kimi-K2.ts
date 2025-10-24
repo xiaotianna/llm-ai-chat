@@ -4,7 +4,6 @@ export const KimiK2Model = {
   description: '月之暗面新一代大模型，超长文本处理能力，中英文对话流畅',
   url: 'https://openrouter.ai/api/v1/chat/completions',
   model: 'moonshotai/kimi-k2:free',
-  type: 'chat',
   requestConfig: {
     method: 'POST',
     headers: {

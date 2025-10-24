@@ -4,7 +4,6 @@ export const Qwen3Model = {
   description: '通义千问，多语言能力强，高性能中文大模型',
   url: 'https://openrouter.ai/api/v1/chat/completions',
   model: 'qwen/qwen3-235b-a22b:free',
-  type: 'chat',
   requestConfig: {
     method: 'POST',
     headers: {

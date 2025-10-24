@@ -4,7 +4,6 @@ export const DeepSeekR1Model = {
   description: '深度求索研发的高性能模型，逻辑推理和代码生成能力强',
   url: 'https://openrouter.ai/api/v1/chat/completions',
   model: 'tngtech/deepseek-r1t2-chimera:free',
-  type: 'chat',
   requestConfig: {
     method: 'POST',
     headers: {
@@ -21,5 +20,5 @@ export const DeepSeekR1Model = {
     content: 'You are a helpful assistant.'
   },
   // 模型提供商
-  provider: 'open-router',
+  provider: 'open-router'
 } as const

@@ -4,7 +4,6 @@ export const OpenAIGPTOSSModel = {
   description: '开源GPT架构大模型，综合能力均衡，多语言支持良好',
   url: 'https://openrouter.ai/api/v1/chat/completions',
   model: 'openai/gpt-oss-20b:free',
-  type: 'chat',
   requestConfig: {
     method: 'POST',
     headers: {

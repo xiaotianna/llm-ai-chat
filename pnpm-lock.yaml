@@ -17,6 +17,7 @@ specifiers:
   '@radix-ui/react-tooltip': ^1.2.7
   '@supabase/supabase-js': ^2.52.1
   '@tailwindcss/postcss': ^4
+  '@types/js-cookie': ^3.0.6
   '@types/mdx': ^2.0.13
   '@types/node': ^20
   '@types/react': ^19
@@ -26,6 +27,7 @@ specifiers:
   clsx: ^2.1.1
   framer-motion: ^12.18.1
   gray-matter: ^4.0.3
+  js-cookie: ^3.0.5
   lucide-react: ^0.513.0
   next: 15.3.3
   next-mdx-remote: ^5.0.0
@@ -71,6 +73,7 @@ dependencies:
   clsx: 2.1.1
   framer-motion: 12.18.1_j6k6oay3ugsr56slyfvma2drry
   gray-matter: 4.0.3
+  js-cookie: 3.0.5
   lucide-react: 0.513.0_react@19.1.0
   next: 15.3.3_j6k6oay3ugsr56slyfvma2drry
   next-mdx-remote: 5.0.0_3y7tt4djiwyqqlve4dazz5ae6q
@@ -93,6 +96,7 @@ dependencies:
 
 devDependencies:
   '@tailwindcss/postcss': 4.1.8
+  '@types/js-cookie': 3.0.6
   '@types/node': 20.19.0
   '@types/react': 19.1.7
   '@types/react-dom': 19.1.6_@types+react@19.1.7
@@ -1767,6 +1771,10 @@ packages:
       '@types/unist': 3.0.3
     dev: false
 
+  /@types/js-cookie/3.0.6:
+    resolution: {integrity: sha512-wkw9yd1kEXOPnvEeEV1Go1MmxtBJL0RR79aOTAApecWFVu7w0NNXNqhcWgvw2YgZDYadliXkl14pa3WXw5jlCQ==}
+    dev: true
+
   /@types/mdast/4.0.4:
     resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
     dependencies:
@@ -2416,6 +2424,11 @@ packages:
     resolution: {integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==}
     hasBin: true
     dev: true
+
+  /js-cookie/3.0.5:
+    resolution: {integrity: sha512-cEiJEAEoIbWfCZYKWhVwFuvPX1gETRYPw6LlaTKoxD3s2AkXzkCjnp6h0V77ozyqj0jakteJ4YqDJT830+lVGw==}
+    engines: {node: '>=14'}
+    dev: false
 
   /js-tokens/4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}

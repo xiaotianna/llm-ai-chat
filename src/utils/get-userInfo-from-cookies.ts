@@ -1,15 +1,12 @@
-import { User } from "@/store/user"
+import { User } from '@/store/user'
+import Cookies from 'js-cookie'
 
 // 从 cookies 中获取用户信息的辅助函数
 export const getUserInfoFromCookies = (): User | null => {
   if (typeof window === 'undefined') return null
 
   try {
-    const userInfoCookie = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('user-info='))
-      ?.split('=')[1]
-
+    const userInfoCookie = Cookies.get('user-info')
     if (userInfoCookie) {
       const userInfo = JSON.parse(decodeURIComponent(userInfoCookie))
       return {

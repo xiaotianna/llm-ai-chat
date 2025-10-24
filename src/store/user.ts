@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabase } from '@/config/supabase'
 import { getUserInfoFromCookies } from '@/utils/get-userInfo-from-cookies'
+import cookie from 'js-cookie'
 
 export interface User {
   id: string
@@ -37,9 +38,11 @@ const useUserStore = create<UserStore>()(
         if (typeof window !== 'undefined') {
           if (user) {
             const userInfoString = JSON.stringify(user);
-            document.cookie = `user-info=${encodeURIComponent(userInfoString)}; path=/; max-age=${30 * 24 * 60 * 60}`; // 30天过期
+            cookie.set('user-info', userInfoString);
+            localStorage.setItem('user-storage', userInfoString);
           } else {
-            document.cookie = 'user-info=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            cookie.remove('user-info');
+            localStorage.removeItem('user-storage');
           }
         }
       },
@@ -65,7 +68,6 @@ const useUserStore = create<UserStore>()(
 
           // 如果 cookies 中没有信息，尝试从 Supabase 获取
           const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          
           if (sessionError) {
             console.error('Session error:', sessionError);
             set({ user: null, isLoading: false, isInitialized: true });
@@ -91,7 +93,9 @@ const useUserStore = create<UserStore>()(
             }),
             type:  'github'
           };
-          set({ user: userInfo, isLoading: false, isInitialized: true });
+          // 确保用户信息被正确存储到 Cookie 中
+          get().setUser(userInfo);
+          set({ isLoading: false, isInitialized: true });
         } catch (error) {
           console.error('Error initializing user:', error);
           set({ user: null, isLoading: false, isInitialized: true });
@@ -108,7 +112,7 @@ const useUserStore = create<UserStore>()(
           
           // 清除cookies
           if (typeof window !== 'undefined') {
-            document.cookie = 'user-info=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            cookie.remove('user-info');
           }
           
           // 清除localStorage中的持久化数据
@@ -120,7 +124,7 @@ const useUserStore = create<UserStore>()(
           // 即使Supabase登出失败，也要清除本地数据
           set({ user: null, isInitialized: false });
           if (typeof window !== 'undefined') {
-            document.cookie = 'user-info=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            cookie.remove('user-info');
             localStorage.removeItem('user-storage');
           }
           throw error;

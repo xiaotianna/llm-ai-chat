@@ -58,39 +58,6 @@ export default function GitHubOAuthCallback() {
           }
         }
 
-        // // 检查是否有授权码（PKCE 流程）
-        // const urlParams = new URLSearchParams(window.location.search)
-        // const code = urlParams.get('code')
-        
-        // if (code) {
-        //   // 使用授权码交换会话
-        //   const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-          
-        //   if (exchangeError) {
-        //     console.error('Error exchanging code:', exchangeError)
-        //     setStatus('error')
-        //     setTimeout(() => {
-        //       router.replace('/github-oauth-authorization/failed')
-        //     }, 2000)
-        //     return
-        //   }
-
-        //   if (data.session) {
-        //     setStatus('success')
-        //     setTimeout(() => {
-        //       router.replace('/github-oauth-authorization/success')
-        //     }, 1000)
-        //     return
-        //   }
-        // }
-
-        // // 如果没有找到任何认证信息
-        // console.error('No authentication data found')
-        // setStatus('error')
-        // setTimeout(() => {
-        //   router.replace('/github-oauth-authorization/failed')
-        // }, 2000)
-
       } catch (error) {
         console.error('Unexpected error in auth callback:', error)
         setStatus('error')

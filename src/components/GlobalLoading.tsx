@@ -2,6 +2,7 @@
 
 import { useUserStore } from '@/store/user'
 import Loading from './Loading'
+import Cookies from 'js-cookie'
 
 export default function GlobalLoading() {
   const { isLoading, isInitialized } = useUserStore()

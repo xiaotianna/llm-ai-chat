@@ -1,7 +1,6 @@
-// Qwen3模型采用Open Router的接口
 export const Qwen3Model = {
   name: 'Qwen3-0.6b',
-  description: 'Ollama 本地 Qwen3 模型',
+  description: 'Ollama本地部署Qwen3模型',
   url: 'http://127.0.0.1:8000/api/v1/chat/completions',
   model: 'qwen3:0.6b',
   requestConfig: {

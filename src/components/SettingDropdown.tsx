@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,7 @@ import { useTheme } from 'next-themes'
 import { useUserStore } from '@/store/user'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import UserProfileModal from '@/components/UserProfileModal'
 
 const themeConfig = {
   system: '跟随系统',
@@ -30,6 +31,7 @@ const SettingDropdown = ({ children }: SettingDropdownProps) => {
   const { theme = 'system', setTheme } = useTheme()
   const { clearUser } = useUserStore()
   const router = useRouter()
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
 
   // 退出登录处理
   const handleLogout = async () => {
@@ -43,6 +45,13 @@ const SettingDropdown = ({ children }: SettingDropdownProps) => {
     }
   }
 
+  // 处理个人中心点击
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsProfileModalOpen(true)
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className='mt-auto'>{children}</DropdownMenuTrigger>
@@ -51,10 +60,11 @@ const SettingDropdown = ({ children }: SettingDropdownProps) => {
         className='flex border w-[220px] rounded-lg flex-col p-1 gap-1'
       >
         <DropdownMenuLabel>设置</DropdownMenuLabel>
-        <DropdownMenuItem className='cursor-pointer'>
+        <DropdownMenuItem className='cursor-pointer' onClick={handleProfileClick}>
           <Laugh className='text-[18px] w-[18px] h-[18px]' color={'rgba(var(--coze-fg-3),var(--coze-fg-3-alpha))'} />
           <span>个人中心</span>
         </DropdownMenuItem>
+        <UserProfileModal open={isProfileModalOpen} onOpenChange={setIsProfileModalOpen} />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className='cursor-pointer'>
             <div className='flex w-full items-center justify-between'>

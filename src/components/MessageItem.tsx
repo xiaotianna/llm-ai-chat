@@ -128,9 +128,9 @@ const AIMessage = ({
               <ReasoningContent>{reasoning}</ReasoningContent>
             </Reasoning>
           )}
-          <div className='flex-wrap max-w-[90%] flex items-center py-3 min-w-2 rounded-[16px] whitespace-pre-wrap break-all mr-auto'>
+          <div className='flex-wrap max-w-[90%]'>
             {/* 渲染 Markdown */}
-            {content && <MarkdownRender content={content} />}
+            {content && <MarkdownRender>{content}</MarkdownRender>}
           </div>
         </>
       ) : (

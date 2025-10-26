@@ -170,7 +170,7 @@ export const ReasoningContent = memo(
       )}
       {...props}
     >
-      <MarkdownRender content={children} className="grid gap-2" />
+      <MarkdownRender className="grid gap-2">{children}</MarkdownRender>
     </CollapsibleContent>
   )
 );

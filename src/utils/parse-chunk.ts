@@ -35,10 +35,12 @@ import { OpenRouterChunkResponse } from '@/types/model/open-router-response'
     }
  */
 // 结束的数据格式为：'data: [DONE]'
-export const parseChunk = (
-  chunk: string
-): { content: string | null; type: 'content' | 'reasoning' } => {
-  const lines = chunk.split('\n').filter((line) => line.trim())
+
+export type ParseChunkType = { content: string; type: 'content' | 'reasoning' }
+
+export const parseChunk = (chunk: string): ParseChunkType[] => {
+  const results: ParseChunkType[] = [];
+  const lines = chunk.split('\n\n').filter((line) => line.trim())
   for (const line of lines) {
     const prefix = 'data: '
     if (line.startsWith(prefix)) {
@@ -51,14 +53,14 @@ export const parseChunk = (
           const reasoning = parsed.choices[0].delta.reasoning
           if (reasoning) {
             // 返回思考内容，可以用于展示思考过程
-            return { type: 'reasoning', content: reasoning }
+            results.push({ type: 'reasoning', content: reasoning })
           }
         }
         // 提取内容
         if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta) {
           const content = parsed.choices[0].delta.content
           if (content) {
-            return { type: 'content', content }
+            results.push({ type: 'content', content })
           }
         }
       } catch (parseError: any) {
@@ -67,5 +69,5 @@ export const parseChunk = (
       }
     }
   }
-  return { content: null, type: 'content' }
+  return results
 }

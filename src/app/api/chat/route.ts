@@ -3,6 +3,9 @@ import { ModelConfigKey, ModelType } from '@/types/model/model-config'
 import { NextResponse } from 'next/server'
 import { type NextRequest } from 'next/server'
 import { openai } from '@/utils/open-ai'
+import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
+
+let messages: ChatCompletionMessageParam[] = []
 
 export async function POST(request: NextRequest) {
   // 设置 SSE 响应头
@@ -14,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { model: modelName, messages } = body
+  const { model: modelName, message } = body
   if (!modelName) {
     return NextResponse.json({ error: '模型名缺少' }, { status: 400 })
   }
@@ -27,11 +30,16 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   }
-  if (!messages) {
+  if (!message) {
     return NextResponse.json({ error: '缺少参数messages' }, { status: 400 })
   }
 
   try {
+    // 查询数据库，组合message
+    messages = [...messages, {
+      role: 'user',
+      content: message
+    }]
     const stream = await openai.chat(messages, model.model)
     // 创建 ReadableStream 来处理流式响应
     const readableStream = new ReadableStream({

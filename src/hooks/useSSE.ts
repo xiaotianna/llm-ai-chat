@@ -1,16 +1,9 @@
-import { ModelConfig } from '@/config/model'
 import { MessagesType, ModelConfigKey } from '@/types/model/model-config'
-import { parseChunk } from '@/utils/parse-chunk'
+import { parseChunk, ParseChunkType } from '@/utils/parse-chunk'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-export type StreamDataType = {
-  content: string | null
-  type: 'content' | 'reasoning'
-}
-
 export const useSSE = (url: string, modelName: ModelConfigKey) => {
-  const [data, setData] = useState<StreamDataType | null>(null)
   const [error, setError] = useState<{
     message: string
     code: number
@@ -28,11 +21,12 @@ export const useSSE = (url: string, modelName: ModelConfigKey) => {
     }
   }, [])
 
-  const connect = async (
-    messages: MessagesType[] // 只传入当前的内容，会去后端数据库查询上下文消息，如果内容有引用上文消息，传入到数组中
+  // 调用play触发sse请求
+  const play = async (
+    message: string, // 只传入当前的内容，会去后端数据库查询上下文消息，如果内容有引用上文消息，传入到数组中
+    onData: (chunk: ParseChunkType[]) => void
   ) => {
     // 初始化状态
-    setData(null)
     setError(null)
     setIsLoading(true)
     setIsDone(false)
@@ -47,7 +41,7 @@ export const useSSE = (url: string, modelName: ModelConfigKey) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          messages,
+          message,
           model: modelName
         }),
         signal: abortController.signal
@@ -61,20 +55,21 @@ export const useSSE = (url: string, modelName: ModelConfigKey) => {
       }
       // 将二进制流转换为文本流
       const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          const chunk = decoder.decode(value, { stream: true })
-          const parsedChunk = parseChunk(chunk)
-          setData(parsedChunk)
+      const decoder = new TextDecoder('utf-8')
+      while (true) {
+        // 检查是否已中止
+        if (abortController.signal.aborted) {
+          break
         }
-      } catch (error) {
-        console.error('Error reading stream:', error)
-      } finally {
-        reader.releaseLock()
+
+        const { done, value } = await reader.read()
+        if (done) {
+          break
+        }
+
+        const chunk = decoder.decode(value, { stream: true })
+        const parsedChunk = parseChunk(chunk)
+        onData(parsedChunk)
       }
     } catch (error: any) {
       // 忽略取消请求的错误
@@ -83,22 +78,22 @@ export const useSSE = (url: string, modelName: ModelConfigKey) => {
         setError(error.message || 'An error occurred')
       }
     } finally {
+      abortControllerRef.current = null
       setIsLoading(false)
       setIsDone(true)
     }
-  }
-
-  // 调用play触发sse请求
-  const play = (messages: MessagesType[]) => {
-    connect(messages)
   }
 
   // 中止请求
   const stop = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
+      abortControllerRef.current = null
     }
+
+    setIsLoading(false)
+    setIsDone(true)
   }
 
-  return { data, error, isLoading, isDone, play, stop }
+  return { error, isLoading, isDone, play, stop }
 }

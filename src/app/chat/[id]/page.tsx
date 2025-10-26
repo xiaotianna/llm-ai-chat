@@ -10,8 +10,9 @@ import {
 import { useSSE } from '@/hooks/useSSE'
 import { MessageRoleType } from '@/types'
 import { MessagesType } from '@/types/model/model-config'
+import { ParseChunkType } from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 
 // 聊天消息为空展示内容
 const ChatLoading = () => {
@@ -56,6 +57,7 @@ const ChatMessageWrapper = ({ messages }: { messages: MessagesType[] }) => {
               key={index}
               role={message.role as MessageRoleType}
               content={message.content}
+              reasoning={message.reasoning}
               isLast={index === messages.length - 1}
             />
           ))}
@@ -69,47 +71,48 @@ const ChatMessageWrapper = ({ messages }: { messages: MessagesType[] }) => {
 
 const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
-  const { data, error, isLoading, isDone, play, stop } = useSSE(
+  const { error, isLoading, isDone, play, stop } = useSSE(
     '/api/chat',
     'DeepSeek-R1'
   )
   const [messages, setMessages] = useState<MessagesType[]>([])
 
-  useEffect(() => {
-    if (data && data.content) {
-      const { type, content } = data
-      // 关键：使用函数参数 prevMessages（React 保证是最新状态）
-      setMessages((prevMessages) => {
-        // 直接基于最新的 prevMessages 操作，而非 ref
-        const lastMessageIndex = prevMessages.length - 1
-        const lastMessage = prevMessages[lastMessageIndex]
-        // 边界处理：若没有最后一条消息（理论上不会出现，因 send 时已添加 assistant 消息）
-        if (!lastMessage || lastMessage.role !== 'assistant') {
-          return prevMessages
-        }
-        // 拼接当前 type（content/reasoning）的内容
-        const updatedLastMessage = {
-          ...lastMessage,
-          [type]: (lastMessage[type] || '') + content
-        }
-        // 替换最后一条消息，返回新数组（保证不可变性）
-        return [
-          ...prevMessages.slice(0, lastMessageIndex),
-          updatedLastMessage,
-          ...prevMessages.slice(lastMessageIndex + 1)
-        ]
-      })
-    }
-  }, [data])
-
-  const handleSendMessage = (message: string) => {
+  const handleSendMessage = async (message: string) => {
     const _messages = [
       ...messages,
       { role: 'user', content: message },
       { role: 'assistant', content: '', reasoning: '' }
     ] as MessagesType[]
     setMessages(_messages)
-    play(_messages)
+    await play(message, handleGetData)
+  }
+
+  const handleGetData = (chunk: ParseChunkType[]) => {
+    setMessages((prev) => {
+      const updated = [...prev]
+      const lastMessage = updated[updated.length - 1]
+
+      if (lastMessage && lastMessage.role === 'assistant') {
+        let newContent = lastMessage.content || ''
+        let newReasoning = lastMessage.reasoning || ''
+
+        chunk.forEach((item) => {
+          if (item.type === 'content') {
+            newContent += item.content
+          } else if (item.type === 'reasoning') {
+            newReasoning += item.content
+          }
+        })
+
+        updated[updated.length - 1] = {
+          ...lastMessage,
+          content: newContent,
+          reasoning: newReasoning
+        }
+      }
+
+      return updated
+    })
   }
 
   return (

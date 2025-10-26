@@ -10,7 +10,9 @@ export type ModelConfigType = {
 
 // 模型消息类型
 export type MessagesType = {
+  id: string
   role: 'system' | 'user' | 'assistant'
   content: string
   reasoning?: string
+  created_time?: string
 }

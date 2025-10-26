@@ -22,7 +22,6 @@ import { useUserStore } from '@/store/user'
 import { toast } from 'sonner'
 import { USER_TYPE_MAP } from '@/constant/common'
 import { ThemeToggle } from './ThemeToggle'
-import { GitRepoToggle } from './GitRepoToggle'
 
 // 用户下拉菜单组件
 function UserDropdown() {
@@ -147,7 +146,7 @@ export default function Navbar() {
   const { user } = useUserStore()
 
   return (
-    <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+    <header className='fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className='container mx-auto flex h-16 items-center justify-between relative'>
         {/* title */}
         <div className='flex items-center gap-2'>
@@ -169,9 +168,6 @@ export default function Navbar() {
         </div>
         {/* 右侧按钮容器 */}
         <div className='flex items-center gap-4'>
-          <div className='border-3 rounded-[50%] md:block md:border-none'>
-            <GitRepoToggle />
-          </div>
           <div className='border-3 rounded-[50%] md:block md:border-none'>
             <ThemeToggle />
           </div>

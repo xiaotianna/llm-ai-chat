@@ -19,7 +19,7 @@ class OpenAIClient {
       throw new Error('请选择模型')
     }
     try {
-      const completion = await this.openai.chat.completions.create({
+      const completion = this.openai.chat.completions.stream({
         model,
         messages,
         stream: true,

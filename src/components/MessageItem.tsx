@@ -7,8 +7,11 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from './ui/tooltip'
-import { StreamDataType } from '@/hooks/useSSE'
-import { useEffect, useState } from 'react'
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger
+} from './ui/shadcn-io/ai/reasoning'
 
 // 渲染每一条message
 export const MessageItem = ({
@@ -30,7 +33,10 @@ export const MessageItem = ({
         {isUser ? (
           <UserMessage content={content} />
         ) : (
-          <AIMessage content={content} reasoning={reasoning} />
+          <AIMessage
+            content={content}
+            reasoning={reasoning}
+          />
         )}
         <div
           className={`flex flex-col justify-start w-full h-[40px] select-none ${
@@ -111,16 +117,22 @@ const AIMessage = ({
   return (
     <>
       {content || reasoning ? (
-        <div className='flex-wrap max-w-[90%] flex items-center py-3 min-w-2 rounded-[16px] whitespace-pre-wrap break-all mr-auto'>
+        <>
           {/* 显示思考过程 */}
           {reasoning && (
-            <div className='mb-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded text-sm text-yellow-800 dark:text-yellow-200'>
-              <span className='font-bold'>思考中:</span> {reasoning}
-            </div>
+            <Reasoning
+              isStreaming={false}
+              defaultOpen={true}
+            >
+              <ReasoningTrigger title='Thinking' />
+              <ReasoningContent>{reasoning}</ReasoningContent>
+            </Reasoning>
           )}
-          {/* 渲染 Markdown */}
-          {content && <MarkdownRender content={content} />}
-        </div>
+          <div className='flex-wrap max-w-[90%] flex items-center py-3 min-w-2 rounded-[16px] whitespace-pre-wrap break-all mr-auto'>
+            {/* 渲染 Markdown */}
+            {content && <MarkdownRender content={content} />}
+          </div>
+        </>
       ) : (
         <div className='bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] px-4 py-3 min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
           <span className='text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))]'>

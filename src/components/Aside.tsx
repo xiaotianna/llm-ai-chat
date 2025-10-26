@@ -27,7 +27,7 @@ const Aside = () => {
           width={100}
           height={100}
         />
-        <span className='text-2xl font-bold italic'>AI Chat</span>
+        <span className='text-2xl font-bold'>AI Chat</span>
       </h1>
       {/* 新任务 按钮 */}
       <Button

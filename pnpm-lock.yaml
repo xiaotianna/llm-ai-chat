@@ -3,20 +3,24 @@ lockfileVersion: 5.4
 specifiers:
   '@ant-design/nextjs-registry': ^1.0.2
   '@hookform/resolvers': ^5.1.1
+  '@icons-pack/react-simple-icons': ^13.8.0
   '@mdx-js/loader': ^3.1.0
   '@mdx-js/mdx': ^3.1.0
   '@mdx-js/react': ^3.1.0
   '@next/mdx': ^15.4.4
   '@radix-ui/react-avatar': ^1.1.10
   '@radix-ui/react-checkbox': ^1.3.2
+  '@radix-ui/react-collapsible': ^1.1.12
   '@radix-ui/react-dialog': ^1.1.15
   '@radix-ui/react-dropdown-menu': ^2.1.15
   '@radix-ui/react-icons': ^1.3.2
   '@radix-ui/react-label': ^2.1.7
   '@radix-ui/react-navigation-menu': ^1.2.13
   '@radix-ui/react-scroll-area': ^1.2.9
+  '@radix-ui/react-select': ^2.2.6
   '@radix-ui/react-slot': ^1.2.3
   '@radix-ui/react-tooltip': ^1.2.7
+  '@radix-ui/react-use-controllable-state': ^1.2.2
   '@supabase/supabase-js': ^2.52.1
   '@tailwindcss/postcss': ^4
   '@types/js-cookie': ^3.0.6
@@ -24,6 +28,8 @@ specifiers:
   '@types/node': ^20
   '@types/react': ^19
   '@types/react-dom': ^19
+  '@types/react-syntax-highlighter': ^15.5.13
+  ai: ^5.0.80
   antd: ^5.26.2
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
@@ -40,8 +46,10 @@ specifiers:
   react-hook-form: ^7.58.1
   react-markdown: ^10.1.0
   rehype-highlight: ^7.0.2
+  rehype-katex: ^7.0.1
   rehype-raw: ^7.0.0
   remark-gfm: ^4.0.1
+  remark-math: ^6.0.0
   remark-mdx: ^3.1.1
   shiki: ^3.12.1
   sonner: ^2.0.5
@@ -56,22 +64,27 @@ specifiers:
 dependencies:
   '@ant-design/nextjs-registry': 1.0.2_veccymdlh4f5jfzagl3w2yshry
   '@hookform/resolvers': 5.1.1_react-hook-form@7.58.1
+  '@icons-pack/react-simple-icons': 13.8.0_react@19.1.0
   '@mdx-js/loader': 3.1.0
   '@mdx-js/mdx': 3.1.0
   '@mdx-js/react': 3.1.0_3y7tt4djiwyqqlve4dazz5ae6q
   '@next/mdx': 15.4.4_pk7en4hfcut6yramuy54dinnoe
   '@radix-ui/react-avatar': 1.1.10_xaeuatbmdan5i34fudw2jkgfw4
   '@radix-ui/react-checkbox': 1.3.2_xaeuatbmdan5i34fudw2jkgfw4
+  '@radix-ui/react-collapsible': 1.1.12_xaeuatbmdan5i34fudw2jkgfw4
   '@radix-ui/react-dialog': 1.1.15_xaeuatbmdan5i34fudw2jkgfw4
   '@radix-ui/react-dropdown-menu': 2.1.15_xaeuatbmdan5i34fudw2jkgfw4
   '@radix-ui/react-icons': 1.3.2_react@19.1.0
   '@radix-ui/react-label': 2.1.7_xaeuatbmdan5i34fudw2jkgfw4
   '@radix-ui/react-navigation-menu': 1.2.13_xaeuatbmdan5i34fudw2jkgfw4
   '@radix-ui/react-scroll-area': 1.2.9_xaeuatbmdan5i34fudw2jkgfw4
+  '@radix-ui/react-select': 2.2.6_xaeuatbmdan5i34fudw2jkgfw4
   '@radix-ui/react-slot': 1.2.3_3y7tt4djiwyqqlve4dazz5ae6q
   '@radix-ui/react-tooltip': 1.2.7_xaeuatbmdan5i34fudw2jkgfw4
+  '@radix-ui/react-use-controllable-state': 1.2.2_3y7tt4djiwyqqlve4dazz5ae6q
   '@supabase/supabase-js': 2.52.1
   '@types/mdx': 2.0.13
+  ai: 5.0.80_zod@3.25.67
   antd: 5.26.2_j6k6oay3ugsr56slyfvma2drry
   class-variance-authority: 0.7.1
   clsx: 2.1.1
@@ -88,8 +101,10 @@ dependencies:
   react-hook-form: 7.58.1_react@19.1.0
   react-markdown: 10.1.0_3y7tt4djiwyqqlve4dazz5ae6q
   rehype-highlight: 7.0.2
+  rehype-katex: 7.0.1
   rehype-raw: 7.0.0
   remark-gfm: 4.0.1
+  remark-math: 6.0.0
   remark-mdx: 3.1.1
   shiki: 3.12.1
   sonner: 2.0.5_j6k6oay3ugsr56slyfvma2drry
@@ -104,11 +119,43 @@ devDependencies:
   '@types/node': 20.19.0
   '@types/react': 19.1.7
   '@types/react-dom': 19.1.6_@types+react@19.1.7
+  '@types/react-syntax-highlighter': 15.5.13
   tailwindcss: 4.1.8
   tw-animate-css: 1.3.4
   typescript: 5.8.3
 
 packages:
+
+  /@ai-sdk/gateway/2.0.1_zod@3.25.67:
+    resolution: {integrity: sha512-vPVIbnP35ZnayS937XLo85vynR85fpBQWHCdUweq7apzqFOTU2YkUd4V3msebEHbQ2Zro60ZShDDy9SMiyWTqA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.12_zod@3.25.67
+      '@vercel/oidc': 3.0.3
+      zod: 3.25.67
+    dev: false
+
+  /@ai-sdk/provider-utils/3.0.12_zod@3.25.67:
+    resolution: {integrity: sha512-ZtbdvYxdMoria+2SlNarEk6Hlgyf+zzcznlD55EAl+7VZvJaSg2sqPvwArY7L6TfDEDJsnCq0fdhBSkYo0Xqdg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@standard-schema/spec': 1.0.0
+      eventsource-parser: 3.0.6
+      zod: 3.25.67
+    dev: false
+
+  /@ai-sdk/provider/2.0.0:
+    resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
+    engines: {node: '>=18'}
+    dependencies:
+      json-schema: 0.4.0
+    dev: false
 
   /@alloc/quick-lru/5.2.0:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -284,6 +331,14 @@ packages:
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.58.1_react@19.1.0
+    dev: false
+
+  /@icons-pack/react-simple-icons/13.8.0_react@19.1.0:
+    resolution: {integrity: sha512-iZrhL1fSklfCCVn68IYHaAoKfcby3RakUTn2tRPyHBkhr2tkYqeQbjJWf+NizIYBzKBn2IarDJXmTdXd6CuEfw==}
+    peerDependencies:
+      react: ^16.13 || ^17 || ^18 || ^19
+    dependencies:
+      react: 19.1.0
     dev: false
 
   /@img/sharp-darwin-arm64/0.34.2:
@@ -687,6 +742,11 @@ packages:
     dev: false
     optional: true
 
+  /@opentelemetry/api/1.9.0:
+    resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
+    engines: {node: '>=8.0.0'}
+    dev: false
+
   /@radix-ui/number/1.1.1:
     resolution: {integrity: sha512-MkKCwxlXTgz6CFoJx3pCwn07GKp36+aZyu/u2Ln2VrA5DcdyCZkASEDBTd8x5whTQQL5CiYf4prXKLcgQdv29g==}
     dev: false
@@ -764,6 +824,33 @@ packages:
       '@radix-ui/react-use-controllable-state': 1.2.2_3y7tt4djiwyqqlve4dazz5ae6q
       '@radix-ui/react-use-previous': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
       '@radix-ui/react-use-size': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@types/react': 19.1.7
+      '@types/react-dom': 19.1.6_@types+react@19.1.7
+      react: 19.1.0
+      react-dom: 19.1.0_react@19.1.0
+    dev: false
+
+  /@radix-ui/react-collapsible/1.1.12_xaeuatbmdan5i34fudw2jkgfw4:
+    resolution: {integrity: sha512-Uu+mSh4agx2ib1uIGPP4/CKNULyajb3p92LsVXmH2EHVMTfZWpll88XJ0j4W0z3f8NK1eYl1+Mf/szHPmcHzyA==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@radix-ui/primitive': 1.1.3
+      '@radix-ui/react-compose-refs': 1.1.2_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-context': 1.1.2_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-id': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-presence': 1.1.5_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-primitive': 2.1.3_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-use-controllable-state': 1.2.2_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-use-layout-effect': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
       '@types/react': 19.1.7
       '@types/react-dom': 19.1.6_@types+react@19.1.7
       react: 19.1.0
@@ -1128,6 +1215,35 @@ packages:
       react-dom: 19.1.0_react@19.1.0
     dev: false
 
+  /@radix-ui/react-popper/1.2.8_xaeuatbmdan5i34fudw2jkgfw4:
+    resolution: {integrity: sha512-0NJQ4LFFUuWkE7Oxf0htBKS6zLkkjBH+hM1uk7Ng705ReR8m/uelduy1DBo0PyBXPKVnBA6YBlU94MBGXrSBCw==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@floating-ui/react-dom': 2.1.3_j6k6oay3ugsr56slyfvma2drry
+      '@radix-ui/react-arrow': 1.1.7_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-compose-refs': 1.1.2_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-context': 1.1.2_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-primitive': 2.1.3_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-use-callback-ref': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-use-layout-effect': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-use-rect': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-use-size': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/rect': 1.1.1
+      '@types/react': 19.1.7
+      '@types/react-dom': 19.1.6_@types+react@19.1.7
+      react: 19.1.0
+      react-dom: 19.1.0_react@19.1.0
+    dev: false
+
   /@radix-ui/react-portal/1.1.9_xaeuatbmdan5i34fudw2jkgfw4:
     resolution: {integrity: sha512-bpIxvq03if6UNwXZ+HTK71JLh4APvnXntDc6XOX8UVq4XQOVl7lwok0AvIl+b8zgCw3fSaVTZMpAPPagXbKmHQ==}
     peerDependencies:
@@ -1265,6 +1381,46 @@ packages:
       '@types/react-dom': 19.1.6_@types+react@19.1.7
       react: 19.1.0
       react-dom: 19.1.0_react@19.1.0
+    dev: false
+
+  /@radix-ui/react-select/2.2.6_xaeuatbmdan5i34fudw2jkgfw4:
+    resolution: {integrity: sha512-I30RydO+bnn2PQztvo25tswPH+wFBjehVGtmagkU78yMdwTwVf12wnAOF+AeP8S2N8xD+5UPbGhkUfPyvT+mwQ==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@radix-ui/number': 1.1.1
+      '@radix-ui/primitive': 1.1.3
+      '@radix-ui/react-collection': 1.1.7_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-compose-refs': 1.1.2_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-context': 1.1.2_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-direction': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-dismissable-layer': 1.1.11_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-focus-guards': 1.1.3_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-focus-scope': 1.1.7_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-id': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-popper': 1.2.8_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-portal': 1.1.9_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-primitive': 2.1.3_xaeuatbmdan5i34fudw2jkgfw4
+      '@radix-ui/react-slot': 1.2.3_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-use-callback-ref': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-use-controllable-state': 1.2.2_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-use-layout-effect': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-use-previous': 1.1.1_3y7tt4djiwyqqlve4dazz5ae6q
+      '@radix-ui/react-visually-hidden': 1.2.3_xaeuatbmdan5i34fudw2jkgfw4
+      '@types/react': 19.1.7
+      '@types/react-dom': 19.1.6_@types+react@19.1.7
+      aria-hidden: 1.2.6
+      react: 19.1.0
+      react-dom: 19.1.0_react@19.1.0
+      react-remove-scroll: 2.7.1_3y7tt4djiwyqqlve4dazz5ae6q
     dev: false
 
   /@radix-ui/react-slot/1.2.3_3y7tt4djiwyqqlve4dazz5ae6q:
@@ -1622,6 +1778,10 @@ packages:
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
     dev: false
 
+  /@standard-schema/spec/1.0.0:
+    resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
+    dev: false
+
   /@standard-schema/utils/0.3.0:
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
     dev: false
@@ -1882,6 +2042,10 @@ packages:
     resolution: {integrity: sha512-wkw9yd1kEXOPnvEeEV1Go1MmxtBJL0RR79aOTAApecWFVu7w0NNXNqhcWgvw2YgZDYadliXkl14pa3WXw5jlCQ==}
     dev: true
 
+  /@types/katex/0.16.7:
+    resolution: {integrity: sha512-HMwFiRujE5PjrgwHQ25+bsLJgowjGjm5Z8FVSf0N6PwgJrwxH0QxzHYDcKsTfV3wva0vzrpqMTJS2jXPr5BMEQ==}
+    dev: false
+
   /@types/mdast/4.0.4:
     resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
     dependencies:
@@ -1912,6 +2076,12 @@ packages:
     dependencies:
       '@types/react': 19.1.7
 
+  /@types/react-syntax-highlighter/15.5.13:
+    resolution: {integrity: sha512-uLGJ87j6Sz8UaBAooU0T6lWJ0dBmjZgN1PZTrj05TNql2/XpC6+4HhMT5syIdFUUt+FASfCeLLv4kBygNU+8qA==}
+    dependencies:
+      '@types/react': 19.1.7
+    dev: true
+
   /@types/react/19.1.7:
     resolution: {integrity: sha512-BnsPLV43ddr05N71gaGzyZ5hzkCmGwhMvYc8zmvI8Ci1bRkkDSzDDVfAXfN2tk748OwI7ediiPX6PfT9p0QGVg==}
     dependencies:
@@ -1935,6 +2105,11 @@ packages:
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
     dev: false
 
+  /@vercel/oidc/3.0.3:
+    resolution: {integrity: sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==}
+    engines: {node: '>= 20'}
+    dev: false
+
   /acorn-jsx/5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -1953,6 +2128,19 @@ packages:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+    dev: false
+
+  /ai/5.0.80_zod@3.25.67:
+    resolution: {integrity: sha512-g1o6pjxm1eTtyh295dRhsg0gvZaHFlSo2oruWrK2rIR7KafWEhNB2A2/aJ9hyPT9AMI8JnQJyto1Tl9DMqwc9w==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+    dependencies:
+      '@ai-sdk/gateway': 2.0.1_zod@3.25.67
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.12_zod@3.25.67
+      '@opentelemetry/api': 1.9.0
+      zod: 3.25.67
     dev: false
 
   /antd/5.26.2_j6k6oay3ugsr56slyfvma2drry:
@@ -2133,6 +2321,11 @@ packages:
     resolution: {integrity: sha512-Fu4hJdvzeylCfQPp9SGWidpzrMs7tTrlu6Vb8XGaRGck8QSNZJJp538Wrb60Lax4fPwR64ViY468OIUTbRlGZg==}
     dev: false
 
+  /commander/8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
+    engines: {node: '>= 12'}
+    dev: false
+
   /compute-scroll-into-view/3.1.1:
     resolution: {integrity: sha512-VRhuHOLoKYOy4UbilLbUzbYg93XLjv2PncJC50EuTWPA3gaja1UjBsUP/D/9/juV3vQFr6XBEzn9KCAHdUvOHw==}
     dev: false
@@ -2276,6 +2469,11 @@ packages:
       '@types/estree': 1.0.8
     dev: false
 
+  /eventsource-parser/3.0.6:
+    resolution: {integrity: sha512-Vo1ab+QXPzZ4tCa8SwIHJFaSzy4R6SHf7BY79rFBDf0idraZWAkYrDjDj8uWaSm3S2TK+hJ7/t1CEmZ7jXw+pg==}
+    engines: {node: '>=18.0.0'}
+    dev: false
+
   /extend-shallow/2.0.1:
     resolution: {integrity: sha512-zCnTtlxNoAiDc3gqY2aYAWFx7XWWiasuF2K8Me5WbN8otHKTUKBwjPtNpRs/rbUZm7KxWAaNj7P1a/p52GbVug==}
     engines: {node: '>=0.10.0'}
@@ -2325,6 +2523,34 @@ packages:
       kind-of: 6.0.3
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
+    dev: false
+
+  /hast-util-from-dom/5.0.1:
+    resolution: {integrity: sha512-N+LqofjR2zuzTjCPzyDUdSshy4Ma6li7p/c3pA78uTwzFgENbgbUrm2ugwsOdcjI1muO+o6Dgzp9p8WHtn/39Q==}
+    dependencies:
+      '@types/hast': 3.0.4
+      hastscript: 9.0.1
+      web-namespaces: 2.0.1
+    dev: false
+
+  /hast-util-from-html-isomorphic/2.0.0:
+    resolution: {integrity: sha512-zJfpXq44yff2hmE0XmwEOzdWin5xwH+QIhMLOScpX91e/NSGPsAzNCvLQDIEPyO2TXi+lBmU6hjLIhV8MwP2kw==}
+    dependencies:
+      '@types/hast': 3.0.4
+      hast-util-from-dom: 5.0.1
+      hast-util-from-html: 2.0.3
+      unist-util-remove-position: 5.0.0
+    dev: false
+
+  /hast-util-from-html/2.0.3:
+    resolution: {integrity: sha512-CUSRHXyKjzHov8yKsQjGOElXy/3EKpyX56ELnkHH34vDVw1N1XSQ1ZcAvTyAPtGqLTuKP/uxM+aLkSPqF/EtMw==}
+    dependencies:
+      '@types/hast': 3.0.4
+      devlop: 1.1.0
+      hast-util-from-parse5: 8.0.3
+      parse5: 7.3.0
+      vfile: 6.0.3
+      vfile-message: 4.0.2
     dev: false
 
   /hast-util-from-parse5/8.0.3:
@@ -2549,10 +2775,21 @@ packages:
       esprima: 4.0.1
     dev: false
 
+  /json-schema/0.4.0:
+    resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
+    dev: false
+
   /json2mq/0.2.0:
     resolution: {integrity: sha512-SzoRg7ux5DWTII9J2qkrZrqV1gt+rTaoufMxEzXbS26Uid0NwaJd123HcoB80TgubEppxxIGdNxCx50fEoEWQA==}
     dependencies:
       string-convert: 0.2.1
+    dev: false
+
+  /katex/0.16.25:
+    resolution: {integrity: sha512-woHRUZ/iF23GBP1dkDQMh1QBad9dmr8/PAwNA54VrSOVYgI12MAcE14TqnDdQOdzyEonGzMepYnqBMYdsoAr8Q==}
+    hasBin: true
+    dependencies:
+      commander: 8.3.0
     dev: false
 
   /kind-of/6.0.3:
@@ -2804,6 +3041,20 @@ packages:
       - supports-color
     dev: false
 
+  /mdast-util-math/3.0.0:
+    resolution: {integrity: sha512-Tl9GBNeG/AhJnQM221bJR2HPvLOSnLE/T9cJI9tlc6zwQk2nPk/4f0cHkOdEixQPC/j8UtKDdITswvLAy1OZ1w==}
+    dependencies:
+      '@types/hast': 3.0.4
+      '@types/mdast': 4.0.4
+      devlop: 1.1.0
+      longest-streak: 3.1.0
+      mdast-util-from-markdown: 2.0.2
+      mdast-util-to-markdown: 2.1.2
+      unist-util-remove-position: 5.0.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /mdast-util-mdx-expression/2.0.1:
     resolution: {integrity: sha512-J6f+9hUp+ldTZqKRSg7Vw5V6MqjATc+3E4gf3CFNcuZNWD8XdyI6zQ8GqH7f8169MM6P7hMBRDVGnn7oHB9kXQ==}
     dependencies:
@@ -2992,6 +3243,18 @@ packages:
       micromark-extension-gfm-tagfilter: 2.0.0
       micromark-extension-gfm-task-list-item: 2.1.0
       micromark-util-combine-extensions: 2.0.1
+      micromark-util-types: 2.0.2
+    dev: false
+
+  /micromark-extension-math/3.1.0:
+    resolution: {integrity: sha512-lvEqd+fHjATVs+2v/8kg9i5Q0AP2k85H0WUOwpIVvUML8BapsMvh1XAogmQjOCsLpoKRCVQqEkQBB3NhVBcsOg==}
+    dependencies:
+      '@types/katex': 0.16.7
+      devlop: 1.1.0
+      katex: 0.16.25
+      micromark-factory-space: 2.0.1
+      micromark-util-character: 2.1.1
+      micromark-util-symbol: 2.0.1
       micromark-util-types: 2.0.2
     dev: false
 
@@ -4098,6 +4361,18 @@ packages:
       vfile: 6.0.3
     dev: false
 
+  /rehype-katex/7.0.1:
+    resolution: {integrity: sha512-OiM2wrZ/wuhKkigASodFoo8wimG3H12LWQaH8qSPVJn9apWKFSH3YOCtbKpBorTVw/eI7cuT21XBbvwEswbIOA==}
+    dependencies:
+      '@types/hast': 3.0.4
+      '@types/katex': 0.16.7
+      hast-util-from-html-isomorphic: 2.0.0
+      hast-util-to-text: 4.0.2
+      katex: 0.16.25
+      unist-util-visit-parents: 6.0.1
+      vfile: 6.0.3
+    dev: false
+
   /rehype-raw/7.0.0:
     resolution: {integrity: sha512-/aE8hCfKlQeA8LmyeyQvQF3eBiLRGNlfBJEvWH7ivp9sBqs7TNqBL5X3v157rM4IFETqDnIOO+z5M/biZbo9Ww==}
     dependencies:
@@ -4124,6 +4399,17 @@ packages:
       micromark-extension-gfm: 3.0.0
       remark-parse: 11.0.0
       remark-stringify: 11.0.0
+      unified: 11.0.5
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /remark-math/6.0.0:
+    resolution: {integrity: sha512-MMqgnP74Igy+S3WwnhQ7kqGlEerTETXMvJhrUzDikVZ2/uogJCb+WHUg97hK9/jcfc0dkD73s3LN8zU49cTEtA==}
+    dependencies:
+      '@types/mdast': 4.0.4
+      mdast-util-math: 3.0.0
+      micromark-extension-math: 3.1.0
       unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
@@ -4434,6 +4720,13 @@ packages:
     resolution: {integrity: sha512-fucsC7HjXvkB5R3kTCO7kUjRdrS0BJt3M/FPxmHMBOm8JQi2BsHAHFsy27E0EolP8rp0NzXsJ+jNPyDWvOJZPA==}
     dependencies:
       '@types/unist': 3.0.3
+    dev: false
+
+  /unist-util-remove-position/5.0.0:
+    resolution: {integrity: sha512-Hp5Kh3wLxv0PHj9m2yZhhLt58KzPtEYKQQ4yxfYFEO7EvHwzyDYnduhHnY1mDxoqr7VUwVuHXk9RXKIiYS1N8Q==}
+    dependencies:
+      '@types/unist': 3.0.3
+      unist-util-visit: 5.0.0
     dev: false
 
   /unist-util-remove/3.1.1:

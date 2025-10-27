@@ -6,6 +6,17 @@ import { getHistories, HistoryItem, setHistories } from '@/store/history'
 import { fetchClient } from '@/utils/fetch-client'
 import { useUserStore } from '@/store/user'
 import { formatDate } from '@/utils/format-date'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import DotLoading from '@/components/DotLoading'
 
 // 按日期分组的类型定义
 interface GroupedHistories {
@@ -17,6 +28,13 @@ const History = () => {
   const [showMenu, setShowMenu] = useState(false)
   const [loading, setLoading] = useState(true)
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null)
+  const [showRenameDialog, setShowRenameDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [renameInput, setRenameInput] = useState('')
+  const [currentHistoryItem, setCurrentHistoryItem] =
+    useState<HistoryItem | null>(null)
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
   const user = useUserStore((state) => state.user)
   const histories = getHistories()
@@ -83,6 +101,83 @@ const History = () => {
   }
 
   const groupedHistories = groupAndSortHistories()
+
+  const handleRenameClick = (item: HistoryItem) => {
+    setCurrentHistoryItem(item)
+    setRenameInput(item.subject)
+    setShowRenameDialog(true)
+    setShowMenu(false)
+  }
+
+  const handleDeleteClick = (item: HistoryItem) => {
+    setCurrentHistoryItem(item)
+    setShowDeleteDialog(true)
+    setShowMenu(false)
+  }
+
+  const handleRename = async () => {
+    if (!currentHistoryItem || !renameInput.trim()) return
+
+    setIsRenaming(true)
+    try {
+      const res = await fetchClient<HistoryItem>('/api/history', {
+        method: 'PUT',
+        body: JSON.stringify({
+          subject: renameInput.trim(),
+          history_id: currentHistoryItem.id
+        })
+      })
+
+      if (res.code === 200) {
+        // 更新历史记录
+        const updatedHistories = histories.map((item) =>
+          item.id === currentHistoryItem.id
+            ? { ...item, subject: renameInput.trim() }
+            : item
+        )
+        setHistories(updatedHistories)
+        setShowRenameDialog(false)
+      }
+    } catch (error) {
+      console.error('重命名历史记录失败:', error)
+    } finally {
+      setIsRenaming(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!currentHistoryItem) return
+
+    setIsDeleting(true)
+    try {
+      const res = await fetchClient<boolean>('/api/history', {
+        method: 'DELETE',
+        body: JSON.stringify({
+          history_id: currentHistoryItem.id
+        })
+      })
+
+      if (res.code === 200) {
+        // 从本地状态中移除历史记录
+        const updatedHistories = histories.filter(
+          (item) => item.id !== currentHistoryItem.id
+        )
+        setHistories(updatedHistories)
+        setShowDeleteDialog(false)
+        // 如果当前在被删除的聊天页面，导航回聊天列表页
+        if (
+          typeof window !== 'undefined' &&
+          window.location.pathname.includes(currentHistoryItem.id)
+        ) {
+          router.push('/chat')
+        }
+      }
+    } catch (error) {
+      console.error('删除历史记录失败:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   // 骨架屏组件
   const HistorySkeleton = () => (
@@ -155,11 +250,17 @@ const History = () => {
                         }}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className='rounded px-3 py-2 hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center gap-2 cursor-pointer text-[rgba(var(--coze-fg-4),var(--coze-fg-4-alpha))]'>
+                        <div
+                          className='rounded px-3 py-2 hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center gap-2 cursor-pointer text-[rgba(var(--coze-fg-4),var(--coze-fg-4-alpha))]'
+                          onClick={() => handleRenameClick(item)}
+                        >
                           <Pin className='w-4 h-4' />
                           <span className='text-sm'>重命名</span>
                         </div>
-                        <div className='rounded px-3 py-2 hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center gap-2 cursor-pointer text-red-500'>
+                        <div
+                          className='rounded px-3 py-2 hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center gap-2 cursor-pointer text-red-500'
+                          onClick={() => handleDeleteClick(item)}
+                        >
                           <Trash2 className='w-4 h-4' />
                           <span className='text-sm'>删除</span>
                         </div>
@@ -172,6 +273,90 @@ const History = () => {
           ))}
         </>
       )}
+      {/* 重命名对话框 */}
+      <Dialog
+        open={showRenameDialog}
+        onOpenChange={setShowRenameDialog}
+      >
+        <DialogContent className='sm:max-w-[425px] bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))]'>
+          <DialogHeader>
+            <DialogTitle>重命名对话</DialogTitle>
+            <DialogDescription>请输入新的对话主题</DialogDescription>
+          </DialogHeader>
+          <div className='grid gap-4 py-4'>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Input
+                id='subject'
+                value={renameInput}
+                onChange={(e) => setRenameInput(e.target.value)}
+                className='col-span-4 border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))] bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] focus-visible:ring-0 focus-visible:ring-offset-0'
+                placeholder='请输入新的主题'
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => setShowRenameDialog(false)}
+              className='border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))] bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] text-[rgba(var(--coze-fg-3),var(--coze-fg-3-alpha))] hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))]'
+            >
+              取消
+            </Button>
+            <Button
+              type='submit'
+              onClick={handleRename}
+              disabled={isRenaming}
+              className='bg-[rgba(var(--coze-brand-5),1)] hover:bg-[rgba(var(--coze-brand-3),var(--coze-brand-3-alpha))] text-white focus-visible:ring-0 focus-visible:ring-offset-0'
+            >
+              确认
+              {isRenaming && (
+                <span className='ml-2 inline'>
+                  <DotLoading />
+                </span>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 删除确认对话框 */}
+      <Dialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+      >
+        <DialogContent className='sm:max-w-[425px] bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))]'>
+          <DialogHeader>
+            <DialogTitle>删除对话</DialogTitle>
+            <DialogDescription>
+              确定要删除这个对话吗？此操作无法撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => setShowDeleteDialog(false)}
+              className='border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))] bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] text-[rgba(var(--coze-fg-3),var(--coze-fg-3-alpha))] hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))]'
+            >
+              取消
+            </Button>
+            <Button
+              variant='destructive'
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className='bg-red-500 hover:bg-red-600 text-white focus-visible:ring-0 focus-visible:ring-offset-0'
+            >
+              {isDeleting ? (
+                <>
+                  <DotLoading />
+                  <span className='ml-2'>删除中...</span>
+                </>
+              ) : (
+                '删除'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

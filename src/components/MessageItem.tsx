@@ -48,6 +48,7 @@ export const MessageItem = ({
             className={`flex flex-row justify-start w-full gap-[10px] text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]`}
           >
             {isAI && isDone && (
+              // TODO 简化
               <TooltipProvider>
                 {/* 复制按钮 */}
                 <Tooltip>

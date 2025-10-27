@@ -38,6 +38,7 @@ export const MessageItem = ({
           <AIMessage
             content={content}
             reasoning={reasoning}
+            isDone={isDone}
           />
         )}
         <div
@@ -46,7 +47,7 @@ export const MessageItem = ({
           <div
             className={`flex flex-row justify-start w-full gap-[10px] text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]`}
           >
-            {(isAI && isDone) && (
+            {isAI && isDone && (
               <TooltipProvider>
                 {/* 复制按钮 */}
                 <Tooltip>
@@ -96,11 +97,15 @@ const UserMessage = ({ content }: { content: string }) => {
 // AI回复的消息
 const AIMessage = ({
   content,
-  reasoning
+  reasoning,
+  isDone = false
 }: {
   content: string
   reasoning?: string
+  isDone?: boolean
 }) => {
+
+  // TODO 完成loading逻辑
   return (
     <>
       {content || reasoning ? (

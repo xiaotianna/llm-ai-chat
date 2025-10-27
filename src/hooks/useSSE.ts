@@ -3,7 +3,7 @@ import { parseChunk, ParseChunkType } from '@/utils/parse-chunk'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-export const useSSE = (url: string, modelName: ModelConfigKey) => {
+export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: string) => {
   const [error, setError] = useState<{
     message: string
     code: number
@@ -42,7 +42,8 @@ export const useSSE = (url: string, modelName: ModelConfigKey) => {
         },
         body: JSON.stringify({
           message,
-          model: modelName
+          model: modelName,
+          conversationId
         }),
         signal: abortController.signal
       })

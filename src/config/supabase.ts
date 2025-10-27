@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/db/supabase'
+import { createClient } from '@supabase/supabase-js'
 
 // 客户端 Supabase 实例（用于浏览器环境）
 export const supabase = createClient<Database>(

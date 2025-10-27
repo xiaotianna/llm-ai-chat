@@ -13,7 +13,7 @@ import { MessagesType } from '@/types/model/model-config'
 import { ParseChunkType } from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
 import React, { useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 
 // 聊天消息为空展示内容
 const ChatLoading = () => {
@@ -82,7 +82,13 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     const _messages: MessagesType[] = [
       ...messages,
       { role: 'user', content: message, id: uuidv4() },
-      { role: 'assistant', content: '', reasoning: '', id: uuidv4(), isDone: false }
+      {
+        role: 'assistant',
+        content: '',
+        reasoning: '',
+        id: uuidv4(),
+        isDone: false
+      }
     ]
     setMessages(_messages)
     await play(message, handleGetData)

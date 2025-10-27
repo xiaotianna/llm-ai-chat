@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -22,10 +22,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
+          extensions?: Json
           operationName?: string
           query?: string
           variables?: Json
-          extensions?: Json
         }
         Returns: Json
       }
@@ -41,101 +41,56 @@ export type Database = {
     Tables: {
       chat_histories: {
         Row: {
-          content_id: string
           create_time: string
           id: string
-          subject: string | null
-          user_id: string
+          subject: string
+          user_id: string | null
         }
         Insert: {
-          content_id?: string
           create_time?: string
           id?: string
-          subject?: string | null
-          user_id?: string
+          subject: string
+          user_id?: string | null
         }
         Update: {
-          content_id?: string
           create_time?: string
           id?: string
-          subject?: string | null
-          user_id?: string
+          subject?: string
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "chat_histories_content_id_fkey"
-            columns: ["content_id"]
-            isOneToOne: true
-            referencedRelation: "llm_conversations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_histories_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "user"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       llm_conversations: {
         Row: {
           content: string | null
           create_time: string
+          history_id: string | null
           id: string
           user_id: string
         }
         Insert: {
           content?: string | null
           create_time?: string
+          history_id?: string | null
           id?: string
           user_id?: string
         }
         Update: {
           content?: string | null
           create_time?: string
+          history_id?: string | null
           id?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "llm_conversations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "user"
+            foreignKeyName: "llm_conversations_history_id_fkey"
+            columns: ["history_id"]
+            isOneToOne: false
+            referencedRelation: "chat_histories"
             referencedColumns: ["id"]
           },
         ]
-      }
-      user: {
-        Row: {
-          create_time: string
-          id: string
-          login_type: number
-          password: string
-          phone: string
-          pic_url: string
-          username: string
-        }
-        Insert: {
-          create_time?: string
-          id?: string
-          login_type?: number
-          password: string
-          phone: string
-          pic_url: string
-          username: string
-        }
-        Update: {
-          create_time?: string
-          id?: string
-          login_type?: number
-          password?: string
-          phone?: string
-          pic_url?: string
-          username?: string
-        }
-        Relationships: []
       }
     }
     Views: {
@@ -145,7 +100,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      login_type: "phone" | "github"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -275,6 +230,8 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      login_type: ["phone", "github"],
+    },
   },
 } as const

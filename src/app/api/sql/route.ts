@@ -107,8 +107,13 @@ export async function POST(request: Request) {
       result = insertedData
       error = insertError
     } else if (type === 'llm_conversation') {
-      // Add user_id to the data
-      const insertData = { ...data, user_id: userId }
+      // Add user_id and default type to the data if not provided
+      const insertData = { 
+        ...data, 
+        user_id: userId,
+        // 如果没有提供 type 字段，则默认为 'user'
+        type: data.type || 'user'
+      }
       console.log('Inserting LLM conversation:', insertData)
 
       const { data: insertedData, error: insertError } = await serviceSupabase
@@ -172,9 +177,12 @@ export async function PUT(request: Request) {
       result = updatedData
       error = updateError
     } else if (type === 'llm_conversation') {
+      // 如果更新的是 llm_conversation，确保不更新 type 字段为无效值
+      const updateData = { ...data };
+      
       const { data: updatedData, error: updateError } = await serviceSupabase
         .from('llm_conversations')
-        .update(data)
+        .update(updateData)
         .eq('id', id)
         .eq('user_id', userId)
         .select()

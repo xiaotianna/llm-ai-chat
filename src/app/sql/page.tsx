@@ -27,8 +27,10 @@ export default function SqlPage() {
   
   const [newLlmConversation, setNewLlmConversation] = useState<Omit<LlmConversation, 'id' | 'create_time'>>({ 
     content: '', 
-    history_id: null, 
-    user_id: user?.id || '' 
+    history_id: '', 
+    user_id: user?.id || '',
+    type: 'user',
+    reasoning: null
   })
 
   // Fetch data using our API route
@@ -158,7 +160,7 @@ export default function SqlPage() {
       
       // Refresh the data
       fetchData()
-      setNewLlmConversation({ content: '', history_id: null, user_id: user.id })
+      setNewLlmConversation({ content: '', history_id: '', user_id: user.id, type: 'user', reasoning: null })
     } catch (err) {
       console.error('Error creating llm conversation:', err)
       setError(err instanceof Error ? err.message : 'An unknown error occurred')
@@ -390,7 +392,7 @@ export default function SqlPage() {
                 <Input
                   placeholder="History ID (leave empty to auto-create)"
                   value={newLlmConversation.history_id || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewLlmConversation({...newLlmConversation, history_id: e.target.value || null})}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewLlmConversation({...newLlmConversation, history_id: e.target.value})}
                 />
                 <p className="text-sm text-gray-500">If left empty, a new chat history will be automatically created.</p>
                 <Button onClick={createLlmConversation}>Create</Button>

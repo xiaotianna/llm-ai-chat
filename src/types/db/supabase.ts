@@ -64,22 +64,28 @@ export type Database = {
         Row: {
           content: string | null
           create_time: string
-          history_id: string | null
+          history_id: string
           id: string
+          reasoning: string | null
+          type: Database["public"]["Enums"]["conversations_type"]
           user_id: string
         }
         Insert: {
           content?: string | null
           create_time?: string
-          history_id?: string | null
+          history_id?: string
           id?: string
+          reasoning?: string | null
+          type: Database["public"]["Enums"]["conversations_type"]
           user_id?: string
         }
         Update: {
           content?: string | null
           create_time?: string
-          history_id?: string | null
+          history_id?: string
           id?: string
+          reasoning?: string | null
+          type?: Database["public"]["Enums"]["conversations_type"]
           user_id?: string
         }
         Relationships: [
@@ -100,6 +106,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      conversations_type: "assistant" | "user"
       login_type: "phone" | "github"
     }
     CompositeTypes: {
@@ -231,6 +238,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      conversations_type: ["assistant", "user"],
       login_type: ["phone", "github"],
     },
   },

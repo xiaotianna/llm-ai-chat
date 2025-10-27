@@ -1,7 +1,7 @@
 interface Delta {
   role: string
   content: string
-  reasoning: null
+  reasoning: string | null
   reasoning_details: any[]
 }
 

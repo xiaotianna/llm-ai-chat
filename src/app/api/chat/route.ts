@@ -5,23 +5,7 @@ import { type NextRequest } from 'next/server'
 import { openai } from '@/utils/open-ai'
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import { cookies } from 'next/headers'
-import { createClient } from '@supabase/supabase-js'
-import { Database } from '@/types/db/supabase'
 import { supabase } from '@/config/supabase'
-
-// Create a Supabase client with service role key (bypasses RLS)
-const getServiceSupabase = () => {
-  // Use the service role key to bypass RLS
-  // This key should be stored in environment variables in production
-  const serviceRoleKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey!
-  )
-}
 
 export async function POST(request: NextRequest) {
   // 设置 SSE 响应头
@@ -70,15 +54,13 @@ export async function POST(request: NextRequest) {
       }
     ]
 
-    const serviceSupabase = getServiceSupabase()
-
     let historyId = conversationId
     if (!historyId) {
       const { data: chatHistoryData, error: chatHistoryError } = await supabase
         .from('chat_histories')
         .insert([
           {
-            subject: message.substring(0, 50), // Use first 50 characters of message as subject
+            subject: message.substring(0, 50),
             user_id: userId
           }
         ])
@@ -92,19 +74,19 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Use the ID of the newly created chat history
       historyId = chatHistoryData[0]?.id
     }
 
-    // Save the user's message to llm_conversations
-    const { data: conversationData, error: conversationError } =
-      await serviceSupabase
+    // 插入用户数据
+    const { error: conversationError } =
+      await supabase
         .from('llm_conversations')
         .insert([
           {
             content: message,
             history_id: historyId,
-            user_id: userId
+            user_id: userId,
+            type: 'user'
           }
         ])
         .select()
@@ -122,31 +104,38 @@ export async function POST(request: NextRequest) {
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          // Collect the full response to save it later
-          let fullResponse = ''
-
+          let fullContent = ''
+          let fullReasoning = ''
           for await (const chunk of stream) {
             controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`)
-            // Collect the response content
             if (
               chunk.choices &&
               chunk.choices[0] &&
-              chunk.choices[0].delta &&
-              chunk.choices[0].delta.content
+              chunk.choices[0].delta
             ) {
-              fullResponse += chunk.choices[0].delta.content
+              const delta = chunk.choices[0].delta
+              // 收集内容
+              if (delta.content) {
+                fullContent += chunk.choices[0].delta.content
+              }
+              // 收集reasoning
+              if ((delta as any).reasoning) {
+                fullReasoning += (delta as any).reasoning
+              }
             }
           }
 
-          // Save the AI's response to llm_conversations after the stream is complete
-          if (fullResponse) {
-            const { error: saveResponseError } = await serviceSupabase
+          if (fullContent) {
+            // 插入ai数据
+            const { error: saveResponseError } = await supabase
               .from('llm_conversations')
               .insert([
                 {
-                  content: fullResponse,
+                  content: fullContent,
+                  reasoning: fullReasoning || null,
                   history_id: historyId,
-                  user_id: userId
+                  user_id: userId,
+                  type: 'assistant'
                 }
               ])
 

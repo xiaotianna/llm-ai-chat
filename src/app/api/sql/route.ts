@@ -235,6 +235,19 @@ export async function DELETE(request: Request) {
     let error
 
     if (type === 'chat_history') {
+      // 先删除关联的 llm_conversations 记录
+      const { error: conversationDeleteError } = await serviceSupabase
+        .from('llm_conversations')
+        .delete()
+        .eq('history_id', id)
+        .eq('user_id', userId)
+      
+      if (conversationDeleteError) {
+        console.error('LLM conversations delete error:', conversationDeleteError)
+        return NextResponse.json({ error: conversationDeleteError.message }, { status: 500 })
+      }
+
+      // 再删除 chat_histories 记录
       const { error: deleteError } = await serviceSupabase
         .from('chat_histories')
         .delete()

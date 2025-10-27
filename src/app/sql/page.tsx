@@ -339,11 +339,16 @@ export default function SqlPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-semibold">ID: {history.id}</p>
-                      {/* Content ID field removed as it no longer exists in the chat_histories table */}
                       <p>Subject: {history.subject || 'No subject'}</p>
                       <p>User ID: {history.user_id}</p>
                       <p className="text-sm text-gray-500">
                         Created: {new Date(history.create_time).toLocaleString()}
+                      </p>
+                      {/* 显示关联的消息数量 */}
+                      <p className="text-sm text-blue-500 mt-1">
+                        关联消息数: {
+                          llmConversations.filter(conv => conv.history_id === history.id).length
+                        }
                       </p>
                     </div>
                     <div className="flex space-x-2">
@@ -362,7 +367,11 @@ export default function SqlPage() {
                       <Button 
                         variant="destructive" 
                         size="sm"
-                        onClick={() => deleteChatHistory(history.id)}
+                        onClick={() => {
+                          if (confirm(`确定要删除这个历史记录 "${history.subject || 'No subject'}" 吗？这将同时删除所有关联的对话消息。`)) {
+                            deleteChatHistory(history.id)
+                          }
+                        }}
                       >
                         Delete
                       </Button>
@@ -409,9 +418,15 @@ export default function SqlPage() {
                       <p className="truncate max-w-xs">Content: {conversation.content || 'No content'}</p>
                       <p>History ID: {conversation.history_id || 'No history (auto-created when needed)'}</p>
                       <p>User ID: {conversation.user_id}</p>
+                      <p>Type: {conversation.type}</p>
                       <p className="text-sm text-gray-500">
                         Created: {new Date(conversation.create_time).toLocaleString()}
                       </p>
+                      {conversation.reasoning && (
+                        <p className="text-sm text-gray-500 truncate max-w-xs">
+                          Reasoning: {conversation.reasoning}
+                        </p>
+                      )}
                     </div>
                     <div className="flex space-x-2">
                       <Button 
@@ -471,7 +486,11 @@ export default function SqlPage() {
                       <Button 
                         variant="destructive" 
                         size="sm"
-                        onClick={() => deleteLlmConversation(conversation.id)}
+                        onClick={() => {
+                          if (confirm(`确定要删除这条对话消息吗？\n\n内容预览: ${conversation.content?.substring(0, 50)}${conversation.content && conversation.content.length > 50 ? '...' : ''}`)) {
+                            deleteLlmConversation(conversation.id)
+                          }
+                        }}
                       >
                         Delete
                       </Button>

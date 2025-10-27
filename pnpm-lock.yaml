@@ -41,6 +41,7 @@ specifiers:
   js-cookie: ^3.0.5
   katex: ^0.16.25
   lucide-react: ^0.513.0
+  motion: ^12.23.24
   next: 15.3.3
   next-mdx-remote: ^5.0.0
   next-themes: ^0.4.6
@@ -101,6 +102,7 @@ dependencies:
   js-cookie: 3.0.5
   katex: 0.16.25
   lucide-react: 0.513.0_react@19.1.0
+  motion: 12.23.24_j6k6oay3ugsr56slyfvma2drry
   next: 15.3.3_j6k6oay3ugsr56slyfvma2drry
   next-mdx-remote: 5.0.0_3y7tt4djiwyqqlve4dazz5ae6q
   next-themes: 0.4.6_j6k6oay3ugsr56slyfvma2drry
@@ -2576,6 +2578,27 @@ packages:
       tslib: 2.8.1
     dev: false
 
+  /framer-motion/12.23.24_j6k6oay3ugsr56slyfvma2drry:
+    resolution: {integrity: sha512-HMi5HRoRCTou+3fb3h9oTLyJGBxHfW+HnNE25tAXOvVx/IvwMHK0cx7IR4a2ZU6sh3IX1Z+4ts32PcYBOqka8w==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      motion-dom: 12.23.23
+      motion-utils: 12.23.6
+      react: 19.1.0
+      react-dom: 19.1.0_react@19.1.0
+      tslib: 2.8.1
+    dev: false
+
   /get-nonce/1.0.1:
     resolution: {integrity: sha512-FJhYRoDaiatfEkUK8HKlicmu/3SGFD51q3itKDGoSTysQJBnfOcxU5GxnhE1E6soB76MbT0MBtnKJuXyAx+96Q==}
     engines: {node: '>=6'}
@@ -3646,8 +3669,38 @@ packages:
       motion-utils: 12.18.1
     dev: false
 
+  /motion-dom/12.23.23:
+    resolution: {integrity: sha512-n5yolOs0TQQBRUFImrRfs/+6X4p3Q4n1dUEqt/H58Vx7OW6RF+foWEgmTVDhIWJIMXOuNNL0apKH2S16en9eiA==}
+    dependencies:
+      motion-utils: 12.23.6
+    dev: false
+
   /motion-utils/12.18.1:
     resolution: {integrity: sha512-az26YDU4WoDP0ueAkUtABLk2BIxe28d8NH1qWT8jPGhPyf44XTdDUh8pDk9OPphaSrR9McgpcJlgwSOIw/sfkA==}
+    dev: false
+
+  /motion-utils/12.23.6:
+    resolution: {integrity: sha512-eAWoPgr4eFEOFfg2WjIsMoqJTW6Z8MTUCgn/GZ3VRpClWBdnbjryiA3ZSNLyxCTmCQx4RmYX6jX1iWHbenUPNQ==}
+    dev: false
+
+  /motion/12.23.24_j6k6oay3ugsr56slyfvma2drry:
+    resolution: {integrity: sha512-Rc5E7oe2YZ72N//S3QXGzbnXgqNrTESv8KKxABR20q2FLch9gHLo0JLyYo2hZ238bZ9Gx6cWhj9VO0IgwbMjCw==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      framer-motion: 12.23.24_j6k6oay3ugsr56slyfvma2drry
+      react: 19.1.0
+      react-dom: 19.1.0_react@19.1.0
+      tslib: 2.8.1
     dev: false
 
   /ms/2.1.3:

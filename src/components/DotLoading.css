@@ -1,0 +1,75 @@
+.dot-flashing {
+    display: flex;
+    height: 24px;
+    padding: 6px 0;
+    position: relative;
+    width: 18px;
+}
+
+.dot-flashing .circle {
+    animation-duration: 0.8s;
+    animation-fill-mode: both;
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1);
+    border-radius: 50%;
+    height: 10px;
+    position: absolute;
+    top: 7px;
+    width: 10px;
+}
+
+@keyframes moveLeftToRight-kxsANF {
+    0% {
+        opacity: 1;
+        transform: translateX(0px) scale(0.6);
+    }
+
+    48% {
+        opacity: 0.5;
+        transform: translateX(4.5px) scale(0.9);
+    }
+
+    52% {
+        opacity: 0.5;
+        transform: translateX(4.5px) scale(0.9);
+    }
+
+    100% {
+        opacity: 0.2;
+        transform: translateX(12px) scale(0.6);
+    }
+}
+
+@keyframes moveRightToLeft-ZcfYdu {
+    0% {
+        opacity: 0.2;
+        transform: translateX(0px) scale(0.6);
+    }
+
+    48% {
+        opacity: 0;
+        transform: translateX(-4.5px) scale(0.3);
+    }
+
+    52% {
+        opacity: 0;
+        transform: translateX(-4.5px) scale(0.3);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-12px) scale(0.6);
+    }
+}
+
+.dot-flashing .circle:first-child {
+    animation-name: moveLeftToRight-kxsANF;
+    background-color: rgba(var(--coze-fg-3),var(--coze-fg-4-alpha));
+    left: 0px;
+}
+
+.dot-flashing .circle:last-child {
+    animation-name: moveRightToLeft-ZcfYdu;
+    background-color: rgba(var(--coze-fg-3),var(--coze-fg-4-alpha));
+    left: 12px;
+}

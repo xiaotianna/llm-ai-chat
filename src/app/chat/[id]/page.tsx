@@ -12,7 +12,8 @@ import { MessageRoleType } from '@/types'
 import { MessagesType } from '@/types/model/model-config'
 import { ParseChunkType } from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid';
 
 // 聊天消息为空展示内容
 const ChatLoading = () => {
@@ -52,13 +53,13 @@ const ChatMessageWrapper = ({ messages }: { messages: MessagesType[] }) => {
     <ScrollArea className='overflow-y-auto flex-1 w-full'>
       <div className='relative flex-1 p-4 pb-7 max-w-[800px] max-md:w-[100vw] mx-auto opacity-100'>
         {messages.length > 0 &&
-          messages.map((message, index) => (
+          messages.map((message) => (
             <MessageItem
-              key={index}
+              key={message.id}
               role={message.role as MessageRoleType}
               content={message.content}
               reasoning={message.reasoning}
-              isLast={index === messages.length - 1}
+              isDone={message.isDone}
             />
           ))}
       </div>
@@ -78,42 +79,60 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [messages, setMessages] = useState<MessagesType[]>([])
 
   const handleSendMessage = async (message: string) => {
-    const _messages = [
+    const _messages: MessagesType[] = [
       ...messages,
-      { role: 'user', content: message },
-      { role: 'assistant', content: '', reasoning: '' }
-    ] as MessagesType[]
+      { role: 'user', content: message, id: uuidv4() },
+      { role: 'assistant', content: '', reasoning: '', id: uuidv4(), isDone: false }
+    ]
     setMessages(_messages)
     await play(message, handleGetData)
   }
 
   const handleGetData = (chunk: ParseChunkType[]) => {
-    setMessages((prev) => {
-      const updated = [...prev]
-      const lastMessage = updated[updated.length - 1]
+    chunk.forEach((chunk: ParseChunkType) => {
+      setMessages((prev) => {
+        const updated = [...prev]
+        const lastMessage = updated[updated.length - 1]
 
-      if (lastMessage && lastMessage.role === 'assistant') {
-        let newContent = lastMessage.content || ''
-        let newReasoning = lastMessage.reasoning || ''
+        if (lastMessage && lastMessage.role === 'assistant') {
+          let newContent = lastMessage.content || ''
+          let newReasoning = lastMessage.reasoning || ''
 
-        chunk.forEach((item) => {
-          if (item.type === 'content') {
-            newContent += item.content
-          } else if (item.type === 'reasoning') {
-            newReasoning += item.content
+          if (chunk.type === 'content') {
+            newContent += chunk.content
+          } else if (chunk.type === 'reasoning') {
+            newReasoning += chunk.content
           }
-        })
 
-        updated[updated.length - 1] = {
-          ...lastMessage,
-          content: newContent,
-          reasoning: newReasoning
+          updated[updated.length - 1] = {
+            ...lastMessage,
+            content: newContent,
+            reasoning: newReasoning
+          }
         }
-      }
 
-      return updated
+        return updated
+      })
     })
   }
+
+  useEffect(() => {
+    if (isDone) {
+      setMessages((prev) => {
+        const updated = [...prev]
+        const lastMessage = updated[updated.length - 1]
+
+        if (lastMessage && lastMessage.role === 'assistant') {
+          updated[updated.length - 1] = {
+            ...lastMessage,
+            isDone: true
+          }
+        }
+
+        return updated
+      })
+    }
+  }, [isDone])
 
   return (
     <div className='flex h-screen min-h-[600px] w-full relative p-[10px] duration-200 ease-[cubic-bezier(0.65,0,0.35,0)]'>

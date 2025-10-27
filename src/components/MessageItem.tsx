@@ -12,18 +12,20 @@ import {
   ReasoningContent,
   ReasoningTrigger
 } from './ui/shadcn-io/ai/reasoning'
+import ShinyText from './ui/shiny-text'
+import DotLoading from './DotLoading'
 
 // 渲染每一条message
 export const MessageItem = ({
   role,
   content,
   reasoning,
-  isLast
+  isDone = false
 }: {
   role: MessageRoleType
   content: string
   reasoning?: string
-  isLast: boolean
+  isDone?: boolean
 }) => {
   const isUser = role === 'user'
   const isAI = role === 'assistant'
@@ -39,38 +41,23 @@ export const MessageItem = ({
           />
         )}
         <div
-          className={`flex flex-col justify-start w-full h-[40px] select-none ${
-            !isLast && 'opacity-0'
-          } group-hover:opacity-100 transition-opacity duration-200`}
+          className={`flex flex-col justify-start w-full h-[40px] select-none pt-2`}
         >
           <div
-            className={`flex flex-row ${
-              isUser ? 'justify-end' : 'justify-start'
-            } w-full gap-[10px] text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]`}
+            className={`flex flex-row justify-start w-full gap-[10px] text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]`}
           >
-            <TooltipProvider>
-              {/* 修改按钮 -> 只有user才能修改 */}
-              {isUser && (
+            {(isAI && isDone) && (
+              <TooltipProvider>
+                {/* 复制按钮 */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button className='w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px]'>
-                      <SquarePen size={16} />
+                      <Copy size={16} />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>修改</TooltipContent>
+                  <TooltipContent>复制</TooltipContent>
                 </Tooltip>
-              )}
-              {/* 复制按钮 */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className='w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px]'>
-                    <Copy size={16} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>复制</TooltipContent>
-              </Tooltip>
-              {/* 重新生成 -> 只有ai回复的消息并且是最后条消息才展示 */}
-              {isAI && isLast && (
+                {/* 重新生成 -> 只有ai回复的消息并且是最后条消息才展示 */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button className='w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px]'>
@@ -79,17 +66,17 @@ export const MessageItem = ({
                   </TooltipTrigger>
                   <TooltipContent>重新生成</TooltipContent>
                 </Tooltip>
-              )}
-              {/* 删除按钮 */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className='w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px] text-red-500'>
-                    <Trash2 size={16} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>删除</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                {/* 删除按钮 */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className='w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px] text-red-500'>
+                      <Trash2 size={16} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>删除</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         </div>
       </div>
@@ -134,10 +121,14 @@ const AIMessage = ({
           </div>
         </>
       ) : (
-        <div className='bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] px-4 py-3 min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
-          <span className='text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))]'>
-            正在思考...
-          </span>
+        <div className='flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
+          <ShinyText
+            text='正在思考中'
+            disabled={false}
+            speed={3}
+            className='text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] mr-1'
+          />
+          <DotLoading />
         </div>
       )}
     </>

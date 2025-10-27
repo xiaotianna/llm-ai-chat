@@ -3,6 +3,7 @@ import FramerSpotlight from '@/components/FramerSpotlight'
 import Navbar from '@/components/Navbar'
 import TypingPromptInput from '@/components/TypingPromptInput'
 import { Button } from '@/components/ui/button'
+import { ColourfulText } from '@/components/ui/shadcn-io/colourful-text'
 import { Zap } from 'lucide-react'
 import Link from 'next/link'
 
@@ -21,7 +22,12 @@ const HomePage = () => {
         <div className='container px-4 md:px-6 py-16 md:py-20 -mt-24 md:mt-0'>
           <div className='flex flex-col items-center text-center max-w-3xl mx-auto'>
             <h1 className='text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter mb-6'>
-              AI Chat Provides You With The Most Suitable Answer
+              <ColourfulText
+                text='AI Chat'
+                className='inline'
+              />
+              {' '}
+              Provides You With The Most Suitable Answer
             </h1>
             <p className='text-xl text-muted-foreground md:text-2xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-2xl mb-12'>
               AI Chat, 一个给你最合适的答案的AI

@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
   const userInfoCookie = cookieStore.get('user-info')
   if (!userInfoCookie) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
   try {

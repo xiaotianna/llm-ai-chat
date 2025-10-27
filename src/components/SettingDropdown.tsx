@@ -36,9 +36,9 @@ const SettingDropdown = ({ children }: SettingDropdownProps) => {
   // 退出登录处理
   const handleLogout = async () => {
     try {
-      await clearUser()
       toast.success('退出登录成功')
       router.replace('/login')
+      clearUser()
     } catch (error) {
       console.error('Logout error:', error)
       toast.error('退出登录失败，请重试')

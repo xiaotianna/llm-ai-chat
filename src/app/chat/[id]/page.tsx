@@ -16,11 +16,12 @@ import { MessageRoleType } from '@/types'
 import { MessagesType } from '@/types/model/model-config'
 import { emitter } from '@/utils/emitter'
 import { fetchClient } from '@/utils/fetch-client'
-import { ParseChunkType } from '@/utils/parse-chunk'
+import { ParseChunkType, ParseDoneChunkType } from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
-import React, { useEffect, useState } from 'react'
+import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
+import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
 
 // 聊天消息为空展示内容
 const ChatLoading = () => {
@@ -55,9 +56,15 @@ const ChatLoading = () => {
 }
 
 // 对话容器
-const ChatMessageWrapper = ({ messages }: { messages: MessagesType[] }) => {
+const ChatMessageWrapper = forwardRef<
+  HTMLDivElement,
+  { messages: MessagesType[] }
+>(({ messages }, ref) => {
   return (
-    <ScrollArea className='overflow-y-auto flex-1 w-full'>
+    <ScrollArea
+      className='overflow-y-auto flex-1 w-full'
+      ref={ref}
+    >
       <div className='relative flex-1 p-4 pb-7 max-w-[800px] max-md:w-[100vw] mx-auto opacity-100'>
         {messages.length > 0 &&
           messages.map((message) => (
@@ -76,16 +83,19 @@ const ChatMessageWrapper = ({ messages }: { messages: MessagesType[] }) => {
       <div className='h-4 w-full absolute left-0 bottom-0 bg-gradient-to-t from-[rgba(var(--coze-bg-11),1)] to-transparent'></div>
     </ScrollArea>
   )
-}
+})
 
 const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
-  const { isDone, play, stop } = useSSE('/api/chat', 'DeepSeek-R1')
+  // TODO stop功能
+  const { isDone, play, stop } = useSSE('/api/chat', 'DeepSeek-R1', id)
   const [messages, setMessages] = useState<MessagesType[]>([])
   const init = useEditorStore.getState().init
   const cacheMessage = useEditorStore.getState().cacheMessage
   const setCacheMessage = useEditorStore.getState().setCacheMessage
-  const [isLoading, setIsLoading] = useState(false)
+  const [isPageLoading, setIsPageLoading] = useState(false)
+  const messageWrapperRef = useRef<HTMLDivElement>(null)
+  const setLoading = useEditorStore.getState().setLoading
 
   useEffect(() => {
     // 初始化执行，动态路由：以local_开头的id为临时会话，并且缓存消息不为空
@@ -103,9 +113,25 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   }, [])
 
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  const scrollToBottom = () => {
+    // TODO 如果用户滚动就不到底部
+    if (messageWrapperRef.current) {
+      const scrollContainer = messageWrapperRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      )
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight
+      }
+    }
+  }
+
   const initConversation = async () => {
     try {
-      setIsLoading(true)
+      setIsPageLoading(true)
       let res = await fetchClient<ResponseMessage[]>(`/api/conversation/${id}`)
       if (res.code === 200) {
         const formattedMessages = res.data.map((item) => {
@@ -123,7 +149,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     } catch (error) {
       console.error('加载失败')
     } finally {
-      setIsLoading(false)
+      setIsPageLoading(false)
     }
   }
 
@@ -140,7 +166,8 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
       }
     ]
     setMessages(_messages)
-    await play(message, handleGetData)
+    setLoading(true)
+    await play(message, handleGetData, handlePlayDone)
   }
 
   const handleGetData = (chunk: ParseChunkType[]) => {
@@ -171,6 +198,39 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     })
   }
 
+  // 接收到的终止数据，包含需要替换的消息id（user、ai）
+  const handlePlayDone = (chunk: ParseDoneChunkType[]) => {
+    console.log(chunk)
+    const userMsg = chunk.find((item) => item.type === 'user')
+    const aiMsg = chunk.find((item) => item.type === 'assistant')
+    setMessages((prev) => {
+      const updated = [...prev]
+      const aiMessageIndex = updated.length - 1
+      const userMessageIndex = updated.length - 2
+
+      if (
+        userMessageIndex >= 0 &&
+        updated[userMessageIndex].role === 'user' &&
+        aiMessageIndex >= 0 &&
+        updated[aiMessageIndex].role === 'assistant'
+      ) {
+        // 更新user消息状态
+        updated[userMessageIndex] = {
+          ...updated[userMessageIndex],
+          id: userMsg?.id || uuidv4(),
+          isDone: true
+        }
+        // 更新ai消息状态
+        updated[aiMessageIndex] = {
+          ...updated[aiMessageIndex],
+          id: aiMsg?.id || uuidv4(),
+          isDone: true
+        }
+      }
+      return updated
+    })
+  }
+
   // 监听子组件MessageItem删除按钮的订阅
   useEffect(() => {
     emitter.on('delete-conversation', (event: unknown) => {
@@ -188,25 +248,6 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
   useEffect(() => {
     if (isDone) {
-      setMessages((prev) => {
-        const updated = [...prev]
-        const lastMessage = updated[updated.length - 1]
-
-        if (lastMessage && lastMessage.role === 'assistant') {
-          // user
-          updated[updated.length - 2] = {
-            ...lastMessage,
-            isDone: true
-          }
-          // ai
-          updated[updated.length - 1] = {
-            ...lastMessage,
-            isDone: true
-          }
-        }
-
-        return updated
-      })
       // 重置状态
       init()
     }
@@ -258,11 +299,14 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
         </div>
         {/* 聊天容器 */}
-        {isLoading ? (
+        {isPageLoading ? (
           <ChatLoading />
         ) : (
           <>
-            <ChatMessageWrapper messages={messages} />
+            <ChatMessageWrapper
+              messages={messages}
+              ref={messageWrapperRef}
+            />
             {/* 输入框 */}
             <div className='rounded-xl w-full max-w-[800px] p-4 pt-0'>
               <Editor onSend={handleSendMessage} />

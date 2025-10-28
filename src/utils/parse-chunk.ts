@@ -37,11 +37,24 @@ import { OpenRouterChunkResponse } from '@/types/model/open-router-response'
 // 结束的数据格式为：'data: [DONE]'
 
 export type ParseChunkType = { content: string; type: 'content' | 'reasoning' }
+export type ParseDoneChunkType = {
+  id: string
+  history_id: string
+  type: 'user' | 'assistant'
+  create_time: string
+}
 
-export const parseChunk = (chunk: string): ParseChunkType[] => {
-  const results: ParseChunkType[] = [];
+export const parseChunk = (
+  chunk: string
+): {
+  data: ParseChunkType[]
+  done: ParseDoneChunkType[]
+} => {
+  const dataResults: ParseChunkType[] = []
+  const doneResults: ParseDoneChunkType[] = []
   const lines = chunk.split('\n\n').filter((line) => line.trim())
   for (const line of lines) {
+    // 解析data: 数据
     const prefix = 'data: '
     if (line.startsWith(prefix)) {
       // 移除 'data: ' 前缀
@@ -53,14 +66,14 @@ export const parseChunk = (chunk: string): ParseChunkType[] => {
           const reasoning = parsed.choices[0].delta.reasoning
           if (reasoning) {
             // 返回思考内容，可以用于展示思考过程
-            results.push({ type: 'reasoning', content: reasoning })
+            dataResults.push({ type: 'reasoning', content: reasoning })
           }
         }
         // 提取内容
         if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta) {
           const content = parsed.choices[0].delta.content
           if (content) {
-            results.push({ type: 'content', content })
+            dataResults.push({ type: 'content', content })
           }
         }
       } catch (parseError: any) {
@@ -68,6 +81,21 @@ export const parseChunk = (chunk: string): ParseChunkType[] => {
         throw new Error('Error parsing SSE data: ' + parseError.message)
       }
     }
+    // 解析done: 数据
+    const donePrefix = 'done: '
+    if (line.startsWith(donePrefix)) {
+      const data = line.substring(prefix.length).trim()
+      try {
+        const parsed: ParseDoneChunkType[] = JSON.parse(data)
+        doneResults.push(...parsed)
+      } catch (err: any) {
+        console.error('Error parsing SSE done data:', data)
+        throw new Error('Error parsing SSE done data: ' + err.message)
+      }
+    }
   }
-  return results
+  return {
+    data: dataResults,
+    done: doneResults
+  }
 }

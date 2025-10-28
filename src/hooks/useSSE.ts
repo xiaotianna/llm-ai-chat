@@ -1,9 +1,9 @@
 import { ModelConfigKey } from '@/types/model/model-config'
-import { parseChunk, ParseChunkType } from '@/utils/parse-chunk'
+import { parseChunk, ParseChunkType, ParseDoneChunkType } from '@/utils/parse-chunk'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: string) => {
+export const useSSE = (url: string, modelName: ModelConfigKey, historyId?: string) => {
   const [error, setError] = useState<{
     message: string
     code: number
@@ -25,7 +25,8 @@ export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: 
   // 调用play触发sse请求
   const play = async (
     message: string, // 只传入当前的内容，会去后端数据库查询上下文消息，如果内容有引用上文消息，传入到数组中
-    onData: (chunk: ParseChunkType[]) => void
+    onData: (chunk: ParseChunkType[]) => void,
+    onDone: (chunk: ParseDoneChunkType[]) => void
   ) => {
     // 初始化状态
     setError(null)
@@ -43,7 +44,7 @@ export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: 
         body: JSON.stringify({
           message,
           model: modelName,
-          conversationId
+          historyId: historyId?.startsWith('local_') ? undefined : historyId
         }),
         signal: abortController.signal
       })
@@ -70,7 +71,9 @@ export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: 
 
         const chunk = decoder.decode(value, { stream: true })
         const parsedChunk = parseChunk(chunk)
-        onData(parsedChunk)
+        const { data, done: parseDone } = parsedChunk
+        data.length && onData(data)
+        parseDone.length && onDone(parseDone)
       }
     } catch (error: any) {
       // 忽略取消请求的错误

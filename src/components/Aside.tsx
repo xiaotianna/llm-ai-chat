@@ -32,6 +32,7 @@ const Aside = () => {
             alt='logo'
             width={100}
             height={100}
+            priority
           />
           <span className='text-2xl font-bold'>AI Chat</span>
         </h1>

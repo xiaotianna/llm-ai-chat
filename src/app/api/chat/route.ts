@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { model: modelName, message, conversationId } = body
+  let { model: modelName, message, historyId } = body
   if (!modelName) {
     return NextResponse.json({ error: '模型名缺少' }, { status: 400 })
   }
@@ -41,22 +41,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    let messages: ChatCompletionMessageParam[] = []
     const userInfo = JSON.parse(userInfoCookie.value)
     const userId = userInfo.id
 
-    // TODO
-    // 查询数据库，组合message
-    messages = [
-      ...messages,
-      {
-        role: 'user',
-        content: message
-      }
-    ]
-
-    let historyId = conversationId
+    let messages: ChatCompletionMessageParam[] = []
     if (!historyId) {
+      // 没有消息记录
       const { data: chatHistoryData, error: chatHistoryError } = await supabase
         .from('chat_histories')
         .insert([
@@ -74,23 +64,68 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         )
       }
-
       historyId = chatHistoryData[0]?.id
+    } else {
+      // 有消息记录
+      // 先查询 chat_histories 表
+      const { data: chatHistory, error: historyError } = await supabase
+        .from('chat_histories')
+        .select('id')
+        .eq('id', historyId)
+        .eq('user_id', userId)
+        .single()
+
+      if (historyError || !chatHistory) {
+        console.error('Chat history fetch error:', historyError)
+        return NextResponse.json(
+          { error: 'Chat history not found' },
+          { status: 404 }
+        )
+      }
+
+      const { data: llmConversations, error: conversationError } =
+        await supabase
+          .from('llm_conversations')
+          .select('*')
+          .eq('history_id', chatHistory.id)
+          .eq('user_id', userId)
+          .order('create_time', { ascending: false })
+          .limit(20) // 只保留最新的20条记录
+
+      if (conversationError) {
+        console.error('LLM conversations fetch error:', conversationError)
+        return NextResponse.json(
+          { error: conversationError.message },
+          { status: 500 }
+        )
+      }
+      const queryMessages = llmConversations.map((conversation) => ({
+        role: conversation.type,
+        content: conversation.content || ''
+      }))
+      messages.push(...queryMessages)
     }
+    // 查询数据库，组合message
+    messages = [
+      ...messages,
+      {
+        role: 'user',
+        content: message
+      }
+    ]
 
     // 插入用户数据
-    const { error: conversationError } =
-      await supabase
-        .from('llm_conversations')
-        .insert([
-          {
-            content: message,
-            history_id: historyId,
-            user_id: userId,
-            type: 'user'
-          }
-        ])
-        .select()
+    const { data: userConversationData, error: conversationError } = await supabase
+      .from('llm_conversations')
+      .insert([
+        {
+          content: message,
+          history_id: historyId,
+          user_id: userId,
+          type: 'user'
+        }
+      ])
+      .select('id, history_id, type, create_time')
 
     if (conversationError) {
       console.error('Error saving user message:', conversationError)
@@ -109,11 +144,7 @@ export async function POST(request: NextRequest) {
           let fullReasoning = ''
           for await (const chunk of stream) {
             controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`)
-            if (
-              chunk.choices &&
-              chunk.choices[0] &&
-              chunk.choices[0].delta
-            ) {
+            if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
               const delta = chunk.choices[0].delta
               // 收集内容
               if (delta.content) {
@@ -128,9 +159,8 @@ export async function POST(request: NextRequest) {
 
           if (fullContent) {
             // 插入ai数据
-            const { error: saveResponseError } = await supabase
-              .from('llm_conversations')
-              .insert([
+            const { data: llm_conversationsData, error: saveResponseError } =
+              await supabase.from('llm_conversations').insert([
                 {
                   content: fullContent,
                   reasoning: fullReasoning || null,
@@ -138,13 +168,15 @@ export async function POST(request: NextRequest) {
                   user_id: userId,
                   type: 'assistant'
                 }
-              ])
+              ]).select('id, history_id, type, create_time')
 
             if (saveResponseError) {
               console.error('Error saving AI response:', saveResponseError)
             }
-          }
 
+            // 发送用户historyId和user、ai会话消息的ai（进行替换）
+            controller.enqueue(`done: ${JSON.stringify([...userConversationData, ...llm_conversationsData!])}\n\n`)
+          }
           controller.close()
         } catch (error) {
           controller.error(error)

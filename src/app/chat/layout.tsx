@@ -1,7 +1,6 @@
 'use client'
 import Aside from '@/components/Aside'
 import { SidebarProvider, useSidebar } from '@/components/SidebarProvider'
-import { SidebarTrigger } from '@/components/SidebarTrigger'
 import { useEditorStore } from '@/store/editor'
 import { usePathname } from 'next/navigation'
 import React, { useEffect } from 'react'

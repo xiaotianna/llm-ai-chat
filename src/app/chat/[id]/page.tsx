@@ -1,4 +1,5 @@
 'use client'
+import { ResponseMessage } from '@/app/api/conversation/[id]/route'
 import Editor from '@/components/Editor'
 import { MessageItem } from '@/components/MessageItem'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -11,9 +12,11 @@ import { useSSE } from '@/hooks/useSSE'
 import { useEditorStore } from '@/store/editor'
 import { MessageRoleType } from '@/types'
 import { MessagesType } from '@/types/model/model-config'
+import { fetchClient } from '@/utils/fetch-client'
 import { ParseChunkType } from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
 
 // 聊天消息为空展示内容
@@ -73,24 +76,52 @@ const ChatMessageWrapper = ({ messages }: { messages: MessagesType[] }) => {
 
 const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
-  const { isDone, play, stop } = useSSE(
-    '/api/chat',
-    'DeepSeek-R1'
-  )
+  const { isDone, play, stop } = useSSE('/api/chat', 'DeepSeek-R1')
   const [messages, setMessages] = useState<MessagesType[]>([])
   const init = useEditorStore.getState().init
   const cacheMessage = useEditorStore.getState().cacheMessage
   const setCacheMessage = useEditorStore.getState().setCacheMessage
-  const isLoading = useEditorStore.getState().isLoading
-  
-  // 初始化执行，动态路由：以local_开头的id为临时会话，并且缓存消息不为空
+  const [isLoading, setIsLoading] = useState(false)
+
   useEffect(() => {
-    if (id.startsWith('local_') && messages.length === 0 && cacheMessage !== '') {
-      // 发送缓存消息后立即清除，防止重复发送
+    // 初始化执行，动态路由：以local_开头的id为临时会话，并且缓存消息不为空
+    if (
+      id.startsWith('local_') &&
+      messages.length === 0 &&
+      cacheMessage !== ''
+    ) {
       handleSendMessage(cacheMessage)
+      // 发送缓存消息后立即清除，防止重复发送
       setCacheMessage('')
+    } else {
+      // 加载之前的会话
+      initConversation()
     }
   }, [])
+
+  const initConversation = async () => {
+    try {
+      setIsLoading(true)
+      let res = await fetchClient<ResponseMessage[]>(`/api/conversation/${id}`)
+      if (res.code === 200) {
+        const formattedMessages = res.data.map((item) => {
+          const { id, type, content, reasoning } = item
+          return {
+            id,
+            role: type,
+            content: content || '',
+            reasoning: reasoning || '',
+            isDone: true
+          }
+        })
+        setMessages(formattedMessages)
+      }
+    } catch (error) {
+      console.error('加载失败')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleSendMessage = async (message: string) => {
     const _messages: MessagesType[] = [
@@ -201,8 +232,11 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
         </div>
         {/* 聊天容器 */}
-        {/* <ChatLoading /> */}
-        <ChatMessageWrapper messages={messages} />
+        {isLoading ? (
+          <ChatLoading />
+        ) : (
+          <ChatMessageWrapper messages={messages} />
+        )}
         {/* 输入框 */}
         <div className='rounded-xl w-full max-w-[800px] p-4 pt-0'>
           <Editor onSend={handleSendMessage} />

@@ -91,7 +91,6 @@ const History = () => {
     const sortGroup = groups.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     )
-    console.log(sortGroup)
     return sortGroup
   }
 

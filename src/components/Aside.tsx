@@ -37,7 +37,7 @@ const Aside = () => {
           router.push('/chat')
         }}
       >
-        <div className='w-full flex items-center justify-between font-bold gap-1 text-[rgba(var(--coze-brand-5),1)]'>
+        <div className='w-full cursor-pointer flex items-center justify-between font-bold gap-1 text-[rgba(var(--coze-brand-5),1)]'>
           <div className='flex items-center gap-1'>
             <Plus className='h-4 w-4' />
             新任务

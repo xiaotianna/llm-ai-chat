@@ -3,30 +3,23 @@ import React, { useEffect, useRef, useState } from 'react'
 import styles from './HomeDefault.module.css'
 import EditorFunctional from './EditorFunctional'
 import SendMessageIcon from './icon/sendMessage-icon'
-import { useChatStore } from '@/store/chat'
+import { useEditorStore } from '@/store/editor'
 
 interface EditorProps {
   onInput?: (value: string) => void
-  onSend?: (message: string) => void,
+  onSend?: (message: string) => void
 }
 
 const Editor = ({ onInput, onSend }: EditorProps) => {
   const editableRef = useRef<HTMLDivElement>(null)
-  const [ content, setContent ] = useState<string>('')
-  const isLoading = useChatStore.getState().isLoading
-  const setLoading = useChatStore.getState().setLoading
+  const [content, setContent] = useState<string>('')
+  const isLoading = useEditorStore.getState().isLoading
 
   useEffect(() => {
     if (onInput) {
       onInput(content)
     }
   }, [content])
-
-  useEffect(() => {
-    if (isLoading) {
-      setLoading(false)
-    }
-  }, [])
 
   return (
     <div className='border w-full p-4 relative rounded-2xl bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] shadow-[0px_2px_6px_0px_rgba(var(--coze-shadow-0),.04),0px_4px_12px_0px_rgba(var(--coze-shadow-0),.02)] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))'>
@@ -81,13 +74,13 @@ const Editor = ({ onInput, onSend }: EditorProps) => {
           disabled={content.length === 0 || isLoading}
           onClick={() => {
             if (onSend && content.trim()) {
-              onSend(content.trim());
+              onSend(content.trim())
               // 清空输入框
               if (editableRef.current) {
-                editableRef.current.textContent = '';
-                editableRef.current.setAttribute('data-empty', 'true');
+                editableRef.current.textContent = ''
+                editableRef.current.setAttribute('data-empty', 'true')
               }
-              setContent('');
+              setContent('')
             }
           }}
         >

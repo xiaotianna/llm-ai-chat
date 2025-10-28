@@ -8,6 +8,7 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { useSSE } from '@/hooks/useSSE'
+import { useEditorStore } from '@/store/editor'
 import { MessageRoleType } from '@/types'
 import { MessagesType } from '@/types/model/model-config'
 import { ParseChunkType } from '@/utils/parse-chunk'
@@ -72,11 +73,24 @@ const ChatMessageWrapper = ({ messages }: { messages: MessagesType[] }) => {
 
 const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
-  const { error, isLoading, isDone, play, stop } = useSSE(
+  const { isDone, play, stop } = useSSE(
     '/api/chat',
     'DeepSeek-R1'
   )
   const [messages, setMessages] = useState<MessagesType[]>([])
+  const init = useEditorStore.getState().init
+  const cacheMessage = useEditorStore.getState().cacheMessage
+  const setCacheMessage = useEditorStore.getState().setCacheMessage
+  const isLoading = useEditorStore.getState().isLoading
+  
+  // 初始化执行，动态路由：以local_开头的id为临时会话，并且缓存消息不为空
+  useEffect(() => {
+    if (id.startsWith('local_') && messages.length === 0 && cacheMessage !== '') {
+      // 发送缓存消息后立即清除，防止重复发送
+      handleSendMessage(cacheMessage)
+      setCacheMessage('')
+    }
+  }, [])
 
   const handleSendMessage = async (message: string) => {
     const _messages: MessagesType[] = [
@@ -137,6 +151,8 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
         return updated
       })
+      // 重置状态
+      init()
     }
   }, [isDone])
 

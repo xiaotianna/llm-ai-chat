@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { MoreHorizontal, Pin, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -17,11 +17,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import DotLoading from '@/components/DotLoading'
-
-// 按日期分组的类型定义
-interface GroupedHistories {
-  [date: string]: HistoryItem[]
-}
+import {
+  GroupedHistories,
+  transformToGroupedHistories
+} from '@/utils/transform-to-grouped-histories'
 
 const History = () => {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
@@ -88,19 +87,15 @@ const History = () => {
 
   // 按日期分组并排序
   const groupAndSortHistories = (): GroupedHistories => {
-    // 按日期分组
-    const grouped: GroupedHistories = {}
-    histories.forEach((item) => {
-      const dateKey = formatDate(item.create_time)
-      if (!grouped[dateKey]) {
-        grouped[dateKey] = []
-      }
-      grouped[dateKey].push(item)
-    })
-    return grouped
+    const groups = transformToGroupedHistories(histories)
+    const sortGroup = groups.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+    console.log(sortGroup)
+    return sortGroup
   }
 
-  const groupedHistories = groupAndSortHistories()
+  const groupedHistories = useMemo(() => groupAndSortHistories(), [histories])
 
   const handleRenameClick = (item: HistoryItem) => {
     setCurrentHistoryItem(item)
@@ -215,12 +210,12 @@ const History = () => {
       ) : (
         <>
           {/* 按日期分组显示历史记录 */}
-          {Object.entries(groupedHistories).map(([date, items]) => (
-            <div key={date}>
+          {groupedHistories.map((item) => (
+            <div key={item.date + item.label}>
               <div className='text-sm mb-2 pl-3 font-medium text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]'>
-                {date}
+                {item.label}
               </div>
-              {items.map((item) => (
+              {item.data.map((item) => (
                 <div
                   key={item.id}
                   className='rounded-lg p-3 mb-3 cursor-pointer group relative bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))]'

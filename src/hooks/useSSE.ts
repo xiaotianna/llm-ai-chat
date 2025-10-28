@@ -1,4 +1,4 @@
-import { MessagesType, ModelConfigKey } from '@/types/model/model-config'
+import { ModelConfigKey } from '@/types/model/model-config'
 import { parseChunk, ParseChunkType } from '@/utils/parse-chunk'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
@@ -8,7 +8,6 @@ export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: 
     message: string
     code: number
   } | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isDone, setIsDone] = useState<boolean>(false)
   const abortControllerRef = useRef<AbortController | null>(null)
 
@@ -18,6 +17,8 @@ export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: 
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
       }
+      // 确保在组件卸载时设置为完成状态
+      setIsDone(true)
     }
   }, [])
 
@@ -28,7 +29,6 @@ export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: 
   ) => {
     // 初始化状态
     setError(null)
-    setIsLoading(true)
     setIsDone(false)
 
     // 创建 AbortController 用于取消请求
@@ -80,7 +80,6 @@ export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: 
       }
     } finally {
       abortControllerRef.current = null
-      setIsLoading(false)
       setIsDone(true)
     }
   }
@@ -92,9 +91,8 @@ export const useSSE = (url: string, modelName: ModelConfigKey, conversationId?: 
       abortControllerRef.current = null
     }
 
-    setIsLoading(false)
     setIsDone(true)
   }
 
-  return { error, isLoading, isDone, play, stop }
+  return { error, isDone, play, stop }
 }

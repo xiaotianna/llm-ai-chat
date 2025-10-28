@@ -4,14 +4,14 @@ import Image from 'next/image'
 import Editor from '@/components/Editor'
 import { useUserStore } from '@/store/user'
 import { toast } from 'sonner'
-import { useChatStore } from '@/store/chat'
+import { useEditorStore } from '@/store/editor'
 import { v4 as uuidv4 } from 'uuid'
 import { useRouter } from 'next/navigation'
 
 const ChatHome = () => {
   const { user } = useUserStore()
   const [content, setContent] = useState<string>('')
-  const { setLoading, setLocalMessageId } = useChatStore()
+  const { setLoading, setCacheMessage } = useEditorStore()
   const router = useRouter()
 
   const handleInput = (value: string) => {
@@ -25,10 +25,8 @@ const ChatHome = () => {
     // 生成一个随机ID记录临时会话
     const id = `local_${uuidv4()}`
     setLoading(true)
-    setLocalMessageId(id)
+    setCacheMessage(content)
     router.push(`/chat/${id}`)
-    // 存储消息信息
-    sessionStorage.setItem(`local_message_${id}`, content)
   }
   return (
     <div

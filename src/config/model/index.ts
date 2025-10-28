@@ -16,3 +16,5 @@ export const models = [DeepSeekR1Model, Qwen3Model] as const
 export const ModelConfig: ModelConfigType = Object.fromEntries(
   models.map((model) => [model.name, model])
 ) as ModelConfigType
+
+export type ModelName = (typeof models)[number]['name']

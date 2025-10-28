@@ -12,7 +12,6 @@ const CssGridBackground = () => {
           WebkitMaskImage:
             'radial-gradient(circle at center, transparent 20%, black 70%)'
         }}
-        aria-hidden='true'
       />
       <div
         className='absolute inset-0 pointer-events-none z-[-2] grid-gradient'
@@ -20,7 +19,6 @@ const CssGridBackground = () => {
           background:
             'radial-gradient(70% 70% at 50% 50%, transparent 0%, rgba(36, 101, 237, 0.05) 100%)'
         }}
-        aria-hidden='true'
       />
     </>
   )

@@ -7,6 +7,7 @@ import { ThemeProvider } from 'next-themes'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
 import UserInitializer from '@/components/UserInitializer'
 import GlobalLoading from '@/components/GlobalLoading'
+import { SidebarProvider } from '@/components/SidebarProvider'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -48,10 +49,12 @@ export default function RootLayout({
           defaultTheme='system'
           enableSystem
         >
-          <UserInitializer />
-          <GlobalLoading />
-          <AntdRegistry>{children}</AntdRegistry>
-          <Toaster richColors />
+          <SidebarProvider>
+            <UserInitializer />
+            <GlobalLoading />
+            <AntdRegistry>{children}</AntdRegistry>
+            <Toaster richColors />
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>

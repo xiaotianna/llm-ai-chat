@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
     const userInfo = JSON.parse(userInfoCookie.value)
     const userId = userInfo.id
 
+    // TODO
     // 查询数据库，组合message
     messages = [
       ...messages,

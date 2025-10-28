@@ -7,6 +7,8 @@ import { toast } from 'sonner'
 import { useEditorStore } from '@/store/editor'
 import { v4 as uuidv4 } from 'uuid'
 import { useRouter } from 'next/navigation'
+import { SidebarTrigger } from '@/components/SidebarTrigger'
+import { useSidebar } from '@/components/SidebarProvider'
 
 const ChatHome = () => {
   const { user } = useUserStore()
@@ -28,13 +30,16 @@ const ChatHome = () => {
     setCacheMessage(content)
     router.push(`/chat/${id}`)
   }
+  const { isCollapsed } = useSidebar()
   return (
     <div
       className={`flex h-screen w-full flex-col items-center justify-center overflow-hidden relative`}
     >
       {/* 背景色 */}
       <div className='absolute top-[100px] left-[40px] right-[40px] bottom-[0] z-[-1] bg-[linear-gradient(74deg,rgba(81,71,255,0.12)_27.4%,rgba(125,246,255,0.12)_59.39%)] rounded-[1800px] blur-[130px]'></div>
-      <div className='flex w-full grow p-[7px]'>
+      <div className='flex w-full grow p-[7px] relative'>
+        {/* 折叠按钮 */}
+        {!isCollapsed ? null : <SidebarTrigger className='mr-2' />}
         {/* 显示容器 */}
         <div className='relative min-h-[600px] flex-1 flex flex-col items-center justify-center p-8 rounded'>
           <div className='z-0 flex -mt-10 flex-col justify-center items-center w-full max-w-[800px] mx-auto relative'>

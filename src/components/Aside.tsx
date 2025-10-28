@@ -7,28 +7,37 @@ import { Plus, CircleUserRound } from 'lucide-react'
 import History from './History'
 import SettingDropdown from './SettingDropdown'
 import { useUserStore } from '@/store/user'
+import { useSidebar } from './SidebarProvider'
+import { SidebarTrigger } from './SidebarTrigger'
 
 const Aside = () => {
   const [avatarLoaded, setAvatarLoaded] = useState(true)
   const router = useRouter()
   const { user } = useUserStore()
+  const { isCollapsed } = useSidebar()
 
   return (
-    <div className='w-[280px] h-full shrink-0 flex flex-col p-4 border-r-1 bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))]'>
-      {/* logo */}
-      <h1
-        className='flex items-center gap-3 mb-3 cursor-pointer'
-        onClick={() => router.push('/')}
-      >
-        <Image
-          className='w-15 h-15 box-border rounded-lg'
-          src={'/logo.gif'}
-          alt='logo'
-          width={100}
-          height={100}
-        />
-        <span className='text-2xl font-bold'>AI Chat</span>
-      </h1>
+    <div
+      className={`${isCollapsed ? 'hidden' : 'block'} w-[280px] h-full shrink-0 flex flex-col p-4 border-r-1 bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))]`}
+    >
+      <div className='w-full flex items-center mb-3'>
+        {/* logo */}
+        <h1
+          className='flex items-center gap-3 cursor-pointer'
+          onClick={() => router.push('/')}
+        >
+          <Image
+            className='w-15 h-15 box-border rounded-lg'
+            src={'/logo.gif'}
+            alt='logo'
+            width={100}
+            height={100}
+          />
+          <span className='text-2xl font-bold'>AI Chat</span>
+        </h1>
+        {/* 折叠按钮 */}
+        <SidebarTrigger />
+      </div>
       {/* 新任务 按钮 */}
       <Button
         variant='outline'
@@ -89,7 +98,7 @@ const Aside = () => {
         </SettingDropdown>
       ) : (
         // 未登录时显示的内容
-        <div 
+        <div
           className='p-3 flex gap-2 cursor-pointer items-center mt-auto'
           onClick={() => router.push('/login')}
         >
@@ -100,9 +109,7 @@ const Aside = () => {
             </div>
           </div>
           {/* 未登录提示 */}
-          <div className='flex-1 truncate text-left text-sm'>
-            未登录
-          </div>
+          <div className='flex-1 truncate text-left text-sm'>未登录</div>
         </div>
       )}
     </div>

@@ -2,6 +2,8 @@
 import { ResponseMessage } from '@/app/api/conversation/[id]/route'
 import Editor from '@/components/Editor'
 import { MessageItem } from '@/components/MessageItem'
+import { useSidebar } from '@/components/SidebarProvider'
+import { SidebarTrigger } from '@/components/SidebarTrigger'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Tooltip,
@@ -95,7 +97,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
       handleSendMessage(cacheMessage)
       // 发送缓存消息后立即清除，防止重复发送
       setCacheMessage('')
-    } else {
+    } else if (!id.startsWith('local_')) {
       // 加载之前的会话
       initConversation()
     }
@@ -174,12 +176,10 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     emitter.on('delete-conversation', (event: unknown) => {
       // 确保 event 是 string 类型
       if (typeof event === 'string') {
-        setMessages((prev) =>
-          prev.filter((message) => message.id !== event)
-        )
+        setMessages((prev) => prev.filter((message) => message.id !== event))
       }
     })
-    
+
     // 清理函数，组件卸载时移除事件监听器
     return () => {
       emitter.off('delete-conversation')
@@ -212,6 +212,8 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   }, [isDone])
 
+  const { isCollapsed } = useSidebar()
+
   return (
     <div className='flex h-screen min-h-[600px] w-full relative p-[10px] duration-200 ease-[cubic-bezier(0.65,0,0.35,0)]'>
       <div className='flex relative bg-[rgba(var(--coze-bg-11),var(--coze-bg-11-alpha))] flex-1 flex-col items-center rounded-xl shadow overflow-hidden'>
@@ -219,16 +221,15 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         <div className='relative flex w-full items-center p-4 h-16.5'>
           <div className='flex items-center gap-[8px] max-w-[100%]'>
             <div className='overflow-hidden flex items-center'>
+              {!isCollapsed ? null : <SidebarTrigger className='mr-2' />}
               <Tooltip>
                 <TooltipTrigger>
                   <h1 className='truncate max-w-2xs text-base text-[rgba(var(--coze-fg-4),var(--coze-fg-4-alpha))] font-medium'>
-                    未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务
+                    未命名
                   </h1>
                 </TooltipTrigger>
                 <TooltipContent align='start'>
-                  <p>
-                    未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务未命名任务
-                  </p>
+                  <p>未命名</p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -260,12 +261,14 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         {isLoading ? (
           <ChatLoading />
         ) : (
-          <ChatMessageWrapper messages={messages} />
+          <>
+            <ChatMessageWrapper messages={messages} />
+            {/* 输入框 */}
+            <div className='rounded-xl w-full max-w-[800px] p-4 pt-0'>
+              <Editor onSend={handleSendMessage} />
+            </div>
+          </>
         )}
-        {/* 输入框 */}
-        <div className='rounded-xl w-full max-w-[800px] p-4 pt-0'>
-          <Editor onSend={handleSendMessage} />
-        </div>
       </div>
     </div>
   )

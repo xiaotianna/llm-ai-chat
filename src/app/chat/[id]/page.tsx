@@ -12,6 +12,7 @@ import { useSSE } from '@/hooks/useSSE'
 import { useEditorStore } from '@/store/editor'
 import { MessageRoleType } from '@/types'
 import { MessagesType } from '@/types/model/model-config'
+import { emitter } from '@/utils/emitter'
 import { fetchClient } from '@/utils/fetch-client'
 import { ParseChunkType } from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
@@ -60,6 +61,7 @@ const ChatMessageWrapper = ({ messages }: { messages: MessagesType[] }) => {
           messages.map((message) => (
             <MessageItem
               key={message.id}
+              id={message.id}
               role={message.role as MessageRoleType}
               content={message.content}
               reasoning={message.reasoning}
@@ -126,7 +128,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const handleSendMessage = async (message: string) => {
     const _messages: MessagesType[] = [
       ...messages,
-      { role: 'user', content: message, id: uuidv4() },
+      { role: 'user', content: message, id: uuidv4(), isDone: false },
       {
         role: 'assistant',
         content: '',
@@ -167,6 +169,23 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     })
   }
 
+  // 监听子组件MessageItem删除按钮的订阅
+  useEffect(() => {
+    emitter.on('delete-conversation', (event: unknown) => {
+      // 确保 event 是 string 类型
+      if (typeof event === 'string') {
+        setMessages((prev) =>
+          prev.filter((message) => message.id !== event)
+        )
+      }
+    })
+    
+    // 清理函数，组件卸载时移除事件监听器
+    return () => {
+      emitter.off('delete-conversation')
+    }
+  }, [])
+
   useEffect(() => {
     if (isDone) {
       setMessages((prev) => {
@@ -174,6 +193,12 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         const lastMessage = updated[updated.length - 1]
 
         if (lastMessage && lastMessage.role === 'assistant') {
+          // user
+          updated[updated.length - 2] = {
+            ...lastMessage,
+            isDone: true
+          }
+          // ai
           updated[updated.length - 1] = {
             ...lastMessage,
             isDone: true

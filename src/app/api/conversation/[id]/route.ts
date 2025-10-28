@@ -31,7 +31,7 @@ export async function GET(
   if (historyError || !chatHistory) {
     console.error('Chat history fetch error:', historyError)
     return NextResponse.json(
-      { error: 'Chat history not found' },
+      ResponseData.error(404, 'Chat history not found'),
       { status: 404 }
     )
   }
@@ -46,7 +46,7 @@ export async function GET(
   if (conversationError) {
     console.error('LLM conversations fetch error:', conversationError)
     return NextResponse.json(
-      { error: conversationError.message },
+      ResponseData.error(500, conversationError.message),
       { status: 500 }
     )
   }
@@ -57,11 +57,42 @@ export async function GET(
 }
 
 export type ResponseMessage = {
-    content: string;
-    create_time: string;
-    history_id: string;
-    id: string;
-    reasoning: string;
-    type: Database["public"]["Enums"]["conversations_type"];
-    user_id: string;
+  content: string
+  create_time: string
+  history_id: string
+  id: string
+  reasoning: string
+  type: Database['public']['Enums']['conversations_type']
+  user_id: string
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const cookieStore = await cookies()
+  const userInfoCookie = cookieStore.get('user-info')
+  if (!userInfoCookie) {
+    return NextResponse.json(ResponseData.error(401, 'Not authenticated'), {
+      status: 401
+    })
+  }
+  const userInfo = JSON.parse(userInfoCookie.value)
+  const userId = userInfo.id
+
+  const { error } = await supabase
+    .from('llm_conversations')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId)
+
+  if (error) {
+    console.error(`delete error:`, error)
+    return NextResponse.json(ResponseData.success(500, error.message), {
+      status: 500
+    })
+  }
+
+  return NextResponse.json(ResponseData.success(200, '删除成功'))
 }

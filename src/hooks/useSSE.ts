@@ -1,15 +1,25 @@
+import { useEditorStore } from '@/store/editor'
 import { ModelConfigKey } from '@/types/model/model-config'
-import { parseChunk, ParseChunkType, ParseDoneChunkType } from '@/utils/parse-chunk'
+import {
+  parseChunk,
+  ParseChunkType,
+  ParseDoneChunkType
+} from '@/utils/parse-chunk'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-export const useSSE = (url: string, modelName: ModelConfigKey, historyId?: string) => {
+export const useSSE = (
+  url: string,
+  modelName: ModelConfigKey,
+  historyId?: string
+) => {
   const [error, setError] = useState<{
     message: string
     code: number
   } | null>(null)
   const [isDone, setIsDone] = useState<boolean>(false)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const init = useEditorStore.getState().init
 
   useEffect(() => {
     return () => {
@@ -84,6 +94,7 @@ export const useSSE = (url: string, modelName: ModelConfigKey, historyId?: strin
     } finally {
       abortControllerRef.current = null
       setIsDone(true)
+      init()
     }
   }
 

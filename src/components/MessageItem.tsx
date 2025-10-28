@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { emitter } from '@/utils/emitter'
+import { useEditorStore } from '@/store/editor'
 
 interface MessageItemProps {
   id: string
@@ -49,7 +50,8 @@ export const MessageItem = (props: MessageItemProps) => {
     {
       icon: Copy,
       label: '复制',
-      className: 'w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px]',
+      className:
+        'w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px]',
       onClick: () => {
         copy(content).then(() => {
           toast.success('复制成功')
@@ -59,17 +61,18 @@ export const MessageItem = (props: MessageItemProps) => {
     {
       icon: Trash2,
       label: '删除',
-      className: 'w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px] text-red-500',
+      className:
+        'w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px] text-red-500',
       onClick: () => {
         setShowDeleteConfirm(true)
-      },
+      }
     }
   ]
 
   // 删除会话
   const deleteConversation = async (id: string) => {
     let res = await fetchClient(`/api/conversation/${id}`, {
-      method: 'DELETE',
+      method: 'DELETE'
     })
     if (res.code === 200) {
       emitter.emit('delete-conversation', id)
@@ -128,9 +131,12 @@ export const MessageItem = (props: MessageItemProps) => {
           </div>
         </div>
       </div>
-      
+
       {/* 删除确认弹窗 */}
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <Dialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+      >
         <DialogContent className='sm:max-w-[425px] bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))]'>
           <DialogHeader>
             <DialogTitle>确认删除</DialogTitle>
@@ -179,10 +185,12 @@ const AIMessage = ({
   reasoning?: string
   isDone?: boolean
 }) => {
+  // const isLoading = useEditorStore.getState().isLoading
+  // TODO 模型失败等错误，不需要展示正在思考中
   // TODO 完成loading逻辑
   return (
     <>
-      {content || reasoning ? (
+      {(content || reasoning) ? (
         <>
           {/* 显示思考过程 */}
           {reasoning && (

@@ -19,9 +19,7 @@ import { fetchClient } from '@/utils/fetch-client'
 import { ParseChunkType, ParseDoneChunkType } from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
-import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
 
 // 聊天消息为空展示内容
 const ChatLoading = () => {
@@ -90,7 +88,6 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   // TODO stop功能
   const { isDone, play, stop } = useSSE('/api/chat', 'DeepSeek-R1', id)
   const [messages, setMessages] = useState<MessagesType[]>([])
-  const init = useEditorStore.getState().init
   const cacheMessage = useEditorStore.getState().cacheMessage
   const setCacheMessage = useEditorStore.getState().setCacheMessage
   const [isPageLoading, setIsPageLoading] = useState(false)
@@ -200,7 +197,6 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
   // 接收到的终止数据，包含需要替换的消息id（user、ai）
   const handlePlayDone = (chunk: ParseDoneChunkType[]) => {
-    console.log(chunk)
     const userMsg = chunk.find((item) => item.type === 'user')
     const aiMsg = chunk.find((item) => item.type === 'assistant')
     setMessages((prev) => {
@@ -229,6 +225,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
       }
       return updated
     })
+    // TODO 更新地址栏id和history记录
   }
 
   // 监听子组件MessageItem删除按钮的订阅
@@ -245,13 +242,6 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
       emitter.off('delete-conversation')
     }
   }, [])
-
-  useEffect(() => {
-    if (isDone) {
-      // 重置状态
-      init()
-    }
-  }, [isDone])
 
   const { isCollapsed } = useSidebar()
 

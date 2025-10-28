@@ -115,17 +115,18 @@ export async function POST(request: NextRequest) {
     ]
 
     // 插入用户数据
-    const { data: userConversationData, error: conversationError } = await supabase
-      .from('llm_conversations')
-      .insert([
-        {
-          content: message,
-          history_id: historyId,
-          user_id: userId,
-          type: 'user'
-        }
-      ])
-      .select('id, history_id, type, create_time')
+    const { data: userConversationData, error: conversationError } =
+      await supabase
+        .from('llm_conversations')
+        .insert([
+          {
+            content: message,
+            history_id: historyId,
+            user_id: userId,
+            type: 'user'
+          }
+        ])
+        .select('id, history_id, type, create_time')
 
     if (conversationError) {
       console.error('Error saving user message:', conversationError)
@@ -160,26 +161,34 @@ export async function POST(request: NextRequest) {
           if (fullContent) {
             // 插入ai数据
             const { data: llm_conversationsData, error: saveResponseError } =
-              await supabase.from('llm_conversations').insert([
-                {
-                  content: fullContent,
-                  reasoning: fullReasoning || null,
-                  history_id: historyId,
-                  user_id: userId,
-                  type: 'assistant'
-                }
-              ]).select('id, history_id, type, create_time')
+              await supabase
+                .from('llm_conversations')
+                .insert([
+                  {
+                    content: fullContent,
+                    reasoning: fullReasoning || null,
+                    history_id: historyId,
+                    user_id: userId,
+                    type: 'assistant'
+                  }
+                ])
+                .select('id, history_id, type, create_time')
 
             if (saveResponseError) {
               console.error('Error saving AI response:', saveResponseError)
             }
 
             // 发送用户historyId和user、ai会话消息的ai（进行替换）
-            controller.enqueue(`done: ${JSON.stringify([...userConversationData, ...llm_conversationsData!])}\n\n`)
+            controller.enqueue(
+              `done: ${JSON.stringify([
+                ...userConversationData,
+                ...llm_conversationsData!
+              ])}\n\n`
+            )
           }
           controller.close()
         } catch (error) {
-          controller.error(error)
+          throw error
         }
       }
     })

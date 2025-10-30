@@ -68,6 +68,7 @@ specifiers:
   typescript: ^5
   uuid: ^11.1.0
   zod: ^3.25.67
+  zod-to-json-schema: ^3.24.6
   zustand: ^5.0.5
 
 dependencies:
@@ -128,6 +129,7 @@ dependencies:
   tailwind-merge: 3.3.0
   uuid: 11.1.0
   zod: 3.25.67
+  zod-to-json-schema: 3.24.6_zod@3.25.67
   zustand: 5.0.5_3y7tt4djiwyqqlve4dazz5ae6q
 
 devDependencies:
@@ -5145,6 +5147,14 @@ packages:
     resolution: {integrity: sha512-4lLa/EcQCB0cJkyts+FpIRx5G/llPxfP6VQU5KByHEhLxY3IJCH0f0Hy1MHI8sClTvsIb8qwRJ6R/ZdlDJ/leQ==}
     engines: {node: '>= 14.6'}
     hasBin: true
+    dev: false
+
+  /zod-to-json-schema/3.24.6_zod@3.25.67:
+    resolution: {integrity: sha512-h/z3PKvcTcTetyjl1fkj79MHNEjm+HpD6NXheWjzOekY7kV+lwDYnHw+ivHkijnCSMz1yJaWBD9vu/Fcmk+vEg==}
+    peerDependencies:
+      zod: ^3.24.1
+    dependencies:
+      zod: 3.25.67
     dev: false
 
   /zod/3.25.67:

@@ -5,7 +5,6 @@ import { type NextRequest } from 'next/server'
 import { openai } from '@/utils/open-ai'
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import { cookies } from 'next/headers'
-import { supabase } from '@/config/supabase'
 import { insertHistoryService, queryHistoryService } from '@/services/history'
 import { insertAIConversationService, insertUserConversationService } from '@/services/conversation'
 import { generateSubjectService } from '@/services/chat'
@@ -103,6 +102,7 @@ export async function POST(request: NextRequest) {
     const readableStream = new ReadableStream({
       async start(controller) {
         // 初始化消息记录（历史记录）
+        // TODO 初始化数据
         controller.enqueue(`init: ${JSON.stringify({})}\n\n`)
         try {
           let fullContent = ''

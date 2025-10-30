@@ -56,12 +56,13 @@ const ChatLoading = () => {
 // 对话容器
 const ChatMessageWrapper = forwardRef<
   HTMLDivElement,
-  { messages: MessagesType[] }
->(({ messages }, ref) => {
+  { messages: MessagesType[], onScroll?: (e: React.UIEvent<HTMLDivElement>) => void }
+>(({ messages, onScroll }, ref) => {
   return (
     <ScrollArea
       className='overflow-y-auto flex-1 w-full'
       ref={ref}
+      onScroll={onScroll}
     >
       <div className='relative flex-1 p-4 pb-7 max-w-[800px] max-md:w-[100vw] mx-auto opacity-100'>
         {messages.length > 0 &&
@@ -94,6 +95,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [isPageLoading, setIsPageLoading] = useState(false)
   const messageWrapperRef = useRef<HTMLDivElement>(null)
   const setLoading = useEditorStore.getState().setLoading
+  const [autoScroll, setAutoScroll] = useState(true)
 
   useEffect(() => {
     // 初始化执行，动态路由：以local_开头的id为临时会话，并且缓存消息不为空
@@ -112,8 +114,10 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   }, [])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (autoScroll) {
+      scrollToBottom()
+    }
+  }, [messages, autoScroll])
 
   const scrollToBottom = () => {
     // TODO 如果用户滚动就不到底部
@@ -125,6 +129,13 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         scrollContainer.scrollTop = scrollContainer.scrollHeight
       }
     }
+  }
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+    // 判断是否接近底部（允许一定误差）
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 20
+    setAutoScroll(isNearBottom)
   }
 
   const initConversation = async () => {
@@ -328,6 +339,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
             <ChatMessageWrapper
               messages={messages}
               ref={messageWrapperRef}
+              onScroll={handleScroll}
             />
             {/* 输入框 */}
             <div className='rounded-xl w-full max-w-[800px] p-4 pt-0'>

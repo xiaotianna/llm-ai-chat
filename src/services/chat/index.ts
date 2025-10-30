@@ -1,7 +1,25 @@
 import { ModelType } from '@/types/model/model-config'
 import { openai } from '@/utils/open-ai'
+import { z } from 'zod'
+import { zodToJsonSchema } from 'zod-to-json-schema'
 
-export const generateSubjectService = async (message: string, model: ModelType) => {
+export const generateSubjectService = async (
+  message: string,
+  model: ModelType
+) => {
+  const subjectSchema = z.object({
+    subject: z.string().describe('The subject of the message')
+  })
+  const jsonSchema = zodToJsonSchema(subjectSchema)
+  const responseFormat = {
+    type: 'json_schema' as const,
+    json_schema: {
+      name: 'subject',
+      strict: true,
+      schema: jsonSchema
+    }
+  }
+
   const subject = await openai.chat(
     [
       {
@@ -15,22 +33,7 @@ export const generateSubjectService = async (message: string, model: ModelType) 
     ],
     model.model,
     {
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'subject',
-          strict: true,
-          schema: {
-            type: 'object',
-            properties: {
-              subject: {
-                type: 'string',
-                description: 'The subject of the message'
-              }
-            }
-          }
-        }
-      }
+      response_format: responseFormat
     }
   )
   return subject

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { MessageRoleType } from '@/types'
 import MarkdownRender from './MarkdownRender'
 import { Copy, Trash2 } from 'lucide-react'
@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { emitter } from '@/utils/emitter'
+import { TextHoverEffect } from './ui/text-hover-effect'
 
 interface MessageItemProps {
   id: string
@@ -195,7 +196,6 @@ const AIMessage = ({
       </div>
     )
   }
-  // TODO 完成loading逻辑
   return (
     <>
       {content || reasoning ? (
@@ -213,6 +213,12 @@ const AIMessage = ({
           <div className='flex-wrap max-w-[90%]'>
             {/* 渲染 Markdown */}
             {content && <MarkdownRender>{content}</MarkdownRender>}
+            {/* 加载中 */}
+            {!isDone && (
+              <div className='flex-wrap mt-2 max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
+                <DotLoading />
+              </div>
+            )}
           </div>
         </>
       ) : (

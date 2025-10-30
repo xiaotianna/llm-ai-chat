@@ -17,5 +17,7 @@ export const DeepSeekR1Model = {
   },
   system_message: {},
   // 模型提供商
-  provider: 'open-router'
+  provider: 'open-router',
+  functionCalling: true,
+  webSearch: false
 } as const

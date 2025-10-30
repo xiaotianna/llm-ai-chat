@@ -1,11 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { MoreHorizontal, Pin, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { getHistories, HistoryItem, setHistories } from '@/store/history'
 import { fetchClient } from '@/utils/fetch-client'
 import { useUserStore } from '@/store/user'
-import { formatDate } from '@/utils/format-date'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +20,7 @@ import {
   GroupedHistories,
   transformToGroupedHistories
 } from '@/utils/transform-to-grouped-histories'
+import { cn } from '@/lib/utils'
 
 const History = () => {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
@@ -115,7 +115,7 @@ const History = () => {
     setIsRenaming(true)
     try {
       const res = await fetchClient<HistoryItem>('/api/history', {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify({
           subject: renameInput.trim(),
           history_id: currentHistoryItem.id
@@ -199,6 +199,8 @@ const History = () => {
     </>
   )
 
+  const { id } = useParams()
+
   return (
     <>
       {/* loading状态 */}
@@ -217,7 +219,9 @@ const History = () => {
               {item.data.map((item) => (
                 <div
                   key={item.id}
-                  className='rounded-lg p-3 mb-3 cursor-pointer group relative bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))]'
+                  className={cn('rounded-lg p-3 mb-3 cursor-pointer group relative hover:bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))]', 
+                    item.id === id && 'bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))]'
+                  )}
                   onClick={() => router.push(`/chat/${item.id}`)}
                 >
                   <div className='text-sm mb-1 truncate font-medium text[rgba(var(--coze-fg-4),var(--coze-fg-4-alpha))]'>

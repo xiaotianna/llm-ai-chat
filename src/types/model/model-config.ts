@@ -15,5 +15,6 @@ export type MessagesType = {
   content: string
   reasoning?: string // ai: 是否带有思考内容
   isDone: boolean // ai: 是否结束
+  error?: string // ai: 错误信息
   created_time?: string
 }

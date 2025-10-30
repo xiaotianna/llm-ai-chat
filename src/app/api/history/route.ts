@@ -36,7 +36,7 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: Request) {
+export async function PATCH(request: Request) {
   const cookieStore = await cookies()
   const userInfoCookie = cookieStore.get('user-info')
   if (!userInfoCookie) {

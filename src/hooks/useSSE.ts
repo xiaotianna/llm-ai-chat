@@ -13,10 +13,7 @@ export const useSSE = (
   modelName: ModelConfigKey,
   historyId?: string
 ) => {
-  const [error, setError] = useState<{
-    message: string
-    code: number
-  } | null>(null)
+  const [error, setError] = useState<string>('')
   const [isDone, setIsDone] = useState<boolean>(false)
   const abortControllerRef = useRef<AbortController | null>(null)
   const init = useEditorStore.getState().init
@@ -39,7 +36,7 @@ export const useSSE = (
     onDone: (chunk: ParseDoneChunkType[]) => void
   ) => {
     // 初始化状态
-    setError(null)
+    setError('')
     setIsDone(false)
 
     // 创建 AbortController 用于取消请求

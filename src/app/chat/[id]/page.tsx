@@ -73,6 +73,7 @@ const ChatMessageWrapper = forwardRef<
               content={message.content}
               reasoning={message.reasoning}
               isDone={message.isDone}
+              error={message.error}
             />
           ))}
       </div>
@@ -85,8 +86,8 @@ const ChatMessageWrapper = forwardRef<
 
 const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
-  // TODO stop功能
-  const { isDone, play, stop } = useSSE('/api/chat', 'DeepSeek-R1', id)
+  // TODO stop功能（用户中断，后端监听事件，需要保存已生成的内容）
+  const { isDone, play, stop, error } = useSSE('/api/chat', 'DeepSeek-R1', id)
   const [messages, setMessages] = useState<MessagesType[]>([])
   const cacheMessage = useEditorStore.getState().cacheMessage
   const setCacheMessage = useEditorStore.getState().setCacheMessage
@@ -227,6 +228,37 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     })
     // TODO 更新地址栏id和history记录
   }
+
+  // 错误捕获：将状态设置为完成，并传递error msg
+  useEffect(() => {
+    if (error) {
+      setMessages((prev) => {
+        const updated = [...prev]
+        const aiMessageIndex = updated.length - 1
+        const userMessageIndex = updated.length - 2
+
+        if (
+          userMessageIndex >= 0 &&
+          updated[userMessageIndex].role === 'user' &&
+          aiMessageIndex >= 0 &&
+          updated[aiMessageIndex].role === 'assistant'
+        ) {
+          // 更新user消息状态
+          updated[userMessageIndex] = {
+            ...updated[userMessageIndex],
+            isDone: true
+          }
+          // 更新ai消息状态
+          updated[aiMessageIndex] = {
+            ...updated[aiMessageIndex],
+            isDone: true,
+            error: error
+          }
+        }
+        return updated
+      })
+    }
+  }, [error])
 
   // 监听子组件MessageItem删除按钮的订阅
   useEffect(() => {

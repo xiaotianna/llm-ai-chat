@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { MessageRoleType } from '@/types'
 import MarkdownRender from './MarkdownRender'
 import { Copy, Trash2 } from 'lucide-react'
@@ -28,7 +28,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { emitter } from '@/utils/emitter'
-import { useEditorStore } from '@/store/editor'
 
 interface MessageItemProps {
   id: string
@@ -36,11 +35,12 @@ interface MessageItemProps {
   content: string
   reasoning?: string
   isDone?: boolean
+  error?: string
 }
 
 // 渲染每一条message
 export const MessageItem = (props: MessageItemProps) => {
-  const { id, role, content, reasoning, isDone = false } = props
+  const { id, role, content, reasoning, isDone = false, error } = props
   const isUser = role === 'user'
   const isAI = role === 'assistant'
   const [copy] = useCopyToClipboard()
@@ -101,6 +101,7 @@ export const MessageItem = (props: MessageItemProps) => {
             content={content}
             reasoning={reasoning}
             isDone={isDone}
+            error={error}
           />
         )}
         <div
@@ -111,7 +112,7 @@ export const MessageItem = (props: MessageItemProps) => {
               isAI ? 'justify-start' : 'justify-end'
             } w-full gap-[10px] text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]`}
           >
-            {isDone && (
+            {isDone && !error && (
               <TooltipProvider>
                 {actions.map((action) => (
                   <Tooltip key={action.label}>
@@ -179,18 +180,25 @@ const UserMessage = ({ content }: { content: string }) => {
 const AIMessage = ({
   content,
   reasoning,
-  isDone = false
+  isDone = false,
+  error
 }: {
   content: string
   reasoning?: string
   isDone?: boolean
+  error?: string
 }) => {
-  // const isLoading = useEditorStore.getState().isLoading
-  // TODO 模型失败等错误，不需要展示正在思考中
+  if (error) {
+    return (
+      <div className='bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] px-4 py-3 min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
+        <div className='text-red-500'>出错啦：{error}</div>
+      </div>
+    )
+  }
   // TODO 完成loading逻辑
   return (
     <>
-      {(content || reasoning) ? (
+      {content || reasoning ? (
         <>
           {/* 显示思考过程 */}
           {reasoning && (
@@ -208,15 +216,17 @@ const AIMessage = ({
           </div>
         </>
       ) : (
-        <div className='flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
-          <ShinyText
-            text='正在思考中'
-            disabled={false}
-            speed={3}
-            className='text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] mr-1'
-          />
-          <DotLoading />
-        </div>
+        !isDone && (
+          <div className='flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
+            <ShinyText
+              text='正在思考中'
+              disabled={false}
+              speed={3}
+              className='text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] mr-1'
+            />
+            <DotLoading />
+          </div>
+        )
       )}
     </>
   )

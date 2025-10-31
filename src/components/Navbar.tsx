@@ -2,11 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import {
-  Zap,
-  MessageSquare,
-  LogOut,
-} from 'lucide-react'
+import { Zap, MessageSquare, LogOut } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +18,7 @@ import { useUserStore } from '@/store/user'
 import { toast } from 'sonner'
 import { USER_TYPE_MAP } from '@/constant/common'
 import { ThemeToggle } from './ThemeToggle'
+import { cn } from '@/lib/utils'
 
 // 用户下拉菜单组件
 function UserDropdown() {
@@ -142,11 +139,22 @@ export type NavMenusType = {
   }[]
 }[]
 
-export default function Navbar() {
+export default function Navbar({
+  className,
+  title
+}: {
+  className?: string
+  title?: string
+}) {
   const { user } = useUserStore()
 
   return (
-    <header className='fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+    <header
+      className={cn(
+        'fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60',
+        className
+      )}
+    >
       <div className='container mx-auto flex h-16 items-center justify-between relative'>
         {/* title */}
         <div className='flex items-center gap-2'>
@@ -162,7 +170,7 @@ export default function Navbar() {
                 width={50}
                 height={50}
               />
-              <span>AI Chat</span>
+              <span>{title ? title : 'AI Chat'}</span>
             </div>
           </Link>
         </div>

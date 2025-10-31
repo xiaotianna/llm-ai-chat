@@ -10,7 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Bolt, Check, Laugh, LogOut, SunMoon } from 'lucide-react'
+import { Check, Laugh, LogOut, Package, SunMoon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useUserStore } from '@/store/user'
 import { useRouter } from 'next/navigation'
@@ -52,6 +52,13 @@ const SettingDropdown = ({ children }: SettingDropdownProps) => {
     setIsProfileModalOpen(true)
   }
 
+  // 处理MCP管理点击 - 改为页面跳转
+  const handleMCPClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    router.push('/chat/mcp')
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className='mt-auto'>{children}</DropdownMenuTrigger>
@@ -63,6 +70,10 @@ const SettingDropdown = ({ children }: SettingDropdownProps) => {
         <DropdownMenuItem className='cursor-pointer' onClick={handleProfileClick}>
           <Laugh className='text-[18px] w-[18px] h-[18px]' color={'rgba(var(--coze-fg-3),var(--coze-fg-3-alpha))'} />
           <span>个人中心</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem className='cursor-pointer' onClick={handleMCPClick}>
+          <Package className='text-[18px] w-[18px] h-[18px]' color={'rgba(var(--coze-fg-3),var(--coze-fg-3-alpha))'} />
+          <span>MCP 管理</span>
         </DropdownMenuItem>
         <UserProfileModal open={isProfileModalOpen} onOpenChange={setIsProfileModalOpen} />
         <DropdownMenuSub>

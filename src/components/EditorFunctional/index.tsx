@@ -24,9 +24,9 @@ export const functionalFeatures: Record<string, FunctionalFeatureConfig> = {
   },
   functionCalling: {
     key: 'functionCalling',
-    name: '函数调用',
+    name: 'MCP',
     icon: <ToolsIcon />,
-    tooltipNode: '启用函数调用能力',
+    tooltipNode: '启用MCP调用能力',
     initialState: false
   }
 }

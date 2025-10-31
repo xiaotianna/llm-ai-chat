@@ -25,7 +25,13 @@ import {
 } from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
-import React, { forwardRef, useEffect, useRef, useState } from 'react'
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState
+} from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 // 聊天消息为空展示内容
@@ -68,10 +74,31 @@ const ChatMessageWrapper = forwardRef<
     onScroll?: (e: React.UIEvent<HTMLDivElement>) => void
   }
 >(({ messages, onScroll }, ref) => {
+  const innerRef = useRef<HTMLDivElement>(null)
+
+  useImperativeHandle(ref, () => innerRef.current as HTMLDivElement)
+
+  useEffect(() => {
+    const scrollContainer = innerRef.current?.querySelector(
+      '[data-radix-scroll-area-viewport]'
+    )
+    if (!scrollContainer) return
+
+    const handleScrollEvent = (event: Event) => {
+      onScroll?.(event as unknown as React.UIEvent<HTMLDivElement>)
+    }
+
+    scrollContainer.addEventListener('scroll', handleScrollEvent)
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScrollEvent)
+    }
+  }, [onScroll])
+
   return (
     <ScrollArea
       className='overflow-y-auto flex-1 w-full'
-      ref={ref}
+      ref={innerRef}
       onScroll={onScroll}
     >
       <div className='relative flex-1 p-4 pb-7 max-w-[800px] max-md:w-[100vw] mx-auto opacity-100'>
@@ -131,7 +158,6 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   }, [messages, autoScroll])
 
   const scrollToBottom = () => {
-    // TODO 如果用户滚动就不到底部
     if (messageWrapperRef.current) {
       const scrollContainer = messageWrapperRef.current.querySelector(
         '[data-radix-scroll-area-viewport]'
@@ -317,6 +343,9 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
   const { isCollapsed } = useSidebar()
 
+  // 取消请求
+  const handleStop = async () => {}
+
   return (
     <div className='flex h-screen min-h-[600px] w-full relative p-[10px] duration-200 ease-[cubic-bezier(0.65,0,0.35,0)]'>
       <div className='flex relative bg-[rgba(var(--coze-bg-11),var(--coze-bg-11-alpha))] flex-1 flex-col items-center rounded-xl shadow overflow-hidden'>
@@ -362,6 +391,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
                 onSend={handleSendMessage}
                 showStop
                 isDone={isDone}
+                onStop={handleStop}
               />
             </div>
           </>

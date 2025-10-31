@@ -11,7 +11,7 @@ interface EditorProps {
   onSend?: (message: string) => void
   showStop?: boolean // 是否展示停止按钮
   isDone?: boolean
-  handleStop?: () => void
+  onStop?: () => void
 }
 
 const Editor = ({
@@ -19,7 +19,7 @@ const Editor = ({
   onSend,
   showStop = false,
   isDone = false,
-  handleStop
+  onStop
 }: EditorProps) => {
   const editableRef = useRef<HTMLDivElement>(null)
   const [content, setContent] = useState<string>('')
@@ -36,7 +36,7 @@ const Editor = ({
       {/* 停止按钮 */}
       {showStop && !isDone && (
         <div
-          onClick={handleStop}
+          onClick={onStop}
           className='absolute border-2 cursor-pointer gap-2 select-none -top-12 left-1/2 rounded-2xl transform -translate-x-1/2 px-6 py-1 flex items-center bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] shadow-[0px_2px_6px_0px_rgba(var(--coze-shadow-0),.04),0px_4px_12px_0px_rgba(var(--coze-shadow-0),.02)] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))'
         >
           <Sparkles className='w-4 h-4 text-[var(--primary-color)]' />

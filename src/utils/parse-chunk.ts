@@ -1,4 +1,3 @@
-import { ModelType } from '@/types/model/model-config'
 import { OpenRouterChunkResponse } from '@/types/model/open-router-response'
 
 // 解析open router模型的参数

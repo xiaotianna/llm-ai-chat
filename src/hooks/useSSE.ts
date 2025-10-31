@@ -15,7 +15,7 @@ export const useSSE = (
   historyId?: string
 ) => {
   const [error, setError] = useState<string>('')
-  const [isDone, setIsDone] = useState<boolean>(false)
+  const [isDone, setIsDone] = useState<boolean>(true)
   const abortControllerRef = useRef<AbortController | null>(null)
   const init = useEditorStore.getState().init
 

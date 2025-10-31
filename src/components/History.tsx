@@ -22,6 +22,7 @@ import {
 } from '@/utils/transform-to-grouped-histories'
 import { cn } from '@/lib/utils'
 import { emitter } from '@/utils/emitter'
+import { toast } from 'sonner'
 
 const History = () => {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
@@ -166,6 +167,7 @@ const History = () => {
         ) {
           router.push('/chat')
         }
+        toast.success('删除成功')
       }
     } catch (error) {
       console.error('删除历史记录失败:', error)

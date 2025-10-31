@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import AIModelIcon from './icon/aiModel-icon'
+import AIModelIcon from '../icon/aiModel-icon'
 import FunctionalDropdown from './FunctionalDropdown'
 import { models } from '@/config/model'
 import FunctionalButton from './FunctionalButton'
-import { NetworkIcon } from './icon/network-icon'
-import { ToolsIcon } from './icon/tools-icon'
+import { NetworkIcon } from '../icon/network-icon'
+import { ToolsIcon } from '../icon/tools-icon'
 
 export interface FunctionalFeatureConfig {
   key: string

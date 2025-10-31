@@ -13,7 +13,7 @@ import {
   ReasoningContent,
   ReasoningTrigger
 } from './ui/shadcn-io/ai/reasoning'
-import ShinyText from './ui/shiny-text'
+import ShinyText from './ui/shadcn-io/shiny-text'
 import DotLoading from './DotLoading'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { toast } from 'sonner'
@@ -28,7 +28,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { emitter } from '@/utils/emitter'
-import { TextHoverEffect } from './ui/text-hover-effect'
 
 interface MessageItemProps {
   id: string

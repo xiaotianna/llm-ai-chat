@@ -3,6 +3,7 @@ import FramerSpotlight from '@/components/FramerSpotlight'
 import Navbar from '@/components/Navbar'
 import TypingPromptInput from '@/components/TypingPromptInput'
 import { Button } from '@/components/ui/button'
+import { WritingText } from '@/components/ui/shadcn-io/writing-text'
 import { ColourfulText } from '@/components/ui/shadcn-io/colourful-text'
 import { Zap } from 'lucide-react'
 import Link from 'next/link'
@@ -21,16 +22,19 @@ const HomePage = () => {
         <FramerSpotlight />
         <div className='container px-4 md:px-6 py-16 md:py-20 -mt-24 md:mt-0'>
           <div className='flex flex-col items-center text-center max-w-3xl mx-auto'>
-            <h1 className='text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter mb-6'>
+            <h1 className='flex-wrap text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter mb-6'>
               <ColourfulText
                 text='AI Chat'
                 className='inline'
               />
-              {' '}
-              Provides You With The Most Suitable Answer
+              {' , '}
+              <WritingText
+                text='An AI that provides you with the most suitable answer!'
+                spacing={15}
+              />
             </h1>
             <p className='text-xl text-muted-foreground md:text-2xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-2xl mb-12'>
-              AI Chat, 一个给你最合适的答案的AI
+              AI Chat, 一个给你最合适的答案的AI!
             </p>
             {/* 自动输入框 */}
             <TypingPromptInput />

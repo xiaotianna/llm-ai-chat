@@ -3,9 +3,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from './ui/dropdown-menu'
-import SelectedIcon from './icon/selected-icon'
-import DownIcon from './icon/down-icon'
+} from '../ui/dropdown-menu'
+import SelectedIcon from '../icon/selected-icon'
+import DownIcon from '../icon/down-icon'
 import { useState } from 'react'
 
 interface DropdownMenuItemType {

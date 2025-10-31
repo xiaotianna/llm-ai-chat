@@ -1,4 +1,7 @@
-import { supabase } from '@/config/supabase'
+import {
+  deleteConversationService,
+  queryAllConversationService
+} from '@/services/conversation'
 import { Database } from '@/types/db/supabase'
 import { ResponseData } from '@/utils/response-message'
 import { cookies } from 'next/headers'
@@ -8,7 +11,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // 会话id
+  // 会话id(historyId)
   const { id } = await params
   const cookieStore = await cookies()
   const userInfoCookie = cookieStore.get('user-info')
@@ -20,40 +23,16 @@ export async function GET(
   const userInfo = JSON.parse(userInfoCookie.value)
   const userId = userInfo.id
 
-  // 先查询 chat_histories 表
-  const { data: chatHistory, error: historyError } = await supabase
-    .from('chat_histories')
-    .select('id')
-    .eq('id', id)
-    .eq('user_id', userId)
-    .single()
-
-  if (historyError || !chatHistory) {
-    console.error('Chat history fetch error:', historyError)
+  try {
+    const llmConversations = await queryAllConversationService(userId, id)
     return NextResponse.json(
-      ResponseData.error(404, 'Chat history not found'),
-      { status: 404 }
+      ResponseData.success(llmConversations, 'Get conversations successfully')
     )
+  } catch (error: any) {
+    return NextResponse.json(ResponseData.error(error.status, error.message), {
+      status: error.status
+    })
   }
-
-  const { data: llmConversations, error: conversationError } = await supabase
-    .from('llm_conversations')
-    .select('*')
-    .eq('history_id', chatHistory.id)
-    .eq('user_id', userId)
-    .order('create_time', { ascending: true })
-
-  if (conversationError) {
-    console.error('LLM conversations fetch error:', conversationError)
-    return NextResponse.json(
-      ResponseData.error(500, conversationError.message),
-      { status: 500 }
-    )
-  }
-
-  return NextResponse.json(
-    ResponseData.success(llmConversations, 'Get conversations successfully')
-  )
 }
 
 export type ResponseMessage = {
@@ -81,18 +60,10 @@ export async function DELETE(
   const userInfo = JSON.parse(userInfoCookie.value)
   const userId = userInfo.id
 
-  const { error } = await supabase
-    .from('llm_conversations')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', userId)
-
-  if (error) {
-    console.error(`delete error:`, error)
-    return NextResponse.json(ResponseData.success(500, error.message), {
-      status: 500
-    })
+  try {
+    await deleteConversationService(id, userId)
+    return NextResponse.json(ResponseData.success(200, '删除成功'))
+  } catch (error: any) {
+    return NextResponse.json(ResponseData.error(500, error.message))
   }
-
-  return NextResponse.json(ResponseData.success(200, '删除成功'))
 }

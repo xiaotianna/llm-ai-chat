@@ -9,16 +9,16 @@ type ColourfulTextProps = Omit<React.ComponentProps<'span'>, 'children'> & {
   staggerDelay?: number
 }
 const defaultColors = [
-  'rgb(172, 239, 38)',
-  'rgb(49, 218, 117)',
-  'rgb(42, 132, 210)',
-  'rgb(4, 112, 202)',
-  'rgb(107, 10, 255)',
-  'rgb(183, 0, 218)',
-  'rgb(218, 0, 171)',
-  'rgb(230, 64, 92)',
-  'rgb(232, 98, 63)',
-  'rgb(249, 129, 47)'
+  'rgb(255, 110, 110)', // 红
+  'rgb(255, 150, 100)', // 橙
+  'rgb(255, 200, 100)', // 黄
+  'rgb(150, 220, 100)', // 黄绿
+  'rgb(100, 200, 150)', // 绿
+  'rgb(100, 180, 220)', // 天蓝
+  'rgb(120, 150, 230)', // 蓝
+  'rgb(180, 130, 220)', // 紫
+  'rgb(220, 120, 180)', // 粉
+  'rgb(255, 150, 180)'  // 粉红
 ]
 function ColourfulText({
   ref,

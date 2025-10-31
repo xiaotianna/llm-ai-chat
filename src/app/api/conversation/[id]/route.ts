@@ -36,13 +36,17 @@ export async function GET(
 }
 
 export type ResponseMessage = {
-  content: string
-  create_time: string
-  history_id: string
-  id: string
-  reasoning: string
-  type: Database['public']['Enums']['conversations_type']
-  user_id: string
+  history_Id: string
+  subject: string
+  conversations: {
+    content: string
+    create_time: string
+    history_id: string
+    id: string
+    reasoning: string
+    type: Database['public']['Enums']['conversations_type']
+    user_id: string
+  }[]
 }
 
 export async function DELETE(

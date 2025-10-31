@@ -63,7 +63,7 @@ export const queryAllConversationService = async (
 ) => {
   const { data: chatHistory, error: historyError } = await supabase
     .from('chat_histories')
-    .select('id')
+    .select('id, subject')
     .eq('id', historyId)
     .eq('user_id', userId)
     .single()
@@ -85,7 +85,11 @@ export const queryAllConversationService = async (
     throw new HttpError(conversationError.message, 500)
   }
 
-  return llmConversations
+  return {
+    conversations: llmConversations,
+    historyId: chatHistory.id,
+    subject: chatHistory.subject
+  }
 }
 
 // 删除某一条会话记录

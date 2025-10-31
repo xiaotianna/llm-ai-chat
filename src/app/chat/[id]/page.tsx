@@ -13,12 +13,18 @@ import {
 } from '@/components/ui/tooltip'
 import { useSSE } from '@/hooks/useSSE'
 import { useEditorStore } from '@/store/editor'
+import { addHistory } from '@/store/history'
 import { MessageRoleType } from '@/types'
 import { MessagesType } from '@/types/model/model-config'
 import { emitter } from '@/utils/emitter'
 import { fetchClient } from '@/utils/fetch-client'
-import { ParseChunkType, ParseDoneChunkType } from '@/utils/parse-chunk'
+import {
+  ParseChunkType,
+  ParseDoneChunkType,
+  ParseInitChunkType
+} from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
+import { useRouter } from 'next/navigation'
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -183,7 +189,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     ]
     setMessages(_messages)
     setLoading(true)
-    await play(message, handleGetData, handlePlayDone)
+    await play(message, handleGetData, handlePlayDone, handlePlayInit)
   }
 
   const handleGetData = (chunk: ParseChunkType[]) => {
@@ -244,7 +250,23 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
       }
       return updated
     })
-    // TODO 更新地址栏id和history记录
+  }
+
+  // 获取到historyId和标题
+  const handlePlayInit = (chunk: ParseInitChunkType) => {
+    if (!chunk) return
+    const localId = id
+    setSubject(chunk.subject)
+    // 不采用router跳转，不然会刷新页面（hooks监听不到id的变化）
+    window.history.replaceState({}, '', `/chat/${chunk.historyId}`)
+    // 采用emitter才监听
+    emitter.emit('update-history-id', chunk.historyId)
+    // 更新历史记录列表
+    addHistory(localId, {
+      id: chunk.historyId,
+      subject: chunk.subject,
+      create_time: new Date().toString()
+    })
   }
 
   // 错误捕获：将状态设置为完成，并传递error msg

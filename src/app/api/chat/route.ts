@@ -6,7 +6,10 @@ import { openai } from '@/utils/open-ai'
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import { cookies } from 'next/headers'
 import { insertHistoryService, queryHistoryService } from '@/services/history'
-import { insertAIConversationService, insertUserConversationService } from '@/services/conversation'
+import {
+  insertAIConversationService,
+  insertUserConversationService
+} from '@/services/conversation'
 import { generateSubjectService } from '@/services/chat'
 
 export async function POST(request: NextRequest) {
@@ -47,12 +50,16 @@ export async function POST(request: NextRequest) {
     const userId = userInfo.id
 
     let messages: ChatCompletionMessageParam[] = []
+    let hasHistoryId = historyId ? true : false
+    let subject: string
+
     if (!historyId) {
       // 生成标题
       const _genSubject = await generateSubjectService(message, model)
       const { subject: genSubject } = JSON.parse(
         _genSubject?.choices[0].message.content || '{}'
       )
+      subject = genSubject as string
       // 没有消息记录
       try {
         const chatHistoryData = await insertHistoryService(genSubject, userId)
@@ -101,9 +108,11 @@ export async function POST(request: NextRequest) {
     // 创建 ReadableStream 来处理流式响应
     const readableStream = new ReadableStream({
       async start(controller) {
-        // 初始化消息记录（历史记录）
-        // TODO 初始化数据
-        controller.enqueue(`init: ${JSON.stringify({})}\n\n`)
+        if (!hasHistoryId) {
+          controller.enqueue(
+            `init: ${JSON.stringify({ historyId, subject })}\n\n`
+          )
+        }
         try {
           let fullContent = ''
           let fullReasoning = ''
@@ -124,7 +133,12 @@ export async function POST(request: NextRequest) {
 
           if (fullContent) {
             // 插入ai数据
-            const llm_conversationsData = await insertAIConversationService(fullContent, fullReasoning, historyId, userId)
+            const llm_conversationsData = await insertAIConversationService(
+              fullContent,
+              fullReasoning,
+              historyId,
+              userId
+            )
             // 发送用户historyId和user、ai会话消息的ai（进行替换）
             controller.enqueue(
               `done: ${JSON.stringify([

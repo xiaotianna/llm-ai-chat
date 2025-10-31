@@ -43,17 +43,24 @@ export type ParseDoneChunkType = {
   type: 'user' | 'assistant'
   create_time: string
 }
+export type ParseInitChunkType = {
+  historyId: string
+  subject: string
+} | undefined
 
 export const parseChunk = (
   chunk: string
 ): {
   data: ParseChunkType[]
   done: ParseDoneChunkType[]
+  init: ParseInitChunkType
 } => {
   const dataResults: ParseChunkType[] = []
   const doneResults: ParseDoneChunkType[] = []
+  let initResults: ParseInitChunkType
   const lines = chunk.split('\n\n').filter((line) => line.trim())
   for (const line of lines) {
+    // TODO 改造
     // 解析data: 数据
     const prefix = 'data: '
     if (line.startsWith(prefix)) {
@@ -84,7 +91,7 @@ export const parseChunk = (
     // 解析done: 数据
     const donePrefix = 'done: '
     if (line.startsWith(donePrefix)) {
-      const data = line.substring(prefix.length).trim()
+      const data = line.substring(donePrefix.length).trim()
       try {
         const parsed: ParseDoneChunkType[] = JSON.parse(data)
         doneResults.push(...parsed)
@@ -93,9 +100,22 @@ export const parseChunk = (
         throw new Error('Error parsing SSE done data: ' + err.message)
       }
     }
+    // 解析init: 数据
+    const initPrefix = 'init: '
+    if (line.startsWith(initPrefix)) {
+      const data = line.substring(initPrefix.length).trim()
+      try {
+        const parsed: ParseInitChunkType = JSON.parse(data)
+        initResults = parsed
+      } catch (err: any) {
+        console.error('Error parsing SSE done data:', data)
+        throw new Error('Error parsing SSE done data: ' + err.message)
+      }
+    }
   }
   return {
     data: dataResults,
-    done: doneResults
+    done: doneResults,
+    init: initResults
   }
 }

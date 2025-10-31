@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { MoreHorizontal, Pin, Trash2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { getHistories, HistoryItem, setHistories } from '@/store/history'
+import { getHistories, HistoryItem, setHistories, useHistoryStore } from '@/store/history'
 import { fetchClient } from '@/utils/fetch-client'
 import { useUserStore } from '@/store/user'
 import {
@@ -21,6 +21,7 @@ import {
   transformToGroupedHistories
 } from '@/utils/transform-to-grouped-histories'
 import { cn } from '@/lib/utils'
+import { emitter } from '@/utils/emitter'
 
 const History = () => {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
@@ -36,7 +37,7 @@ const History = () => {
   const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
   const user = useUserStore((state) => state.user)
-  const histories = getHistories()
+  const histories = useHistoryStore(state => state.histories)
 
   // 添加点击事件监听器，用于关闭菜单
   useEffect(() => {
@@ -200,6 +201,16 @@ const History = () => {
   )
 
   const { id } = useParams()
+  const [nowId, setNowId] = useState(id)
+
+  useEffect(() => {
+    emitter.on('update-history-id', (id: any) => {
+      setNowId(id)
+    })
+    return () => {
+      emitter.off('update-history-id')
+    }
+  }, [])
 
   return (
     <>
@@ -220,7 +231,7 @@ const History = () => {
                 <div
                   key={item.id}
                   className={cn('rounded-lg p-3 mb-3 cursor-pointer group relative hover:bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))]', 
-                    item.id === id && 'bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))]'
+                    item.id === nowId && 'bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))]'
                   )}
                   onClick={() => router.push(`/chat/${item.id}`)}
                 >

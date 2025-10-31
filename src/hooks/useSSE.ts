@@ -3,7 +3,8 @@ import { ModelConfigKey } from '@/types/model/model-config'
 import {
   parseChunk,
   ParseChunkType,
-  ParseDoneChunkType
+  ParseDoneChunkType,
+  ParseInitChunkType
 } from '@/utils/parse-chunk'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
@@ -33,7 +34,8 @@ export const useSSE = (
   const play = async (
     message: string, // 只传入当前的内容，会去后端数据库查询上下文消息，如果内容有引用上文消息，传入到数组中
     onData: (chunk: ParseChunkType[]) => void,
-    onDone: (chunk: ParseDoneChunkType[]) => void
+    onDone: (chunk: ParseDoneChunkType[]) => void,
+    onInit: (chunk: ParseInitChunkType) => void
   ) => {
     // 初始化状态
     setError('')
@@ -78,9 +80,10 @@ export const useSSE = (
 
         const chunk = decoder.decode(value, { stream: true })
         const parsedChunk = parseChunk(chunk)
-        const { data, done: parseDone } = parsedChunk
+        const { data, done: parseDone, init } = parsedChunk
         data.length && onData(data)
         parseDone.length && onDone(parseDone)
+        init && onInit(init)
       }
     } catch (error: any) {
       // 忽略取消请求的错误

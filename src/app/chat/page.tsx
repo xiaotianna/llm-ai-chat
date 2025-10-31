@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { useRouter } from 'next/navigation'
 import { SidebarTrigger } from '@/components/SidebarTrigger'
 import { useSidebar } from '@/components/SidebarProvider'
+import { addHistory } from '@/store/history'
 
 const ChatHome = () => {
   const { user } = useUserStore()
@@ -29,6 +30,12 @@ const ChatHome = () => {
     setLoading(true)
     setCacheMessage(content)
     router.push(`/chat/${id}`)
+    // 添加到历史记录中
+    addHistory(id, {
+      id,
+      subject: '新会话',
+      create_time: new Date().toString()
+    })
   }
   const { isCollapsed } = useSidebar()
   return (

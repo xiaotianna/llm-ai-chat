@@ -12,7 +12,6 @@ import {
 } from '@/services/conversation'
 import { generateSubjectService } from '@/services/chat'
 
-// TODO 改造
 export async function POST(request: NextRequest) {
   // 设置 SSE 响应头
   const headers = {

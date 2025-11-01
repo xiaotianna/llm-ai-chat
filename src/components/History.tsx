@@ -207,8 +207,6 @@ const History = () => {
 
   useEffect(() => {
     if (id) {
-      console.log(id);
-      
       setNowId(id)
     }
     emitter.on('update-history-id', (id: any) => {

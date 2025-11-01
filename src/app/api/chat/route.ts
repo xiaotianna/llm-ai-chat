@@ -12,6 +12,7 @@ import {
 } from '@/services/conversation'
 import { generateSubjectService } from '@/services/chat'
 
+// TODO 改造
 export async function POST(request: NextRequest) {
   // 设置 SSE 响应头
   const headers = {
@@ -113,10 +114,33 @@ export async function POST(request: NextRequest) {
             `init: ${JSON.stringify({ historyId, subject })}\n\n`
           )
         }
+        let fullContent = ''
+        let fullReasoning = ''
+        // 监听客户端断开连接
+        request.signal.addEventListener(
+          'abort',
+          () => {
+            // 如果已经有部分内容，则保存
+            if (fullContent || fullReasoning) {
+              // 使用 Promise 处理异步操作，但不等待结果
+              insertAIConversationService(
+                fullContent,
+                fullReasoning,
+                historyId,
+                userId
+              ).catch(console.error)
+            }
+            controller.close()
+          },
+          { once: true }
+        )
         try {
-          let fullContent = ''
-          let fullReasoning = ''
           for await (const chunk of stream!) {
+            // 检查客户端是否已断开连接
+            if (request.signal.aborted) {
+              controller.close()
+              return
+            }
             controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`)
             if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
               const delta = chunk.choices[0].delta
@@ -149,6 +173,10 @@ export async function POST(request: NextRequest) {
           }
           controller.close()
         } catch (error) {
+          if (request.signal.aborted) {
+            controller.close()
+            return
+          }
           throw error
         }
       }

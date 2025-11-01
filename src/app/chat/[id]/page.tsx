@@ -124,8 +124,8 @@ const ChatMessageWrapper = forwardRef<
 
 const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
-  // TODO stop功能（用户中断，后端监听事件，需要保存已生成的内容）
-  const { isDone, play, stop, error } = useSSE('/api/chat', 'DeepSeek-R1', id)
+  const [historyId, setHistoryId] = useState('')
+  const { isDone, play, stop, error } = useSSE('/api/chat', 'DeepSeek-R1', historyId)
   const [messages, setMessages] = useState<MessagesType[]>([])
   const cacheMessage = useEditorStore.getState().cacheMessage
   const setCacheMessage = useEditorStore.getState().setCacheMessage
@@ -134,6 +134,12 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const setLoading = useEditorStore.getState().setLoading
   const [autoScroll, setAutoScroll] = useState(true)
   const [subject, setSubject] = useState('')
+
+  useEffect(() => {
+    if (id) {
+      setHistoryId(id)
+    }
+  }, [id])
 
   useEffect(() => {
     // 初始化执行，动态路由：以local_开头的id为临时会话，并且缓存消息不为空
@@ -250,6 +256,11 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const handlePlayDone = (chunk: ParseDoneChunkType[]) => {
     const userMsg = chunk.find((item) => item.type === 'user')
     const aiMsg = chunk.find((item) => item.type === 'assistant')
+    updateMessageDone(userMsg, aiMsg)
+  }
+
+  // 更新消息完成状态
+  const updateMessageDone = (userMsg?: ParseDoneChunkType, aiMsg?: ParseDoneChunkType) => {
     setMessages((prev) => {
       const updated = [...prev]
       const aiMessageIndex = updated.length - 1
@@ -285,6 +296,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     setSubject(chunk.subject)
     // 不采用router跳转，不然会刷新页面（hooks监听不到id的变化）
     window.history.replaceState({}, '', `/chat/${chunk.historyId}`)
+    setHistoryId(chunk.historyId)
     // 采用emitter才监听
     emitter.emit('update-history-id', chunk.historyId)
     // 更新历史记录列表
@@ -344,7 +356,10 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { isCollapsed } = useSidebar()
 
   // 取消请求
-  const handleStop = async () => {}
+  const handleStop = async () => {
+    updateMessageDone()
+    stop()
+  }
 
   return (
     <div className='flex h-screen min-h-[600px] w-full relative p-[10px] duration-200 ease-[cubic-bezier(0.65,0,0.35,0)]'>

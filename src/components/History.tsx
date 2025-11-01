@@ -206,13 +206,18 @@ const History = () => {
   const [nowId, setNowId] = useState(id)
 
   useEffect(() => {
+    if (id) {
+      console.log(id);
+      
+      setNowId(id)
+    }
     emitter.on('update-history-id', (id: any) => {
       setNowId(id)
     })
     return () => {
       emitter.off('update-history-id')
     }
-  }, [])
+  }, [id])
 
   return (
     <>

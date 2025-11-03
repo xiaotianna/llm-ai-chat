@@ -3,6 +3,8 @@ import { parseDataPlugin, ParseChunkType } from './parse-data-plugin'
 import { parseDonePlugin, ParseDoneChunkType } from './parse-done-plugin'
 import { parseInitPlugin, ParseInitChunkType } from './parse-init-plugin'
 
+export type { ParseChunkType, ParseDoneChunkType, ParseInitChunkType }
+
 export interface ParseChunkResult {
   data: ParseChunkType[]
   done: ParseDoneChunkType[]

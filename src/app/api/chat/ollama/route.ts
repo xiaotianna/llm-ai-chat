@@ -10,7 +10,9 @@ import {
   insertAIConversationService,
   insertUserConversationService
 } from '@/services/conversation'
-import { generateSubjectService } from '@/services/chat'
+import { ollamaGenerateSubjectService } from '@/services/chat'
+import { Message } from 'ollama'
+import { ollama } from '@/utils/ollama'
 
 export async function POST(request: NextRequest) {
   // 设置 SSE 响应头
@@ -49,16 +51,14 @@ export async function POST(request: NextRequest) {
     const userInfo = JSON.parse(userInfoCookie.value)
     const userId = userInfo.id
 
-    let messages: ChatCompletionMessageParam[] = []
+    let messages: Message[] = []
     let hasHistoryId = historyId ? true : false
     let subject: string
 
     if (!historyId) {
       // 生成标题
-      const _genSubject = await generateSubjectService(message, model)
-      const { subject: genSubject } = JSON.parse(
-        _genSubject?.choices[0].message.content || '{}'
-      )
+      const _genSubject = await ollamaGenerateSubjectService(message, model)
+      const genSubject = _genSubject.subject
       subject = genSubject as string
       // 没有消息记录
       try {
@@ -104,7 +104,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const stream = await openai.streamChat(messages, model.model)
+    const stream = await ollama.stream(modelName, messages, {
+      think: true
+    })
     // 创建 ReadableStream 来处理流式响应
     const readableStream = new ReadableStream({
       async start(controller) {
@@ -120,7 +122,7 @@ export async function POST(request: NextRequest) {
           'abort',
           () => {
             // 如果已经有部分内容，则保存
-            if (fullContent || fullReasoning) {
+            if (fullContent|| fullReasoning) {
               // 使用 Promise 处理异步操作，但不等待结果
               insertAIConversationService(
                 fullContent,
@@ -140,20 +142,20 @@ export async function POST(request: NextRequest) {
               controller.close()
               return
             }
-            if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
-              const delta = chunk.choices[0].delta
+            if (chunk) {
+              const delta = chunk.message
               // 收集内容
               if (delta.content) {
-                fullContent += chunk.choices[0].delta.content
                 controller.enqueue(`data: ${JSON.stringify({
                   content: delta.content
                 })}\n\n`)
+                fullContent += delta.content
               }
               // 收集reasoning
-              if ((delta as any).reasoning) {
-                fullReasoning += (delta as any).reasoning
+              if (delta.thinking) {
+                fullReasoning += delta.thinking
                 controller.enqueue(`data: ${JSON.stringify({
-                  reasoning: (delta as any).reasoning
+                  reasoning: delta.thinking
                 })}\n\n`)
               }
             }
@@ -163,7 +165,7 @@ export async function POST(request: NextRequest) {
             // 插入ai数据
             const llm_conversationsData = await insertAIConversationService(
               fullContent,
-              fullReasoning,
+              '',
               historyId,
               userId
             )

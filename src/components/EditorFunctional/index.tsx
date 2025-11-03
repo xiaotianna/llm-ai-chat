@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import AIModelIcon from '../icon/aiModel-icon'
 import FunctionalDropdown from './FunctionalDropdown'
 import { models } from '@/config/model'
+import { useModel } from '@/components/ModelProvider'
 import FunctionalButton from './FunctionalButton'
 import { NetworkIcon } from '../icon/network-icon'
 import { ToolsIcon } from '../icon/tools-icon'
@@ -48,8 +49,8 @@ const EditorFunctional: React.FC = () => {
     webSearch: true,
     functionCalling: false
   })
+  const { currentModel, setCurrentModel } = useModel()
 
-  const currentModel = models[currentModelIndex]
   // 计算当前模型启用的功能
   const enabledFeatures = useMemo(() => {
     return getEnabledFeaturesForModel(currentModel)
@@ -76,9 +77,9 @@ const EditorFunctional: React.FC = () => {
         icon={<AIModelIcon />}
         currentIndex={currentModelIndex}
         handleSelect={(item) => {
-          const index = models.findIndex((model) => model.model === item.value)
-          if (index !== -1) {
-            setCurrentModelIndex(index)
+          const model = models.find((model) => model.model === item.value)
+          if (model) {
+            setCurrentModel(model)
           }
         }}
       />

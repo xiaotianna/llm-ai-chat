@@ -49,6 +49,7 @@ specifiers:
   next: 15.3.3
   next-mdx-remote: ^5.0.0
   next-themes: ^0.4.6
+  ollama: ^0.6.2
   openai: ^5.15.0
   react: ^19.0.0
   react-dom: ^19.0.0
@@ -115,6 +116,7 @@ dependencies:
   next: 15.3.3_j6k6oay3ugsr56slyfvma2drry
   next-mdx-remote: 5.0.0_3y7tt4djiwyqqlve4dazz5ae6q
   next-themes: 0.4.6_j6k6oay3ugsr56slyfvma2drry
+  ollama: 0.6.2
   openai: 5.15.0_zod@3.25.67
   react: 19.1.0
   react-dom: 19.1.0_react@19.1.0
@@ -3901,6 +3903,12 @@ packages:
       - babel-plugin-macros
     dev: false
 
+  /ollama/0.6.2:
+    resolution: {integrity: sha512-VcPZpBuz3kdoJIcyWpiDS1MSDSZKyQPM6f9wi405vdLOB5yZWiQ+m7NSTrYsntQyCp/s/Yy0quKiYerhq7Liog==}
+    dependencies:
+      whatwg-fetch: 3.6.20
+    dev: false
+
   /oniguruma-parser/0.12.1:
     resolution: {integrity: sha512-8Unqkvk1RYc6yq2WBYRj4hdnsAxVze8i7iPfQr8e4uSP3tRv0rpZcbGUDvxfQQcdwHt/e9PrMvGCsa8OqG9X3w==}
     dev: false
@@ -5196,6 +5204,10 @@ packages:
 
   /webidl-conversions/3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
+    dev: false
+
+  /whatwg-fetch/3.6.20:
+    resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
     dev: false
 
   /whatwg-url/5.0.0:

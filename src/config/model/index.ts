@@ -18,3 +18,9 @@ export const ModelConfig: ModelConfigType = Object.fromEntries(
 ) as ModelConfigType
 
 export type ModelName = (typeof models)[number]['name']
+
+// 模型请求url
+export const ModelUrlMap: Record<(typeof models)[number]['provider'], string> = {
+  'open-router': '/api/chat',
+  'ollama': '/api/chat/ollama'
+} as const

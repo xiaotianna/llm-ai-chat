@@ -1,12 +1,10 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { login_github } from './actions'
 import { toast } from 'sonner'
-import { setUserInfo, useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/user'
 import { useRouter } from 'next/navigation'
 
 const LoginPage = () => {

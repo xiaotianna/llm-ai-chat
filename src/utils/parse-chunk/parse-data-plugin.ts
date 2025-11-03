@@ -1,4 +1,3 @@
-import { OpenRouterChunkResponse } from '@/types/model/open-router-response'
 import { ParsePlugin } from './plugin'
 import { ParseChunkResult } from './index'
 
@@ -10,19 +9,22 @@ export const parseDataPlugin: ParsePlugin<ParseChunkType[], ParseChunkResult> = 
   parse: (data: string) => {
     const result: ParseChunkType[] = []
     try {
-      const parsed: OpenRouterChunkResponse = JSON.parse(data)
+      const parsed: {
+        reasoning?: string
+        content?: string
+      } = JSON.parse(data)
       // 思考内容
-      if (parsed.choices?.[0]?.delta?.reasoning) {
+      if (parsed.reasoning) {
         result.push({
           type: 'reasoning',
-          content: parsed.choices[0].delta.reasoning
+          content: parsed.reasoning
         })
       }
       // 内容
-      if (parsed.choices?.[0]?.delta?.content) {
+      if (parsed.content) {
         result.push({
           type: 'content',
-          content: parsed.choices[0].delta.content
+          content: parsed.content
         })
       }
       return result

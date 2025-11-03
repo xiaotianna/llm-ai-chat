@@ -3,6 +3,7 @@ import { ResponseMessage } from '@/app/api/conversation/[id]/route'
 import Editor from '@/components/Editor'
 import { StartIcon } from '@/components/icon/start-icon'
 import { MessageItem } from '@/components/MessageItem'
+import { useModel } from '@/components/ModelProvider'
 import { useSidebar } from '@/components/SidebarProvider'
 import { SidebarTrigger } from '@/components/SidebarTrigger'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -11,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { ModelUrlMap } from '@/config/model'
 import { useSSE } from '@/hooks/useSSE'
 import { useEditorStore } from '@/store/editor'
 import { addHistory } from '@/store/history'
@@ -24,7 +26,6 @@ import {
   ParseInitChunkType
 } from '@/utils/parse-chunk'
 import { useTheme } from 'next-themes'
-import { useRouter } from 'next/navigation'
 import React, {
   forwardRef,
   useEffect,
@@ -125,7 +126,12 @@ const ChatMessageWrapper = forwardRef<
 const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
   const [historyId, setHistoryId] = useState('')
-  const { isDone, play, stop, error } = useSSE('/api/chat', 'DeepSeek-R1', historyId)
+  const { currentModel } = useModel()
+  const { isDone, play, stop, error } = useSSE(
+    ModelUrlMap[currentModel.provider],
+    currentModel.name,
+    historyId
+  )
   const [messages, setMessages] = useState<MessagesType[]>([])
   const cacheMessage = useEditorStore.getState().cacheMessage
   const setCacheMessage = useEditorStore.getState().setCacheMessage
@@ -260,7 +266,10 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   }
 
   // 更新消息完成状态
-  const updateMessageDone = (userMsg?: ParseDoneChunkType, aiMsg?: ParseDoneChunkType) => {
+  const updateMessageDone = (
+    userMsg?: ParseDoneChunkType,
+    aiMsg?: ParseDoneChunkType
+  ) => {
     setMessages((prev) => {
       const updated = [...prev]
       const aiMessageIndex = updated.length - 1

@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs'
 import { RadioGroup, RadioGroupItem } from './ui/radio-group'
 import DotLoading from './DotLoading'
 import { z } from 'zod'
+import { fetchClient } from '@/utils/fetch-client'
 
 // 定义 MCP 配置的 Zod schema
 const mcpConfigSchema = z.object({
@@ -45,12 +46,16 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<{
     json: string | JsonError[]
+    form: {
+      name?: string
+      url?: string
+    }
   }>({
-    json: ''
+    json: '',
+    form: {}
   })
 
   const currentOpen = open !== undefined ? open : isOpen
-
   // dialog打开回调
   const handleOpenChange = (newOpen: boolean) => {
     if (onOpenChange) {
@@ -70,17 +75,25 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
 
   // 对表单内容进行校验
   const validateForm = () => {
-    let isValid = true
+    const newErrors = {
+      name: '',
+      url: ''
+    }
 
     if (!formData.name.trim()) {
-      isValid = false
+      newErrors.name = '名称不能为空'
     }
 
     if (!formData.url.trim()) {
-      isValid = false
+      newErrors.url = 'URL不能为空'
     }
 
-    return isValid
+    setErrors(prev => ({
+      ...prev,
+      form: newErrors
+    }))
+
+    return !newErrors.name && !newErrors.url
   }
 
   const handleJsonChange = (value: string) => {
@@ -164,14 +177,39 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
 
   const handleSubmit = async () => {
     setIsLoading(true)
+    setErrors(prev => ({...prev, json: '', form: {}}))
 
     try {
       let isValid = true
+      let configToSubmit
 
       if (activeTab === 'form') {
         isValid = validateForm()
+        
+        if (isValid) {
+          // 将表单数据转换为配置对象
+          configToSubmit = {
+            data_type: 'form',
+            name: formData.name,
+            type: formData.type,
+            url: formData.url,
+            description: formData.description
+          }
+        }
       } else {
         isValid = validateJson()
+        
+        if (isValid && jsonValue.trim()) {
+          try {
+            const parsedJson = JSON.parse(jsonValue)
+            configToSubmit = {
+              data_type: 'json',
+              ...parsedJson
+            }
+          } catch (e) {
+            console.error('JSON parse error:', e)
+          }
+        }
       }
 
       if (!isValid) {
@@ -179,25 +217,31 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
         return
       }
 
-      // 这里添加提交逻辑
-      if (activeTab === 'form') {
-        // 处理表单提交
-        console.log('Form data:', formData)
-      } else {
-        // 处理JSON提交
-        try {
-          const parsedJson = JSON.parse(jsonValue)
-          console.log('JSON data:', parsedJson)
-        } catch (e) {
-          console.error('JSON parse error:', e)
-        }
-      }
+      // 调用API保存配置
+      const result = await fetchClient('/api/mcp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(configToSubmit)
+      })
 
-      // 模拟API调用
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      handleOpenChange(false)
+      if (result.code === 200) {
+        // 保存成功，关闭对话框
+        handleOpenChange(false)
+      } else {
+        // 保存失败，显示错误信息
+        setErrors(prev => ({
+          ...prev,
+          json: result.message || '保存配置失败'
+        }))
+      }
     } catch (error) {
       console.error('Submit error:', error)
+      setErrors(prev => ({
+        ...prev,
+        json: '网络错误，请稍后重试'
+      }))
     } finally {
       setIsLoading(false)
     }
@@ -252,8 +296,15 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
                   value={formData.name}
                   onChange={(e) => handleFormChange('name', e.target.value)}
                   placeholder='请输入名称'
-                  className='focus-visible:ring-[var(--primary-color)] focus-visible:ring-[3px]'
+                  className={`focus-visible:ring-[var(--primary-color)] focus-visible:ring-[3px] ${
+                    errors.form.name ? 'border-red-500' : ''
+                  }`}
                 />
+                {errors.form.name && (
+                  <div className='text-red-500 text-sm'>
+                    {errors.form.name}
+                  </div>
+                )}
               </div>
 
               <div className='space-y-3'>
@@ -299,8 +350,15 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
                   value={formData.url}
                   onChange={(e) => handleFormChange('url', e.target.value)}
                   placeholder='请输入URL链接'
-                  className='focus-visible:ring-[var(--primary-color)] focus-visible:ring-[3px]'
+                  className={`focus-visible:ring-[var(--primary-color)] focus-visible:ring-[3px] ${
+                    errors.form.url ? 'border-red-500' : ''
+                  }`}
                 />
+                {errors.form.url && (
+                  <div className='text-red-500 text-sm'>
+                    {errors.form.url}
+                  </div>
+                )}
               </div>
 
               <div className='space-y-3'>
@@ -388,8 +446,12 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
             onClick={handleSubmit}
             disabled={
               isLoading ||
-              (activeTab === 'form' &&
-                (!formData.name || !formData.type || !formData.url))
+              (activeTab === 'form' && 
+                (!formData.name.trim() || !formData.type || !formData.url.trim())) ||
+              (activeTab === 'json' && 
+                (!jsonValue.trim() || 
+                  (Array.isArray(errors.json) && errors.json.length > 0) ||
+                  (typeof errors.json === 'string' && errors.json !== '')))
             }
             className='bg-[var(--primary-color)] hover:bg-[var(--primary-color)]'
           >

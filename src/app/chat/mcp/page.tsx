@@ -9,49 +9,35 @@ import {
 } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import { ChevronLeft, Package, Plus, Search, CircleHelp } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import McpModal from '@/components/McpModal'
 import { useRouter } from 'next/navigation'
 import { Switch } from '@/components/ui/switch'
 import MCPConfigModal from '@/components/MCPConfigModal'
-
-const mcpServices = [
-  {
-    id: '1',
-    name: 'mcp-deepwiki',
-    description: '暂无服务说明',
-    enabled: false
-  },
-  {
-    id: '2',
-    name: 'mcp-deepwiki2',
-    description: '暂无服务说明',
-    enabled: false
-  },
-  {
-    id: '3',
-    name: 'mcp-deepwiki2',
-    description: '暂无服务说明',
-    enabled: false
-  }
-]
+import { fetchClient } from '@/utils/fetch-client'
+import { MCPConfig, ResponseMCPConfig } from '@/app/api/mcp/route'
+import DotLoading from '@/components/DotLoading'
 
 const MCPPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const router = useRouter()
-  const [services, setServices] = useState(mcpServices)
+  const [services, setServices] = useState<MCPConfig[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  // 获取MCP配置数据
 
   const handleToggleService = (id: string) => {
     setServices(
-      services.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s))
+      services.map((s) => (s.id === id ? { ...s, status: !s.status } : s))
     )
   }
 
   const handleRemoveService = (id: string) => {
     setServices(services.filter((s) => s.id !== id))
   }
+
 
   return (
     <div
@@ -68,7 +54,7 @@ const MCPPage = () => {
               router.back()
             }}
           >
-            <ChevronLeft className='h-8 w-8' />
+            <ChevronLeft className='h-8 w-8 text-black dark:text-white' />
           </Button>
           <p className='font-medium flex items-center gap-3'>
             MCP 服务设置
@@ -115,27 +101,40 @@ const MCPPage = () => {
           </Button>
         </div>
         {/* MCP弹窗 */}
-        <MCPConfigModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+        <MCPConfigModal 
+          open={isModalOpen} 
+          onOpenChange={(open) => {
+            setIsModalOpen(open)
+            // 如果关闭弹窗且之前是打开状态，说明可能添加了新配置，需要刷新列表
+            if (!open) {
+              // handleConfigAdded()
+            }
+          }} 
+        />
         {/* 内容 */}
         <div className='flex-1 w-full'>
-          {services.length > 0 ? (
-            <div className='w-full gap-2 grid grid-cols-1 md:grid-cols-2'>
+          {loading ? (
+            <div className='flex justify-center items-center h-40'>
+              <DotLoading />
+            </div>
+          ) : services.length > 0 ? (
+            <div className='w-full gap-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
               {services.map((service) => (
                 <div
                   key={service.id}
-                  className='flex items-center justify-between rounded-lg bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] p-4 transition-colors'
+                  className='flex items-center justify-between rounded-lg border border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))] bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] p-4 transition-colors'
                 >
                   <div className='flex-1'>
-                    <h3 className='font-medium text-foreground mb-1'>
+                    <div className='font-medium text-sm text-foreground mb-1'>
                       {service.name}
-                    </h3>
+                    </div>
                     <p className='text-sm text-muted-foreground'>
-                      {service.description}
+                      {service.desc}
                     </p>
                   </div>
                   <div className='flex items-center gap-3'>
                     <Switch
-                      checked={service.enabled}
+                      checked={service.status}
                       onCheckedChange={() => handleToggleService(service.id)}
                     />
                     <Button

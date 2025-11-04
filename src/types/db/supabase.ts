@@ -98,6 +98,36 @@ export type Database = {
           },
         ]
       }
+      mcp_config: {
+        Row: {
+          create_time: string
+          data_type: Database["public"]["Enums"]["mcp_config_data-type"]
+          form_desc: string | null
+          form_name: string
+          form_type: Database["public"]["Enums"]["mcp_config_form-type"]
+          id: string
+          json_content: Json
+        }
+        Insert: {
+          create_time?: string
+          data_type: Database["public"]["Enums"]["mcp_config_data-type"]
+          form_desc?: string | null
+          form_name: string
+          form_type: Database["public"]["Enums"]["mcp_config_form-type"]
+          id?: string
+          json_content: Json
+        }
+        Update: {
+          create_time?: string
+          data_type?: Database["public"]["Enums"]["mcp_config_data-type"]
+          form_desc?: string | null
+          form_name?: string
+          form_type?: Database["public"]["Enums"]["mcp_config_form-type"]
+          id?: string
+          json_content?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -108,6 +138,8 @@ export type Database = {
     Enums: {
       conversations_type: "assistant" | "user"
       login_type: "phone" | "github"
+      "mcp_config_data-type": "form" | "json"
+      "mcp_config_form-type": "sse" | "streamable"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -240,6 +272,8 @@ export const Constants = {
     Enums: {
       conversations_type: ["assistant", "user"],
       login_type: ["phone", "github"],
+      "mcp_config_data-type": ["form", "json"],
+      "mcp_config_form-type": ["sse", "streamable"],
     },
   },
 } as const

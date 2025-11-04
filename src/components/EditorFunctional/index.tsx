@@ -4,7 +4,6 @@ import FunctionalDropdown from './FunctionalDropdown'
 import { models } from '@/config/model'
 import { useModel } from '@/components/ModelProvider'
 import FunctionalButton from './FunctionalButton'
-import { NetworkIcon } from '../icon/network-icon'
 import { ToolsIcon } from '../icon/tools-icon'
 
 export interface FunctionalFeatureConfig {
@@ -16,13 +15,6 @@ export interface FunctionalFeatureConfig {
 }
 
 export const functionalFeatures: Record<string, FunctionalFeatureConfig> = {
-  webSearch: {
-    key: 'webSearch',
-    name: '联网搜索',
-    icon: <NetworkIcon />,
-    tooltipNode: '实时联网查询，获取最新信息',
-    initialState: true
-  },
   functionCalling: {
     key: 'functionCalling',
     name: 'MCP',
@@ -46,7 +38,6 @@ export const getEnabledFeaturesForModel = (model: any): string[] => {
 const EditorFunctional: React.FC = () => {
   const [currentModelIndex, setCurrentModelIndex] = useState(0)
   const [featureStates, setFeatureStates] = useState<Record<string, boolean>>({
-    webSearch: true,
     functionCalling: false
   })
   const { currentModel, setCurrentModel } = useModel()

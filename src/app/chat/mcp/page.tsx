@@ -13,6 +13,7 @@ import React, { useState } from 'react'
 import McpModal from '@/components/McpModal'
 import { useRouter } from 'next/navigation'
 import { Switch } from '@/components/ui/switch'
+import MCPConfigModal from '@/components/MCPConfigModal'
 
 const mcpServices = [
   {
@@ -40,6 +41,7 @@ const MCPPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const router = useRouter()
   const [services, setServices] = useState(mcpServices)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleToggleService = (id: string) => {
     setServices(
@@ -102,11 +104,18 @@ const MCPPage = () => {
               className='pl-9 bg-muted/30'
             />
           </div>
-          <Button className='ml-auto gap-2 cursor-pointer hover:cursor-pointer bg-[var(--primary-color)] hover:bg-[var(--primary-color-hover)]'>
+          <Button
+            className='ml-auto gap-2 cursor-pointer hover:cursor-pointer bg-[var(--primary-color)] hover:bg-[var(--primary-color-hover)]'
+            onClick={() => {
+              setIsModalOpen(true)
+            }}
+          >
             <Plus className='h-4 w-4' />
             添加MCP服务
           </Button>
         </div>
+        {/* MCP弹窗 */}
+        <MCPConfigModal open={isModalOpen} onOpenChange={setIsModalOpen} />
         {/* 内容 */}
         <div className='flex-1 w-full'>
           {services.length > 0 ? (

@@ -3,7 +3,7 @@ import { type NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { ResponseData } from '@/utils/response-message'
 import { Database } from '@/types/db/supabase'
-import { insertMcpConfigService, getMcpConfigsByUserId } from '@/services/mcp'
+import { updateMcpConfigService, deleteMcpConfigService } from '@/services/mcp'
 
 export interface MCPConfig {
   create_time?: string
@@ -16,18 +16,7 @@ export interface MCPConfig {
   status: boolean
 }
 
-export interface ResponseMCPConfig {
-    create_time: string;
-    desc: string | null;
-    id: string;
-    mcp_type: Database["public"]["Enums"]["mcp_type"];
-    name: string;
-    status: boolean | null;
-    url: string;
-    user_id: string;
-}
-
-export async function GET() {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies()
   const userInfoCookie = cookieStore.get('user-info')
   if (!userInfoCookie) {
@@ -46,23 +35,35 @@ export async function GET() {
   }
 
   try {
-    const data = await getMcpConfigsByUserId(userId)
+    const { id } = await params
+    const body = await request.json()
+    const { mcp_type, name, url, desc, status } = body
+
+    // 构建更新对象，只包含提供的字段
+    const updateData: Partial<MCPConfig> = {}
+    if (mcp_type !== undefined) updateData.mcp_type = mcp_type
+    if (name !== undefined) updateData.name = name
+    if (url !== undefined) updateData.url = url
+    if (desc !== undefined) updateData.desc = desc
+    if (status !== undefined) updateData.status = status
+
+    const data = await updateMcpConfigService(id, updateData)
     return NextResponse.json(
-      ResponseData.success(data, 'MCP configurations fetched successfully')
+      ResponseData.success(data, 'MCP configuration updated successfully')
     )
   } catch (error: any) {
-    console.error('Error in GET MCP configs:', error)
+    console.error('Error in PUT MCP config:', error)
     return NextResponse.json(
       ResponseData.error(
         error.status || 500,
-        error.message || 'Failed to fetch MCP configs'
+        error.message || 'Failed to update MCP config'
       ),
       { status: error.status || 500 }
     )
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies()
   const userInfoCookie = cookieStore.get('user-info')
   if (!userInfoCookie) {
@@ -81,24 +82,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json()
-    const { mcp_type, name, url, desc } = body
-    const data = await insertMcpConfigService({
-      mcp_type,
-      name,
-      url,
-      desc,
-      user_id: userId
-    })
+    const { id } = await params
+    const data = await deleteMcpConfigService(id)
     return NextResponse.json(
-      ResponseData.success(data, 'MCP configuration saved successfully')
+      ResponseData.success(data, 'MCP configuration deleted successfully')
     )
   } catch (error: any) {
-    console.error('Error in POST MCP config:', error)
+    console.error('Error in DELETE MCP config:', error)
     return NextResponse.json(
       ResponseData.error(
         error.status || 500,
-        error.message || 'Failed to save MCP config'
+        error.message || 'Failed to delete MCP config'
       ),
       { status: error.status || 500 }
     )

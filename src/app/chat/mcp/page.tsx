@@ -17,6 +17,14 @@ import MCPConfigModal from '@/components/MCPConfigModal'
 import { fetchClient } from '@/utils/fetch-client'
 import { MCPConfig, ResponseMCPConfig } from '@/app/api/mcp/route'
 import DotLoading from '@/components/DotLoading'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const MCPPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -25,6 +33,10 @@ const MCPPage = () => {
   const [services, setServices] = useState<MCPConfig[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [togglingServiceId, setTogglingServiceId] = useState<string | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deletingServiceId, setDeletingServiceId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // 获取MCP配置数据
   const fetchMcpConfigs = async () => {
@@ -43,18 +55,62 @@ const MCPPage = () => {
     fetchMcpConfigs()
   }, [])
 
-  const handleToggleService = (id: string) => {
-    setServices(
-      services.map((s) => (s.id === id ? { ...s, status: !s.status } : s))
-    )
+  const handleToggleService = async (id: string) => {
+    // 设置正在切换的服务ID，用于禁用开关
+    setTogglingServiceId(id)
+    
+    try {
+      // 更新本地状态（乐观更新）
+      const service = services.find(s => s.id === id)
+      if (!service) return
+      
+      const newStatus = !service.status
+      setServices(
+        services.map((s) => (s.id === id ? { ...s, status: newStatus } : s))
+      )
+      
+      // 发送请求更新服务端状态
+      await fetchClient(`/api/mcp/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus })
+      })
+    } catch (error) {
+      // 如果请求失败，回滚状态
+      console.error('切换服务状态失败:', error)
+      setServices(
+        services.map((s) => (s.id === id ? { ...s, status: !s.status } : s))
+      )
+    } finally {
+      // 清除正在切换的服务ID
+      setTogglingServiceId(null)
+    }
   }
 
-  const handleRemoveService = (id: string) => {
-    setServices(services.filter((s) => s.id !== id))
+  const handleRemoveService = async () => {
+    if (!deletingServiceId) return
+    
+    setIsDeleting(true)
+    try {
+      await fetchClient(`/api/mcp/${deletingServiceId}`, {
+        method: 'DELETE'
+      })
+      setServices(services.filter((s) => s.id !== deletingServiceId))
+      setIsDeleteDialogOpen(false)
+    } catch (error) {
+      console.error('删除服务失败:', error)
+    } finally {
+      setIsDeleting(false)
+      setDeletingServiceId(null)
+    }
   }
 
   const handleConfigAdded = () => {
     fetchMcpConfigs()
+  }
+
+  const openDeleteDialog = (id: string) => {
+    setDeletingServiceId(id)
+    setIsDeleteDialogOpen(true)
   }
 
 
@@ -130,6 +186,44 @@ const MCPPage = () => {
             }
           }} 
         />
+        {/* 删除确认弹窗 */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className='sm:max-w-[425px] bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))]'>
+            <DialogHeader>
+              <DialogTitle className='text-left text-lg font-semibold'>
+                确认删除
+              </DialogTitle>
+              <DialogDescription className='text-left text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]'>
+                确定要删除此MCP服务吗？此操作不可撤销。
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className='gap-2 sm:space-x-0'>
+              <Button
+                variant='outline'
+                onClick={() => setIsDeleteDialogOpen(false)}
+                disabled={isDeleting}
+              >
+                取消
+              </Button>
+              <Button
+                variant='destructive'
+                onClick={handleRemoveService}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    删除中
+                    <span className='ml-2'>
+                      <DotLoading />
+                    </span>
+                  </>
+                ) : (
+                  '确认删除'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         {/* 内容 */}
         <div className='flex-1 w-full'>
           {loading ? (
@@ -155,6 +249,7 @@ const MCPPage = () => {
                     <Switch
                       checked={service.status}
                       onCheckedChange={() => handleToggleService(service.id)}
+                      disabled={togglingServiceId === service.id}
                     />
                     <Button
                       variant='link'
@@ -166,7 +261,7 @@ const MCPPage = () => {
                     <Button
                       variant='link'
                       size='sm'
-                      onClick={() => handleRemoveService(service.id)}
+                      onClick={() => openDeleteDialog(service.id)}
                       className='text-red-500 p-0'
                     >
                       移除

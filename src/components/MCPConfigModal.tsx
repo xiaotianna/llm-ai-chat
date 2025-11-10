@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Textarea } from './ui/textarea'
 import { Input } from './ui/input'
@@ -22,6 +22,15 @@ const mcpConfigSchema = z.object({
   )
 })
 
+// 定义 MCP 配置类型
+interface MCPConfig {
+  id?: string
+  name: string
+  type: 'sse' | 'streamable_http'
+  url: string
+  description?: string
+}
+
 // 定义验证错误类型
 type JsonError = {
   path?: string
@@ -31,9 +40,11 @@ type JsonError = {
 interface MCPConfigModalProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  editData?: MCPConfig | null // 添加编辑数据属性
+  onSave?: () => void // 添加保存成功回调
 }
 
-const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
+const MCPConfigModal = ({ open, onOpenChange, editData, onSave }: MCPConfigModalProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('form')
   const [formData, setFormData] = useState({
@@ -79,6 +90,26 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
       setActiveTab('form')
     }
   }
+
+  // 当编辑数据变化时，更新表单
+  useEffect(() => {
+    if (editData) {
+      setFormData({
+        name: editData.name || '',
+        type: editData.type || 'sse',
+        url: editData.url || '',
+        description: editData.description || ''
+      })
+    } else {
+      // 重置表单
+      setFormData({
+        name: '',
+        type: 'sse',
+        url: '',
+        description: ''
+      })
+    }
+  }, [editData])
 
   const handleFormChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -199,17 +230,36 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
   const submitFormConfig = async () => {
     setIsLoading(true)
     try {
-      const response = await fetchClient('/api/mcp', {
-        method: 'POST',
-        body: JSON.stringify({
-          mcp_type: formData.type,
-          name: formData.name,
-          url: formData.url,
-          desc: formData.description
+      if (editData && editData.id) {
+        // 编辑模式
+        const response = await fetchClient(`/api/mcp/${editData.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            mcp_type: formData.type,
+            name: formData.name,
+            url: formData.url,
+            desc: formData.description
+          })
         })
-      })
+      } else {
+        // 新增模式
+        const response = await fetchClient('/api/mcp', {
+          method: 'POST',
+          body: JSON.stringify({
+            mcp_type: formData.type,
+            name: formData.name,
+            url: formData.url,
+            desc: formData.description
+          })
+        })
+      }
       
-      // 提交成功，关闭模态框
+      // 提交成功，调用保存回调
+      if (onSave) {
+        onSave()
+      }
+      
+      // 关闭模态框
       handleOpenChange(false)
     } catch (error) {
       console.error('提交出错:', error)
@@ -245,6 +295,11 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
         console.error('部分配置提交失败:', failed)
       }
       
+      // 提交成功，调用保存回调
+      if (onSave) {
+        onSave()
+      }
+      
       // 关闭模态框
       handleOpenChange(false)
     } catch (error) {
@@ -262,7 +317,7 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
       <DialogContent className='sm:max-w-[425px] bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))]'>
         <DialogHeader>
           <DialogTitle className='text-left text-lg font-semibold'>
-            MCP配置
+            {editData ? '编辑MCP服务' : 'MCP配置'}
           </DialogTitle>
         </DialogHeader>
 
@@ -276,7 +331,7 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
               value='form'
               className='data-[state=active]:bg-[var(--primary-color)] data-[state=active]:text-white data-[state=active]:font-semibold data-[state=inactive]:text-[rgba(var(--coze-fg-3),var(--coze-fg-3-alpha))]'
             >
-              表单添加
+              {editData ? '表单编辑' : '表单添加'}
             </TabsTrigger>
             <TabsTrigger
               value='json'
@@ -454,13 +509,13 @@ const MCPConfigModal = ({ open, onOpenChange }: MCPConfigModalProps) => {
           >
             {isLoading ? (
               <>
-                确认
+                {editData ? '更新中' : '确认'}
                 <span className='ml-2'>
                   <DotLoading />
                 </span>
               </>
             ) : (
-              '确认'
+              editData ? '更新' : '确认'
             )}
           </Button>
         </div>

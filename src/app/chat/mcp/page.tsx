@@ -32,6 +32,7 @@ const MCPPage = () => {
   const router = useRouter()
   const [services, setServices] = useState<MCPConfig[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingService, setEditingService] = useState<MCPConfig | null>(null) // 添加编辑服务状态
   const [loading, setLoading] = useState(true)
   const [togglingServiceId, setTogglingServiceId] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -113,6 +114,26 @@ const MCPPage = () => {
     setIsDeleteDialogOpen(true)
   }
 
+  // 处理编辑服务
+  const handleEditService = (service: MCPConfig) => {
+    setEditingService(service)
+    setIsModalOpen(true)
+  }
+
+  // 处理模态框关闭
+  const handleModalClose = (open: boolean) => {
+    setIsModalOpen(open)
+    // 仅在关闭时清空编辑服务，不刷新列表
+    if (!open) {
+      setEditingService(null)
+    }
+  }
+  
+  // 处理保存成功
+  const handleSaveSuccess = () => {
+    handleConfigAdded() // 刷新列表
+    setEditingService(null) // 清空编辑服务
+  }
 
   return (
     <div
@@ -168,6 +189,7 @@ const MCPPage = () => {
           <Button
             className='ml-auto gap-2 cursor-pointer hover:cursor-pointer bg-[var(--primary-color)] hover:bg-[var(--primary-color-hover)]'
             onClick={() => {
+              setEditingService(null) // 确保是新增模式
               setIsModalOpen(true)
             }}
           >
@@ -178,13 +200,15 @@ const MCPPage = () => {
         {/* MCP弹窗 */}
         <MCPConfigModal 
           open={isModalOpen} 
-          onOpenChange={(open) => {
-            setIsModalOpen(open)
-            // 如果关闭弹窗且之前是打开状态，说明可能添加了新配置，需要刷新列表
-            if (!open) {
-              handleConfigAdded()
-            }
-          }} 
+          onOpenChange={handleModalClose}
+          onSave={handleSaveSuccess} // 添加保存成功回调
+          editData={editingService ? {
+            id: editingService.id,
+            name: editingService.name,
+            type: editingService.mcp_type,
+            url: editingService.url,
+            description: editingService.desc
+          } : null}
         />
         {/* 删除确认弹窗 */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -255,6 +279,7 @@ const MCPPage = () => {
                       variant='link'
                       size='sm'
                       className='text-[var(--primary-color)] p-0'
+                      onClick={() => handleEditService(service)}
                     >
                       修改
                     </Button>

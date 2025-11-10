@@ -24,7 +24,7 @@ export const FunctionalConfig: Record<
 > = {
   tools: {
     key: 'tools',
-    name: 'MCP',
+    name: 'MCP工具',
     component: FunctionalTools
   },
   webSearch: {

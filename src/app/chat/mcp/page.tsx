@@ -27,6 +27,21 @@ const MCPPage = () => {
   const [loading, setLoading] = useState(true)
 
   // 获取MCP配置数据
+  const fetchMcpConfigs = async () => {
+    try {
+      setLoading(true)
+      const response = await fetchClient<MCPConfig[]>('/api/mcp', {})
+      setServices(response.data || [])
+    } catch (error) {
+      console.error('获取MCP配置失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchMcpConfigs()
+  }, [])
 
   const handleToggleService = (id: string) => {
     setServices(
@@ -36,6 +51,10 @@ const MCPPage = () => {
 
   const handleRemoveService = (id: string) => {
     setServices(services.filter((s) => s.id !== id))
+  }
+
+  const handleConfigAdded = () => {
+    fetchMcpConfigs()
   }
 
 
@@ -107,7 +126,7 @@ const MCPPage = () => {
             setIsModalOpen(open)
             // 如果关闭弹窗且之前是打开状态，说明可能添加了新配置，需要刷新列表
             if (!open) {
-              // handleConfigAdded()
+              handleConfigAdded()
             }
           }} 
         />

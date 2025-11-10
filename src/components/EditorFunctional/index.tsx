@@ -1,33 +1,20 @@
-import React from 'react'
-import AIModelIcon from '../icon/aiModel-icon'
-import FunctionalDropdown from './FunctionalDropdown'
-import { models } from '@/config/model'
-import { useModel } from '@/components/ModelProvider'
+import React, { useEffect } from 'react'
+import FunctionalModel from './FunctionalModel'
+import { useModel } from '../ModelProvider'
+import { FunctionalConfig, FunctionalConfigKey } from './FunctionalConfig';
 
 const EditorFunctional: React.FC = () => {
-  const { currentModel, setCurrentModel } = useModel()
-  const currentModelIndex = models.findIndex(model => model.model === currentModel.model)
-  
+  const { currentModel } = useModel()
   return (
     <div className='flex space-x-2'>
       {/* 模型切换 */}
-      <FunctionalDropdown
-        dropdownMenu={[
-          ...models.map((model) => ({
-            name: model.name,
-            value: model.model,
-            description: model.description
-          }))
-        ]}
-        icon={<AIModelIcon />}
-        currentIndex={currentModelIndex}
-        handleSelect={(item) => {
-          const model = models.find((model) => model.model === item.value)
-          if (model) {
-            setCurrentModel(model)
-          }
-        }}
-      />
+      <FunctionalModel />
+      {/* 其他配置 */}
+      {Object.keys(currentModel.function).map((key) => {
+        const configKey = key as FunctionalConfigKey;
+        const Component = FunctionalConfig[configKey].component as React.ComponentType<any>;
+        return <Component key={key} />;
+      })}
     </div>
   )
 }

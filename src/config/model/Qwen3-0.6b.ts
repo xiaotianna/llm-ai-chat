@@ -18,7 +18,7 @@ export const Qwen3Model = {
   // 模型提供商
   provider: 'ollama',
   function: {
-    functionCalling: true,
+    tools: true,
     webSearch: true
   }
 } as const

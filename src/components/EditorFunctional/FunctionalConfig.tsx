@@ -1,6 +1,6 @@
 import { models } from '@/config/model'
-import { ToolsIcon } from '../icon/tools-icon'
-import FunctionalButton from './FunctionalButton'
+import FunctionalTools from './FunctionalTools'
+import FunctionalWebSearch from './FunctionalWebSearch'
 
 type GetAllFunctionKeys<T> = T extends readonly (infer U)[]
   ? U extends { function: infer F }
@@ -8,33 +8,28 @@ type GetAllFunctionKeys<T> = T extends readonly (infer U)[]
     : never
   : never
 
-// "functionCalling" | "webSearch"
+// "tools" | "webSearch"
 export type FunctionalConfigKey = GetAllFunctionKeys<typeof models>
 
 export interface FunctionalConfigValueType {
   key: string
   name: string
-  icon: React.ReactNode
-  tooltipNode: string
   component: React.ComponentType<any> | React.ReactNode
 }
 
+// 额外的一些模型支持的配置
 export const FunctionalConfig: Record<
   FunctionalConfigKey,
   FunctionalConfigValueType
 > = {
-  functionCalling: {
-    key: 'functionCalling',
+  tools: {
+    key: 'tools',
     name: 'MCP',
-    icon: <ToolsIcon />,
-    tooltipNode: '启用MCP调用能力',
-    component: <div>hello mcp</div>
+    component: FunctionalTools
   },
   webSearch: {
     key: 'webSearch',
     name: '联网搜索',
-    icon: <ToolsIcon />,
-    tooltipNode: '启用Web搜索能力',
-    component: FunctionalButton
+    component: FunctionalWebSearch
   }
 }

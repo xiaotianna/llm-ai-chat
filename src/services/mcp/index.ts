@@ -81,3 +81,17 @@ export const deleteMcpConfigService = async (id: string) => {
 
   return data
 }
+
+export const getMcpConfigCountByUserId = async (userId: string) => {
+  const { count, error } = await supabase
+    .from('mcp_config')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+
+  if (error) {
+    console.error('Error fetching MCP config count:', error)
+    throw new Error('Failed to fetch MCP config count')
+  }
+
+  return count || 0
+}

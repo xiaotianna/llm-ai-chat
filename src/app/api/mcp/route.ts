@@ -3,7 +3,11 @@ import { type NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { ResponseData } from '@/utils/response-message'
 import { Database } from '@/types/db/supabase'
-import { insertMcpConfigService, getMcpConfigsByUserId } from '@/services/mcp'
+import {
+  insertMcpConfigService,
+  getMcpConfigsByUserId,
+  getMcpConfigCountByUserId
+} from '@/services/mcp'
 
 export interface MCPConfig {
   create_time?: string
@@ -17,14 +21,14 @@ export interface MCPConfig {
 }
 
 export interface ResponseMCPConfig {
-    create_time: string;
-    desc: string | null;
-    id: string;
-    mcp_type: Database["public"]["Enums"]["mcp_type"];
-    name: string;
-    status: boolean | null;
-    url: string;
-    user_id: string;
+  create_time: string
+  desc: string | null
+  id: string
+  mcp_type: Database['public']['Enums']['mcp_type']
+  name: string
+  status: boolean | null
+  url: string
+  user_id: string
 }
 
 export async function GET() {
@@ -81,6 +85,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // 检查用户已有的MCP配置数量
+    const configCount = await getMcpConfigCountByUserId(userId)
+
+    // 限制每个用户最多30个配置
+    if (configCount >= 30) {
+      return NextResponse.json(
+        ResponseData.error(400, '每个用户最多只能添加30个MCP配置'),
+        { status: 400 }
+      )
+    }
+
     const body = await request.json()
     const { mcp_type, name, url, desc } = body
     const data = await insertMcpConfigService({

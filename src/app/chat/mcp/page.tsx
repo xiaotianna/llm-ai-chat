@@ -256,7 +256,12 @@ const MCPPage = () => {
             </div>
           ) : services.length > 0 ? (
             <div className='w-full gap-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
-              {services.map((service) => (
+              {services
+                .filter(service => 
+                  service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (service.desc && service.desc.toLowerCase().includes(searchQuery.toLowerCase()))
+                )
+                .map((service) => (
                 <div
                   key={service.id}
                   className='flex items-center justify-between rounded-lg border border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))] bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] p-4 transition-colors'

@@ -17,7 +17,7 @@ export const Qwen3Model = {
   system_message: {},
   // 模型提供商
   provider: 'ollama',
-  functional: {
+  function: {
     functionCalling: true,
     webSearch: true
   }

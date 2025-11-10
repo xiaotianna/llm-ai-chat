@@ -30,7 +30,7 @@ export class OllamaClient {
       model: this.getModel(modelName),
       messages,
       stream: true,
-      ...options
+      ...options,
     })
     return response
   }

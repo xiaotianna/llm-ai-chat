@@ -1,59 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React from 'react'
 import AIModelIcon from '../icon/aiModel-icon'
 import FunctionalDropdown from './FunctionalDropdown'
 import { models } from '@/config/model'
 import { useModel } from '@/components/ModelProvider'
-import FunctionalButton from './FunctionalButton'
-import { ToolsIcon } from '../icon/tools-icon'
-
-export interface FunctionalFeatureConfig {
-  key: string
-  name: string
-  icon: React.ReactNode
-  tooltipNode: string
-  initialState: boolean
-}
-
-export const functionalFeatures: Record<string, FunctionalFeatureConfig> = {
-  functionCalling: {
-    key: 'functionCalling',
-    name: 'MCP',
-    icon: <ToolsIcon />,
-    tooltipNode: '启用MCP调用能力',
-    initialState: false
-  }
-}
-
-export const getEnabledFeaturesForModel = (model: any): string[] => {
-  return Object.keys(functionalFeatures).filter((featureKey) => {
-    // 如果模型配置中该功能明确设置为 false，则不启用
-    if (featureKey in model) {
-      return model[featureKey as keyof typeof model] !== false
-    }
-    // 默认启用
-    return true
-  })
-}
 
 const EditorFunctional: React.FC = () => {
-  const [currentModelIndex, setCurrentModelIndex] = useState(0)
-  const [featureStates, setFeatureStates] = useState<Record<string, boolean>>({
-    functionCalling: false
-  })
   const { currentModel, setCurrentModel } = useModel()
-
-  // 计算当前模型启用的功能
-  const enabledFeatures = useMemo(() => {
-    return getEnabledFeaturesForModel(currentModel)
-  }, [currentModelIndex, currentModel])
-
-  // 切换功能状态
-  const toggleFeature = (featureKey: string) => {
-    setFeatureStates((prev) => ({
-      ...prev,
-      [featureKey]: !prev[featureKey]
-    }))
-  }
+  const currentModelIndex = models.findIndex(model => model.model === currentModel.model)
+  
   return (
     <div className='flex space-x-2'>
       {/* 模型切换 */}
@@ -74,23 +28,6 @@ const EditorFunctional: React.FC = () => {
           }
         }}
       />
-      {/* 根据模型配置动态渲染功能按钮 */}
-      {enabledFeatures.map((featureKey) => {
-        const config = functionalFeatures[featureKey]
-        if (!config) return null
-
-        return (
-          <FunctionalButton
-            key={featureKey}
-            active={featureStates[featureKey] ?? config.initialState}
-            tooltipNode={config.tooltipNode}
-            handleClick={() => toggleFeature(featureKey)}
-            icon={config.icon}
-          >
-            {config.name}
-          </FunctionalButton>
-        )
-      })}
     </div>
   )
 }

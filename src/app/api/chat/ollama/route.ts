@@ -2,8 +2,6 @@ import { ModelConfig } from '@/config/model'
 import { ModelConfigKey, ModelType } from '@/types/model/model-config'
 import { NextResponse } from 'next/server'
 import { type NextRequest } from 'next/server'
-import { openai } from '@/utils/open-ai'
-import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import { cookies } from 'next/headers'
 import { insertHistoryService, queryHistoryService } from '@/services/history'
 import {
@@ -13,6 +11,8 @@ import {
 import { ollamaGenerateSubjectService } from '@/services/chat'
 import { Message } from 'ollama'
 import { ollama } from '@/utils/ollama'
+import { getAllToolsService, queryMcpConfigService } from '@/services/mcp'
+import { MCPConfig } from '../../mcp/route'
 
 export async function POST(request: NextRequest) {
   // 设置 SSE 响应头
@@ -83,14 +83,6 @@ export async function POST(request: NextRequest) {
         )
       }
     }
-    // 查询数据库，组合message
-    messages = [
-      ...messages,
-      {
-        role: 'user',
-        content: message
-      }
-    ]
 
     // 插入用户数据
     let userConversationData
@@ -104,8 +96,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // 查询数据库，组合message
+    messages = [
+      ...messages,
+      {
+        role: 'user',
+        content: message
+      }
+    ]
+
+    // 查询mcp配置
+    const mcpConfigs = await queryMcpConfigService(userId)
+    // 建立连接，查询所有的mcp的tools
+    const tools = getAllToolsService(mcpConfigs as MCPConfig[])
+
     const stream = await ollama.stream(modelName, messages, {
-      think: true
+      think: true,
     })
     // 创建 ReadableStream 来处理流式响应
     const readableStream = new ReadableStream({

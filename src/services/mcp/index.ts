@@ -1,5 +1,8 @@
+import { MCPConfig } from '@/app/api/mcp/route'
 import { supabase } from '@/config/supabase'
 import { Database } from '@/types/db/supabase'
+import { MCPConnect } from '@/utils/mcp/mcp-client'
+import { Tool } from 'ollama'
 
 export const insertMcpConfigService = async (mcpConfig: {
   mcp_type: Database['public']['Enums']['mcp_type']
@@ -94,4 +97,45 @@ export const getMcpConfigCountByUserId = async (userId: string) => {
   }
 
   return count || 0
+}
+
+export const queryMcpConfigService = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('mcp_config')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', true)
+
+  if (error) {
+    console.error('Error fetching tools:', error)
+    throw new Error('Failed to fetch tools')
+  }
+
+  return data
+}
+
+export const getAllToolsService = async (mcpConfigs: MCPConfig[]) => {
+  const configs = mcpConfigs.map((config) => ({
+    id: config.id,
+    name: config.name,
+    type: config.mcp_type,
+    url: config.url
+  }))
+  const mcp = new MCPConnect(configs)
+  try {
+    const tools = await mcp.getAllServerTools()
+    return tools.map((tool) => {
+      return {
+        type: 'function',
+        function: {
+          name: tool.name,
+          description: tool.description,
+          parameters: tool.inputSchema
+        }
+      } as Tool
+    })
+  } catch (error) {
+    console.error('Error fetching tools:', error)
+    throw error
+  }
 }

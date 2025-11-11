@@ -119,7 +119,7 @@ const FunctionalTools = () => {
           className="justify-center whitespace-nowrap text-sm font-medium disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4.5 shrink-0 [&_svg]:shrink-0 outline-none aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer transition has-[>svg]:px-3 flex h-[32px] rounded-[100px] items-center gap-1 px-3 py-1 border border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))] bg-[rgba(var(--coze-bg-3), var(--coze-bg-3-alpha))] text-[rgba(var(--coze-fg-3), var(--coze-fg-3-alpha))] hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))]"
         >
           <ToolsIcon />
-          <span className='font-medium text-sm'>MCP 工具</span>
+          <span className='font-medium text-sm'>MCP工具</span>
           <DownIcon />
         </div>
       </DropdownMenuTrigger>

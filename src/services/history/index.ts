@@ -61,7 +61,7 @@ export const queryHistoryService = async (
     .eq('history_id', chatHistory.id)
     .eq('user_id', userId)
     .order('create_time', { ascending: false })
-    .limit(20) // 只保留最新的20条记录
+    .limit(50) // 只保留最新的50条记录
 
   if (conversationError) {
     console.error('LLM conversations fetch error:', conversationError)

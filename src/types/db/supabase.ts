@@ -66,7 +66,10 @@ export type Database = {
           create_time: string
           history_id: string
           id: string
+          next_id: string | null
           reasoning: string | null
+          tool_calls: Json | null
+          tool_name: string | null
           type: Database["public"]["Enums"]["conversations_type"]
           user_id: string
         }
@@ -75,7 +78,10 @@ export type Database = {
           create_time?: string
           history_id?: string
           id?: string
+          next_id?: string | null
           reasoning?: string | null
+          tool_calls?: Json | null
+          tool_name?: string | null
           type: Database["public"]["Enums"]["conversations_type"]
           user_id?: string
         }
@@ -84,7 +90,10 @@ export type Database = {
           create_time?: string
           history_id?: string
           id?: string
+          next_id?: string | null
           reasoning?: string | null
+          tool_calls?: Json | null
+          tool_name?: string | null
           type?: Database["public"]["Enums"]["conversations_type"]
           user_id?: string
         }
@@ -139,7 +148,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      conversations_type: "assistant" | "user"
+      conversations_type: "assistant" | "user" | "tool"
       login_type: "phone" | "github"
       mcp_type: "sse" | "streamable_http"
     }
@@ -272,7 +281,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      conversations_type: ["assistant", "user"],
+      conversations_type: ["assistant", "user", "tool"],
       login_type: ["phone", "github"],
       mcp_type: ["sse", "streamable_http"],
     },

@@ -19,6 +19,6 @@ export const Qwen3Model = {
   provider: 'ollama',
   function: {
     tools: true,
-    webSearch: true
+    agent: true
   }
 } as const

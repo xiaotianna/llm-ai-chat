@@ -114,14 +114,7 @@ export const queryMcpConfigService = async (userId: string) => {
   return data
 }
 
-export const getAllToolsService = async (mcpConfigs: MCPConfig[]) => {
-  const configs = mcpConfigs.map((config) => ({
-    id: config.id,
-    name: config.name,
-    type: config.mcp_type,
-    url: config.url
-  }))
-  const mcp = new MCPConnect(configs)
+export const getAllToolsService = async (mcp: MCPConnect) => {
   try {
     const tools = await mcp.getAllServerTools()
     return tools.map((tool) => {

@@ -1,6 +1,6 @@
 import { models } from '@/config/model'
 import FunctionalTools from './FunctionalTools'
-import FunctionalWebSearch from './FunctionalWebSearch'
+import FunctionalAgent from './FunctionalAgent'
 
 type GetAllFunctionKeys<T> = T extends readonly (infer U)[]
   ? U extends { function: infer F }
@@ -8,7 +8,7 @@ type GetAllFunctionKeys<T> = T extends readonly (infer U)[]
     : never
   : never
 
-// "tools" | "webSearch"
+// "tools" | "agent"
 export type FunctionalConfigKey = GetAllFunctionKeys<typeof models>
 
 export interface FunctionalConfigValueType {
@@ -27,9 +27,9 @@ export const FunctionalConfig: Record<
     name: 'MCP工具',
     component: FunctionalTools
   },
-  webSearch: {
-    key: 'webSearch',
-    name: '联网搜索',
-    component: FunctionalWebSearch
+  agent: {
+    key: 'agent',
+    name: '智能体',
+    component: FunctionalAgent
   }
 }

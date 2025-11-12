@@ -1,6 +1,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
+import { Tool } from 'ollama'
 
 interface ServerConfig {
   id: string
@@ -134,23 +135,24 @@ class MCPConnect {
   }
 
   // 执行 mcp server 的某个工具
-  async executeServerTool(
-    key: string,
-    toolName: string,
-    args: Record<string, any>
-  ) {
+  async executeServerTool(toolName: string, args: Record<string, any>) {
     try {
       await this.waitForInitialization()
-      const server = this.servers[key]
-      if (!server) {
-        console.log(`Server at key: ${key} not found`)
+      let executeServer
+      for (const server of Object.values(this.servers)) {
+        const tools = await server.client.listTools()
+        const tool = tools.tools.find((tool) => tool.name === toolName)
+        if (tool) executeServer = server
+      }
+      if (!executeServer) {
+        console.log(`Server with name: ${toolName} not found`)
         return
       }
-      const result = await server.client.callTool({
+      const result = await executeServer.client.callTool({
         name: toolName,
         arguments: args
       })
-      return result.toolResult
+      return result
     } catch (error) {
       console.error(`执行工具失败:`, error)
       throw error

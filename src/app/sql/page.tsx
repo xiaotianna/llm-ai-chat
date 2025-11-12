@@ -44,7 +44,7 @@ export default function SqlPage() {
 
       setLoading(true)
       
-      const response = await fetch(`/api/mock/sql?userId=${user.id}`)
+      const response = await fetch(`/api/sql?userId=${user.id}`)
       const data = await response.json()
       
       if (!response.ok) {
@@ -70,7 +70,7 @@ export default function SqlPage() {
         return
       }
 
-      const response = await fetch('/api/mock/sql', {
+      const response = await fetch('/api/sql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ export default function SqlPage() {
       let historyId = newLlmConversation.history_id
       if (!historyId) {
         // Create a new chat history record
-        const chatHistoryResponse = await fetch('/api/mock/sql', {
+        const chatHistoryResponse = await fetch('/api/sql', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ export default function SqlPage() {
         history_id: historyId
       }
 
-      const response = await fetch('/api/mock/sql', {
+      const response = await fetch('/api/sql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ export default function SqlPage() {
         return
       }
 
-      const response = await fetch('/api/mock/sql', {
+      const response = await fetch('/api/sql', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -210,7 +210,7 @@ export default function SqlPage() {
         return
       }
 
-      const response = await fetch('/api/mock/sql', {
+      const response = await fetch('/api/sql', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -245,7 +245,7 @@ export default function SqlPage() {
         return
       }
 
-      const response = await fetch(`/api/mock/sql?type=chat_history&id=${id}&userId=${user.id}`, {
+      const response = await fetch(`/api/sql?type=chat_history&id=${id}&userId=${user.id}`, {
         method: 'DELETE',
       })
       
@@ -271,7 +271,7 @@ export default function SqlPage() {
         return
       }
 
-      const response = await fetch(`/api/mock/sql?type=llm_conversation&id=${id}&userId=${user.id}`, {
+      const response = await fetch(`/api/sql?type=llm_conversation&id=${id}&userId=${user.id}`, {
         method: 'DELETE',
       })
       
@@ -443,7 +443,7 @@ export default function SqlPage() {
                           } else if (newHistoryId === 'new') {
                             // Create a new chat history
                             try {
-                              const chatHistoryResponse = await fetch('/api/mock/sql', {
+                              const chatHistoryResponse = await fetch('/api/sql', {
                                 method: 'POST',
                                 headers: {
                                   'Content-Type': 'application/json',

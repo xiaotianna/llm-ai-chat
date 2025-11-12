@@ -2,11 +2,14 @@
   "name": "ai-chat",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "server": "nodemon mcp-server/index.ts",
+    "test": "npx @modelcontextprotocol/inspector"
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.2",
@@ -41,6 +44,7 @@
     "antd": "^5.26.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "express": "^5.1.0",
     "framer-motion": "^12.18.1",
     "gray-matter": "^4.0.3",
     "harden-react-markdown": "^1.1.5",
@@ -76,12 +80,14 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/express": "^5.0.5",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/refractor": "^4.0.0",
+    "nodemon": "^3.1.11",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5"

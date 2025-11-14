@@ -29,7 +29,7 @@ export async function GET() {
   while (iteration < maxIterations) {
     iteration++
     const res = await ollama.chat('Qwen3-0.6b', messages, {
-      tools: tools as Tool[]
+      tools: tools as Tool[],
     })
     const aiMessage = res.message
     messages.push({

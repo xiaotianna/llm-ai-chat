@@ -29,7 +29,7 @@ export const generateSubjectService = async (
       },
       {
         role: 'user',
-        content: `对内容进行总结，总结内容不超过10个字{{：${message}}}`
+        content: `对内容进行总结，总结内容不超过10个字：{{${message}}}`
       }
     ],
     model.model,
@@ -58,7 +58,7 @@ export const ollamaGenerateSubjectService = async (
       },
       {
         role: 'user',
-        content: `对内容进行总结，总结内容不超过10个字{{：${message}}}`
+        content: `对内容进行总结，总结内容不超过10个字：{{${message}}}`
       }
     ],
     {

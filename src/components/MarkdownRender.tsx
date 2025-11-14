@@ -88,7 +88,7 @@ function parseIncompleteMarkdown(text: string): string {
     }, 0)
     // If odd number of single _, we have an incomplete italic - complete it
     if (singleUnderscores % 2 === 1) {
-      result = `${result}_`
+      result = `${result}`
     }
   }
   // Handle incomplete inline code blocks (`) - but avoid code blocks (```)

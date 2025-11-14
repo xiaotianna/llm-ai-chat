@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
           role: conversation.type,
           content: conversation.content || ''
         }))
-        messages.push(...queryMessages)
+        messages.push(...queryMessages as unknown as ChatCompletionMessageParam[])
       } catch (error: any) {
         return NextResponse.json(
           { error: error.message },

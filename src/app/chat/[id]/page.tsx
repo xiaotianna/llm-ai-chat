@@ -113,6 +113,8 @@ const ChatMessageWrapper = forwardRef<
               reasoning={message.reasoning}
               isDone={message.isDone}
               error={message.error}
+              next_id={message.next_id || null}
+              tool_name={message.tool_name}
             />
           ))}
       </div>
@@ -200,11 +202,13 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
             role: type,
             content: content || '',
             reasoning: reasoning || '',
-            isDone: true
+            isDone: true,
+            next_id: item.next_id || null,
+            tool_name: item.tool_name || ''
           }
         })
         setSubject(resSubject)
-        setMessages(formattedMessages)
+        setMessages(formattedMessages as MessagesType[])
       }
     } catch (error) {
       console.error('加载失败')

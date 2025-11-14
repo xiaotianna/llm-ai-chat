@@ -1,5 +1,20 @@
 import { supabase } from '@/config/supabase'
 import { HttpError } from '@/utils/http-error'
+import { ToolCall } from 'ollama'
+
+// 工具函数：将 ToolCall 转换为 JSON 兼容格式
+function convertToolCallsToJson(tool_calls?: ToolCall[]): any[] | null {
+  if (!tool_calls || tool_calls.length === 0) {
+    return null
+  }
+
+  return tool_calls.map((call) => ({
+    function: {
+      name: call.function.name,
+      arguments: call.function.arguments
+    }
+  }))
+}
 
 // 插入type为user的会话记录
 export const insertUserConversationService = async (
@@ -33,7 +48,9 @@ export const insertAIConversationService = async (
   fullContent: string,
   fullReasoning: string,
   historyId: string,
-  userId: string
+  userId: string,
+  tool_calls?: ToolCall[],
+  next_id?: string | null
 ) => {
   const { data: llm_conversationsData, error: saveResponseError } =
     await supabase
@@ -44,6 +61,8 @@ export const insertAIConversationService = async (
           reasoning: fullReasoning || null,
           history_id: historyId,
           user_id: userId,
+          tool_calls: convertToolCallsToJson(tool_calls),
+          next_id: next_id || null,
           type: 'assistant'
         }
       ])
@@ -51,6 +70,36 @@ export const insertAIConversationService = async (
 
   if (saveResponseError) {
     console.error('Error saving AI response:', saveResponseError)
+  }
+
+  return llm_conversationsData
+}
+
+// 插入ai的tool工具调用会话记录
+export const insertAIToolConversationService = async (
+  historyId: string,
+  userId: string,
+  content: string,
+  tool_name: string,
+  next_id?: string | null
+) => {
+  const { data: llm_conversationsData, error: saveResponseError } =
+    await supabase
+      .from('llm_conversations')
+      .insert([
+        {
+          content: content,
+          tool_name: tool_name,
+          history_id: historyId,
+          user_id: userId,
+          next_id: next_id || null,
+          type: 'tool'
+        }
+      ])
+      .select('id, history_id, type, create_time')
+
+  if (saveResponseError) {
+    console.error('Error saving AI tool response:', saveResponseError)
   }
 
   return llm_conversationsData
@@ -93,7 +142,10 @@ export const queryAllConversationService = async (
 }
 
 // 删除某一条会话记录
-export const deleteConversationService = async (conversationId: string, userId: string) => {
+export const deleteConversationService = async (
+  conversationId: string,
+  userId: string
+) => {
   const { error } = await supabase
     .from('llm_conversations')
     .delete()
@@ -104,4 +156,25 @@ export const deleteConversationService = async (conversationId: string, userId: 
     console.error(`delete error:`, error)
     throw new HttpError(error.message, 500)
   }
+}
+
+// 更新会话记录的next_id字段
+export const updateConversationNextIdService = async (
+  conversationId: string,
+  nextId: string,
+  userId: string
+) => {
+  const { data, error } = await supabase
+    .from('llm_conversations')
+    .update({ next_id: nextId })
+    .eq('id', conversationId)
+    .eq('user_id', userId)
+    .select('id, history_id, type, create_time')
+
+  if (error) {
+    console.error('Error updating conversation next_id:', error)
+    throw new Error('Error updating conversation next_id:' + error)
+  }
+
+  return data
 }

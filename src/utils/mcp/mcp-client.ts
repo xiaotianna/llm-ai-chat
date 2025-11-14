@@ -1,7 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
-import { Tool } from 'ollama'
 
 interface ServerConfig {
   id: string
@@ -152,7 +151,7 @@ class MCPConnect {
         name: toolName,
         arguments: args
       })
-      return result
+      return result.content
     } catch (error) {
       console.error(`执行工具失败:`, error)
       throw error

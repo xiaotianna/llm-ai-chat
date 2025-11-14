@@ -28,6 +28,13 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { emitter } from '@/utils/emitter'
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput
+} from './ui/shadcn-io/ai/tool'
 
 interface MessageItemProps {
   id: string
@@ -36,13 +43,25 @@ interface MessageItemProps {
   reasoning?: string
   isDone?: boolean
   error?: string
+  next_id: string | null
+  tool_name?: string
 }
 
 // 渲染每一条message
 export const MessageItem = (props: MessageItemProps) => {
-  const { id, role, content, reasoning, isDone = false, error } = props
+  const {
+    id,
+    role,
+    content,
+    reasoning,
+    isDone = false,
+    error,
+    next_id,
+    tool_name
+  } = props
   const isUser = role === 'user'
   const isAI = role === 'assistant'
+  const isTool = role === 'tool'
   const [copy] = useCopyToClipboard()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
@@ -94,9 +113,8 @@ export const MessageItem = (props: MessageItemProps) => {
   return (
     <div className='w-full group'>
       <div className='flex flex-col item-end gap-2 w-full mt-3'>
-        {isUser ? (
-          <UserMessage content={content} />
-        ) : (
+        {isUser && <UserMessage content={content} />}
+        {isAI && (
           <AIMessage
             content={content}
             reasoning={reasoning}
@@ -104,33 +122,43 @@ export const MessageItem = (props: MessageItemProps) => {
             error={error}
           />
         )}
-        <div
-          className={`flex flex-col justify-start w-full h-[40px] select-none pt-2`}
-        >
+        {isTool && (
+          <ToolMessage
+            id={id}
+            content={content}
+            isDone={isDone}
+            tool_name={tool_name || 'tool_name'}
+          />
+        )}
+        {!next_id && (
           <div
-            className={`flex flex-row ${
-              isAI ? 'justify-start' : 'justify-end'
-            } w-full gap-[10px] text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]`}
+            className={`flex flex-col justify-start w-full h-[40px] select-none pt-2`}
           >
-            {isDone && !error && (
-              <TooltipProvider>
-                {actions.map((action) => (
-                  <Tooltip key={action.label}>
-                    <TooltipTrigger
-                      asChild
-                      onClick={action.onClick}
-                    >
-                      <button className={action.className}>
-                        <action.icon size={16} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>{action.label}</TooltipContent>
-                  </Tooltip>
-                ))}
-              </TooltipProvider>
-            )}
+            <div
+              className={`flex flex-row ${
+                isAI ? 'justify-start' : 'justify-end'
+              } w-full gap-[10px] text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]`}
+            >
+              {isDone && !error && (
+                <TooltipProvider>
+                  {actions.map((action) => (
+                    <Tooltip key={action.label}>
+                      <TooltipTrigger
+                        asChild
+                        onClick={action.onClick}
+                      >
+                        <button className={action.className}>
+                          <action.icon size={16} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>{action.label}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                </TooltipProvider>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 删除确认弹窗 */}
@@ -234,5 +262,48 @@ const AIMessage = ({
         )
       )}
     </>
+  )
+}
+
+// AI调用工具的消息
+const ToolMessage = ({
+  id,
+  content,
+  tool_name,
+  isDone = false
+}: {
+  id: string
+  content: string
+  tool_name: string
+  isDone?: boolean
+}) => {
+  const { input, output, error } = JSON.parse(content)
+  const toolCall = {
+    type: tool_name,
+    toolCallId: id,
+    input: input,
+    output: '``` json\n' + output[0].text,
+    errorText: error
+  }
+
+  const state = isDone
+    ? error
+      ? 'output-error'
+      : 'output-available'
+    : 'input-available'
+  return (
+    <Tool defaultOpen={false}>
+      <ToolHeader
+        state={state}
+        type={toolCall.type}
+      />
+      <ToolContent>
+        <ToolInput input={toolCall.input} />
+        <ToolOutput
+          errorText={toolCall.errorText}
+          output={<MarkdownRender>{String(toolCall.output)}</MarkdownRender>}
+        />
+      </ToolContent>
+    </Tool>
   )
 }

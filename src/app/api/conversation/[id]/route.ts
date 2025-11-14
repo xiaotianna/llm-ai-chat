@@ -2,7 +2,7 @@ import {
   deleteConversationService,
   queryAllConversationService
 } from '@/services/conversation'
-import { Database } from '@/types/db/supabase'
+import { Database, Json } from '@/types/db/supabase'
 import { ResponseData } from '@/utils/response-message'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -36,17 +36,20 @@ export async function GET(
 }
 
 export type ResponseMessage = {
-  history_Id: string
-  subject: string
   conversations: {
-    content: string
+    content: string | null
     create_time: string
     history_id: string
     id: string
-    reasoning: string
+    next_id: string | null
+    reasoning: string | null
+    tool_calls: Json | null
+    tool_name: string | null
     type: Database['public']['Enums']['conversations_type']
     user_id: string
   }[]
+  historyId: string
+  subject: string
 }
 
 export async function DELETE(

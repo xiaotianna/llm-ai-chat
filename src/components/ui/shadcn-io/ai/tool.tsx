@@ -31,10 +31,10 @@ export type ToolHeaderProps = {
 }
 const getStatusBadge = (status: ToolUIPart['state']) => {
   const labels = {
-    'input-streaming': 'Pending',
-    'input-available': 'Running',
-    'output-available': 'Completed',
-    'output-error': 'Error'
+    'input-streaming': '待处理',
+    'input-available': '运行中',
+    'output-available': '完成',
+    'output-error': '错误'
   } as const
   const icons = {
     'input-streaming': <CircleIcon className='size-4' />,

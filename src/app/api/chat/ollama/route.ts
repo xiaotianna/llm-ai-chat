@@ -8,13 +8,19 @@ import {
   insertAIConversationService,
   insertUserConversationService,
   updateConversationNextIdService,
-  insertAIToolConversationService
+  insertAIToolConversationService,
+  queryLastAIConversationService
 } from '@/services/conversation'
 import { ollamaGenerateSubjectService } from '@/services/chat'
 import { Message, ToolCall } from 'ollama'
 import { ollama } from '@/utils/ollama'
-import { getAllToolsService, queryMcpConfigService } from '@/services/mcp'
+import {
+  executeUpdateToolService,
+  getAllToolsService,
+  queryMcpConfigService
+} from '@/services/mcp'
 import { MCPConnect } from '@/utils/mcp/mcp-client'
+import { StreamMessage } from '@/utils/stream-message'
 
 export async function POST(request: NextRequest) {
   // 设置 SSE 响应头
@@ -132,10 +138,9 @@ export async function POST(request: NextRequest) {
     // 创建 ReadableStream 来处理流式响应
     const readableStream = new ReadableStream({
       async start(controller) {
+        const streamMessage = new StreamMessage(controller)
         if (!hasHistoryId) {
-          controller.enqueue(
-            `init: ${JSON.stringify({ historyId, subject })}\n\n`
-          )
+          streamMessage.init({ historyId, subject })
         }
 
         // 当前每轮对话的内容
@@ -160,16 +165,22 @@ export async function POST(request: NextRequest) {
                 userId,
                 undefined // 没有工具调用
                 // 不传next_id参数
-              ).then((llm_conversationsData) => {
-                // 如果有前一条消息，更新其next_id为当前消息的ID
-                if (previousMessageId && llm_conversationsData && llm_conversationsData.length > 0) {
-                  updateConversationNextIdService(
-                    previousMessageId,
-                    llm_conversationsData[0].id,
-                    userId
-                  ).catch(console.error)
-                }
-              }).catch(console.error)
+              )
+                .then((llm_conversationsData) => {
+                  // 如果有前一条消息，更新其next_id为当前消息的ID
+                  if (
+                    previousMessageId &&
+                    llm_conversationsData &&
+                    llm_conversationsData.length > 0
+                  ) {
+                    updateConversationNextIdService(
+                      previousMessageId,
+                      llm_conversationsData[0].id,
+                      userId
+                    ).catch(console.error)
+                  }
+                })
+                .catch(console.error)
             }
             controller.close()
           },
@@ -202,20 +213,19 @@ export async function POST(request: NextRequest) {
                 // 收集内容
                 if (delta.content) {
                   fullContent += delta.content
-                  controller.enqueue(
-                    `data: ${JSON.stringify({
-                      content: delta.content
-                    })}\n\n`
-                  )
+                  // 如果有prev_id就代表是agent消息（有多轮），第二轮开始的才有prev_id
+                  streamMessage.data({
+                    content: delta.content,
+                    prev_id: previousMessageId
+                  })
                 }
                 // 收集reasoning
                 if (delta.thinking) {
                   fullReasoning += delta.thinking
-                  controller.enqueue(
-                    `data: ${JSON.stringify({
-                      reasoning: delta.thinking
-                    })}\n\n`
-                  )
+                  streamMessage.data({
+                    reasoning: delta.thinking,
+                    prev_id: previousMessageId
+                  })
                 }
                 // 收集tool_calls
                 if (delta.tool_calls) {
@@ -242,7 +252,11 @@ export async function POST(request: NextRequest) {
             )
 
             // 如果有前一条消息，更新其next_id为当前消息的ID
-            if (previousMessageId && llm_conversationsData && llm_conversationsData.length > 0) {
+            if (
+              previousMessageId &&
+              llm_conversationsData &&
+              llm_conversationsData.length > 0
+            ) {
               await updateConversationNextIdService(
                 previousMessageId,
                 llm_conversationsData[0].id,
@@ -263,6 +277,8 @@ export async function POST(request: NextRequest) {
                   string,
                   any
                 >
+                // 保存一下，防止后续更新覆盖
+                let prevId = previousMessageId
                 try {
                   const toolResult = await mcp.executeServerTool(
                     toolName,
@@ -272,40 +288,25 @@ export async function POST(request: NextRequest) {
                     input: toolArgs,
                     output: toolResult
                   }
+                  let toolPreviousMessageId = await executeUpdateToolService({
+                    toolName,
+                    content: JSON.stringify(content),
+                    historyId,
+                    userId,
+                    previousMessageId
+                  })
+                  previousMessageId = toolPreviousMessageId
                   messages.push({
                     role: 'tool',
                     content: JSON.stringify(content),
                     tool_name: toolName
                   })
-                  
-                  // 存储工具调用结果到数据库
-                  const toolConversationData = await insertAIToolConversationService(
-                    historyId,
-                    userId,
-                    JSON.stringify(content),
-                    toolName
-                    // 不传next_id参数
-                  )
-                  
-                  // 如果有前一条消息，更新其next_id为当前工具调用消息的ID
-                  if (previousMessageId && toolConversationData && toolConversationData.length > 0) {
-                    await updateConversationNextIdService(
-                      previousMessageId,
-                      toolConversationData[0].id,
-                      userId
-                    )
-                  }
-                  
-                  // 更新previousMessageId为当前插入的工具调用消息ID
-                  if (toolConversationData && toolConversationData.length > 0) {
-                    previousMessageId = toolConversationData[0].id
-                  }
-                  
-                  controller.enqueue(
-                    `tool: ${JSON.stringify({
-                      content: content
-                    })}\n\n`
-                  )
+                  // 如果有prev_id就代表是agent消息（有多轮），第二轮开始的才有prev_id
+                  streamMessage.tool({
+                    ...content,
+                    tool_name: toolName,
+                    prev_id: prevId
+                  })
                 } catch (error) {
                   // 错误处理：将错误信息加入消息历史
                   const errorContent = JSON.stringify({
@@ -313,73 +314,34 @@ export async function POST(request: NextRequest) {
                     input: toolArgs,
                     error: (error as Error).message
                   })
-                  
+                  let toolPreviousMessageId = await executeUpdateToolService({
+                    toolName,
+                    content: errorContent,
+                    historyId,
+                    userId,
+                    previousMessageId
+                  })
+                  previousMessageId = toolPreviousMessageId
                   messages.push({
                     role: 'tool',
                     content: errorContent,
                     tool_name: toolName
                   })
-                  
-                  // 存储工具调用错误到数据库
-                  const toolConversationData = await insertAIToolConversationService(
-                    historyId,
-                    userId,
-                    errorContent,
-                    toolName
-                    // 不传next_id参数
-                  )
-                  
-                  // 如果有前一条消息，更新其next_id为当前工具调用消息的ID
-                  if (previousMessageId && toolConversationData && toolConversationData.length > 0) {
-                    await updateConversationNextIdService(
-                      previousMessageId,
-                      toolConversationData[0].id,
-                      userId
-                    )
-                  }
-                  
-                  // 更新previousMessageId为当前插入的工具调用消息ID
-                  if (toolConversationData && toolConversationData.length > 0) {
-                    previousMessageId = toolConversationData[0].id
-                  }
-                  
                   // 发送前端
-                  controller.enqueue(
-                    `tool: ${JSON.stringify({
-                      content: errorContent
-                    })}\n\n`
-                  )
+                  streamMessage.tool({ error: errorContent, prev_id: prevId })
                 }
               }
             } else {
               // 没有更多工具调用，结束循环
+              // 发送用户historyId和user、ai会话消息的ai（进行替换）
+              // 多轮对话消息，只需要补齐最后一次对话id即可，之前的链表消息id已经通过prev_id传回
+              const llm_lastConversationsData = await queryLastAIConversationService(userId, historyId)
+              streamMessage.done([
+                ...userConversationData,
+                llm_lastConversationsData
+              ])
               break
             }
-          }
-
-          // 发送最终响应给前端，不插入数据库记录
-          if (fullContent) {
-            // TODO 暂时有问题
-            // 创建临时的消息对象用于发送给前端
-            const tempConversationData = {
-              id: 'temp-id', // 临时ID，不会存储到数据库
-              content: fullContent,
-              reasoning: '',
-              history_id: historyId,
-              user_id: userId,
-              tool_calls: undefined,
-              next_id: null,
-              type: 'assistant',
-              create_time: new Date().toISOString()
-            };
-            
-            // 发送用户historyId和user、ai会话消息的ai（进行替换）
-            controller.enqueue(
-              `done: ${JSON.stringify([
-                ...userConversationData,
-                tempConversationData
-              ])}\n\n`
-            )
           }
           controller.close()
         } catch (error) {

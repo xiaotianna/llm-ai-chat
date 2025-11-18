@@ -127,7 +127,7 @@ export const ToolOutput = ({
         className={cn(
           'overflow-x-auto rounded-md text-xs [&_table]:w-full',
           errorText
-            ? 'bg-destructive/10 text-destructive'
+            ? 'bg-destructive/10 text-destructive p-3'
             : 'bg-muted/50 text-foreground'
         )}
       >

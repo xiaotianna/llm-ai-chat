@@ -101,6 +101,7 @@ export const MessageItem = (props: MessageItemProps) => {
 
   // 确认删除
   const confirmDelete = () => {
+    // TODO agent下删除逻辑有问题
     deleteConversation(id)
     setShowDeleteConfirm(false)
   }
@@ -282,7 +283,7 @@ const ToolMessage = ({
     type: tool_name,
     toolCallId: id,
     input: input,
-    output: '``` json\n' + output[0].text,
+    output: output ? '```json\n' + output[0].text : undefined,
     errorText: error
   }
 
@@ -301,7 +302,7 @@ const ToolMessage = ({
         <ToolInput input={toolCall.input} />
         <ToolOutput
           errorText={toolCall.errorText}
-          output={<MarkdownRender>{String(toolCall.output)}</MarkdownRender>}
+          output={<MarkdownRender>{toolCall.output}</MarkdownRender>}
         />
       </ToolContent>
     </Tool>

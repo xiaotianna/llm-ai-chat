@@ -178,3 +178,26 @@ export const updateConversationNextIdService = async (
 
   return data
 }
+
+// 查询最后一条ai消息
+export const queryLastAIConversationService = async (
+  userId: string,
+  historyId: string
+) => {
+  const { data: llmConversations, error: conversationError } = await supabase
+    .from('llm_conversations')
+    .select('id, history_id, type, create_time')
+    .eq('history_id', historyId)
+    .eq('user_id', userId)
+    .eq('type', 'assistant')
+    .order('create_time', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (conversationError) {
+    console.error('Last AI conversation fetch error:', conversationError)
+    throw new HttpError(conversationError.message, 500)
+  }
+
+  return llmConversations
+}

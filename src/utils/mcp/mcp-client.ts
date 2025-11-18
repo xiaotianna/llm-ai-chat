@@ -145,7 +145,7 @@ class MCPConnect {
       }
       if (!executeServer) {
         console.log(`Server with name: ${toolName} not found`)
-        return
+        throw new Error(`Server with name: ${toolName} not found`)
       }
       const result = await executeServer.client.callTool({
         name: toolName,

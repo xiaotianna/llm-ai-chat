@@ -114,8 +114,7 @@ export async function POST(request: NextRequest) {
      * @description 核心 next_id -> 用于标识下一条消息
      */
     messages = [
-      // TODO
-      // ...messages,
+      ...messages,
       {
         role: 'user',
         content: message

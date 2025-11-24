@@ -5,6 +5,7 @@ export type ParseToolChunkType =
   | {
       input: Record<string, any>
       output: { type: string; text: string }[]
+      error?: string
       tool_name: string
       prev_id?: string | null
     }

@@ -248,35 +248,101 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
   const handleGetData = (chunk: ParseChunkType[]) => {
     chunk.forEach((chunk: ParseChunkType) => {
-      setMessages((prev) => {
-        const updated = [...prev]
-        const lastMessage = updated[updated.length - 1]
+      if (chunk.prev_id) {
+        chunkUpdMsgWithPrevId(chunk)
+      } else {
+        chunkUpdMsg(chunk)
+      }
+    })
+  }
 
-        if (lastMessage && lastMessage.role === 'assistant') {
-          let newContent = lastMessage.content || ''
-          let newReasoning = lastMessage.reasoning || ''
+  // 添加没有prev_id的消息
+  const chunkUpdMsg = (chunk: ParseChunkType) => {
+    setMessages((prev) => {
+      const updated = [...prev]
+      const lastMessage = updated[updated.length - 1]
 
-          if (chunk.type === 'content') {
-            newContent += chunk.content
-          } else if (chunk.type === 'reasoning') {
-            newReasoning += chunk.content
-          }
+      if (lastMessage && lastMessage.role === 'assistant') {
+        let newContent = lastMessage.content || ''
+        let newReasoning = lastMessage.reasoning || ''
 
-          updated[updated.length - 1] = {
-            ...lastMessage,
-            content: newContent,
-            reasoning: newReasoning
-          }
+        if (chunk.type === 'content') {
+          newContent += chunk.content
+        } else if (chunk.type === 'reasoning') {
+          newReasoning += chunk.content
         }
 
-        return updated
-      })
+        updated[updated.length - 1] = {
+          ...lastMessage,
+          content: newContent,
+          reasoning: newReasoning
+        }
+      }
+
+      return updated
     })
+  }
+
+  // 通用函数：处理prev_id相关的消息更新逻辑
+  const handlePrevIdMessageUpdate = (
+    prev_id: string,
+    newMessage: Omit<MessagesType, 'id' | 'isDone'> & { id?: string }
+  ) => {
+    setMessages((prev) => {
+      const updated = [...prev]
+      const lastMessageIndex = updated.length - 1
+      const lastMessage = updated[lastMessageIndex]
+
+      if (lastMessage && prev_id && !processedPrevIds.current.has(prev_id)) {
+        // 标记已处理
+        processedPrevIds.current.add(prev_id)
+
+        const nextMessageId = `local_${uuidv4()}`
+        // 修改上一条消息状态，设置为完成
+        updated[lastMessageIndex] = {
+          ...lastMessage,
+          id: prev_id,
+          next_id: nextMessageId,
+          isDone: true
+        }
+
+        // 新增一条新消息
+        updated.push({
+          id: nextMessageId,
+          isDone: false,
+          ...newMessage
+        })
+      }
+
+      return updated
+    })
+  }
+
+  // 添加有prev_id的消息
+  const processedPrevIds = useRef<Set<string>>(new Set())
+  const chunkUpdMsgWithPrevId = (chunk: ParseChunkType) => {
+    handlePrevIdMessageUpdate(chunk.prev_id!, {
+      role: 'assistant',
+      content: '',
+      reasoning: ''
+    })
+    chunkUpdMsg(chunk)
   }
 
   // 处理工具调用数据
   const handlePlayTool = (chunk: ParseToolChunkType) => {
     if (!chunk) return
+    if (chunk.prev_id) {
+      handlePrevIdMessageUpdate(chunk.prev_id, {
+        role: 'tool',
+        content: JSON.stringify({
+          input: chunk.input,
+          output: chunk.output,
+          error: chunk.error
+        }),
+        tool_name: chunk.tool_name
+      })
+    }
   }
 
   // 接收到的终止数据，包含需要替换的消息id（user、ai）
@@ -293,8 +359,12 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   ) => {
     setMessages((prev) => {
       const updated = [...prev]
-      const aiMessageIndex = updated.length - 1
-      const userMessageIndex = updated.length - 2
+      const aiMessageIndex = updated.findLastIndex(
+        (message) => message.role === 'assistant'
+      )
+      const userMessageIndex = updated.findLastIndex(
+        (message) => message.role === 'user'
+      )
 
       if (
         userMessageIndex >= 0 &&

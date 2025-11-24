@@ -2,6 +2,7 @@ import { ParsePluginManager } from './plugin'
 import { parseDataPlugin, ParseChunkType } from './parse-data-plugin'
 import { parseDonePlugin, ParseDoneChunkType } from './parse-done-plugin'
 import { parseInitPlugin, ParseInitChunkType } from './parse-init-plugin'
+import { parseToolPlugin, ParseToolChunkType } from './parse-tool-plugin'
 
 export type { ParseChunkType, ParseDoneChunkType, ParseInitChunkType }
 
@@ -9,18 +10,21 @@ export interface ParseChunkResult {
   data: ParseChunkType[]
   done: ParseDoneChunkType[]
   init: ParseInitChunkType
+  tool: ParseToolChunkType
 }
 
 const pluginManager = new ParsePluginManager<any, ParseChunkResult>()
 pluginManager.use(parseDataPlugin)
 pluginManager.use(parseDonePlugin)
 pluginManager.use(parseInitPlugin)
+pluginManager.use(parseToolPlugin)
 
 export const parseChunk = (chunk: string): ParseChunkResult => {
   const collector: ParseChunkResult = {
     data: [],
     done: [],
-    init: undefined
+    init: undefined,
+    tool: undefined,
   }
 
   const lines = chunk.split('\n\n').filter((line) => line.trim())

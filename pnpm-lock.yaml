@@ -39,6 +39,7 @@ specifiers:
   '@types/refractor': ^4.0.0
   ai: ^5.0.80
   antd: ^5.26.2
+  babel-plugin-react-compiler: ^1.0.0
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
   express: ^5.1.0
@@ -121,7 +122,7 @@ dependencies:
   lucide-react: 0.513.0_react@19.1.0
   mitt: 3.0.1
   motion: 12.23.24_j6k6oay3ugsr56slyfvma2drry
-  next: 15.3.3_j6k6oay3ugsr56slyfvma2drry
+  next: 15.3.3_kja5sem3luleskqgcwop446zr4
   next-mdx-remote: 5.0.0_3y7tt4djiwyqqlve4dazz5ae6q
   next-themes: 0.4.6_j6k6oay3ugsr56slyfvma2drry
   ollama: 0.6.2
@@ -155,6 +156,7 @@ devDependencies:
   '@types/react-dom': 19.1.6_@types+react@19.1.7
   '@types/react-syntax-highlighter': 15.5.13
   '@types/refractor': 4.0.0
+  babel-plugin-react-compiler: 1.0.0
   nodemon: 3.1.11
   tailwindcss: 4.1.8
   tw-animate-css: 1.3.4
@@ -279,7 +281,7 @@ packages:
       react-dom: '>=16.0.0'
     dependencies:
       antd: 5.26.2_j6k6oay3ugsr56slyfvma2drry
-      next: 15.3.3_j6k6oay3ugsr56slyfvma2drry
+      next: 15.3.3_kja5sem3luleskqgcwop446zr4
       react: 19.1.0
       react-dom: 19.1.0_react@19.1.0
     dev: false
@@ -306,15 +308,30 @@ packages:
       picocolors: 1.1.1
     dev: false
 
+  /@babel/helper-string-parser/7.27.1:
+    resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
+    engines: {node: '>=6.9.0'}
+
   /@babel/helper-validator-identifier/7.27.1:
     resolution: {integrity: sha512-D2hP9eA+Sqx1kBZgzxZh0y1trbuU+JoDkiEwqhQ36nodYqJwyEIhPSdMNd7lOm/4io72luTPWH20Yda0xOuUow==}
     engines: {node: '>=6.9.0'}
     dev: false
 
+  /@babel/helper-validator-identifier/7.28.5:
+    resolution: {integrity: sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==}
+    engines: {node: '>=6.9.0'}
+
   /@babel/runtime/7.27.6:
     resolution: {integrity: sha512-vbavdySgbTTrmFE+EsiqUTzlOr5bzlnJtUv9PynGCAKvfQqjIXbvFdumPM/GxMDfyuGMJaJAU6TO4zc1Jf1i8Q==}
     engines: {node: '>=6.9.0'}
     dev: false
+
+  /@babel/types/7.28.5:
+    resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
+    engines: {node: '>=6.9.0'}
+    dependencies:
+      '@babel/helper-string-parser': 7.27.1
+      '@babel/helper-validator-identifier': 7.28.5
 
   /@emnapi/runtime/1.4.3:
     resolution: {integrity: sha512-pBPWdu6MLKROBX05wSNKcNb++m5Er+KQ9QkB+WVM+pW2Kx9hoSrVTnu3BdkI5eBLZoKu/J6mW/B6i6bJB2ytXQ==}
@@ -2538,6 +2555,11 @@ packages:
     hasBin: true
     dev: false
 
+  /babel-plugin-react-compiler/1.0.0:
+    resolution: {integrity: sha512-Ixm8tFfoKKIPYdCCKYTsqv+Fd4IJ0DQqMyEimo+pxUOMUR9cVPlwTrFt9Avu+3cb6Zp3mAzl+t1MrG2fxxKsxw==}
+    dependencies:
+      '@babel/types': 7.28.5
+
   /bail/2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
     dev: false
@@ -4456,7 +4478,7 @@ packages:
       react-dom: 19.1.0_react@19.1.0
     dev: false
 
-  /next/15.3.3_j6k6oay3ugsr56slyfvma2drry:
+  /next/15.3.3_kja5sem3luleskqgcwop446zr4:
     resolution: {integrity: sha512-JqNj29hHNmCLtNvd090SyRbXJiivQ+58XjCcrC50Crb5g5u2zi7Y2YivbsEfzk6AtVI80akdOQbaMZwWB1Hthw==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
     hasBin: true
@@ -4480,6 +4502,7 @@ packages:
       '@next/env': 15.3.3
       '@swc/counter': 0.1.3
       '@swc/helpers': 0.5.15
+      babel-plugin-react-compiler: 1.0.0
       busboy: 1.6.0
       caniuse-lite: 1.0.30001721
       postcss: 8.4.31

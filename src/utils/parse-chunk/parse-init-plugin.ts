@@ -16,8 +16,8 @@ export const parseInitPlugin: ParsePlugin<ParseInitChunkType, ParseChunkResult> 
       const parsed: ParseInitChunkType = JSON.parse(data)
       return parsed
     } catch (error: any) {
-      console.error('Error parsing SSE done data:', data)
-      throw new Error('Error parsing SSE done data: ' + error.message)
+      console.error('Error parsing SSE init data:', data)
+      throw new Error('Error parsing SSE init data: ' + error.message)
     }
   },
   process: (result: ParseInitChunkType, collector: ParseChunkResult) => {

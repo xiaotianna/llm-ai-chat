@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import FunctionalModel from './FunctionalModel'
 import { useModel } from '../ModelProvider'
 import { FunctionalConfig, FunctionalConfigKey } from './FunctionalConfig'

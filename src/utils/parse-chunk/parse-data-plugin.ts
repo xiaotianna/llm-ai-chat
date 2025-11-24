@@ -1,7 +1,7 @@
 import { ParsePlugin } from './plugin'
 import { ParseChunkResult } from './index'
 
-export type ParseChunkType = { content: string; type: 'content' | 'reasoning' }
+export type ParseChunkType = { content: string; type: 'content' | 'reasoning', prev_id?: string | null }
 
 export const parseDataPlugin: ParsePlugin<ParseChunkType[], ParseChunkResult> = {
   name: 'parseData',
@@ -12,19 +12,22 @@ export const parseDataPlugin: ParsePlugin<ParseChunkType[], ParseChunkResult> = 
       const parsed: {
         reasoning?: string
         content?: string
+        prev_id?: string | null
       } = JSON.parse(data)
       // 思考内容
       if (parsed.reasoning) {
         result.push({
           type: 'reasoning',
-          content: parsed.reasoning
+          content: parsed.reasoning,
+          prev_id: parsed.prev_id
         })
       }
       // 内容
       if (parsed.content) {
         result.push({
           type: 'content',
-          content: parsed.content
+          content: parsed.content,
+          prev_id: parsed.prev_id
         })
       }
       return result

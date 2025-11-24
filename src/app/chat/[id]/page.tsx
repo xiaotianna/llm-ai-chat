@@ -25,6 +25,7 @@ import {
   ParseDoneChunkType,
   ParseInitChunkType
 } from '@/utils/parse-chunk'
+import { ParseToolChunkType } from '@/utils/parse-chunk/parse-tool-plugin'
 import { useTheme } from 'next-themes'
 import React, {
   forwardRef,
@@ -220,18 +221,29 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const handleSendMessage = async (message: string) => {
     const _messages: MessagesType[] = [
       ...messages,
-      { role: 'user', content: message, id: uuidv4(), isDone: false },
+      {
+        role: 'user',
+        content: message,
+        id: `local_${uuidv4()}`,
+        isDone: false
+      },
       {
         role: 'assistant',
         content: '',
         reasoning: '',
-        id: uuidv4(),
+        id: `local_${uuidv4()}`,
         isDone: false
       }
     ]
     setMessages(_messages)
     setLoading(true)
-    await play(message, handleGetData, handlePlayDone, handlePlayInit)
+    await play(
+      message,
+      handleGetData,
+      handlePlayDone,
+      handlePlayInit,
+      handlePlayTool
+    )
   }
 
   const handleGetData = (chunk: ParseChunkType[]) => {
@@ -262,6 +274,11 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     })
   }
 
+  // 处理工具调用数据
+  const handlePlayTool = (chunk: ParseToolChunkType) => {
+    if (!chunk) return
+  }
+
   // 接收到的终止数据，包含需要替换的消息id（user、ai）
   const handlePlayDone = (chunk: ParseDoneChunkType[]) => {
     const userMsg = chunk.find((item) => item.type === 'user')
@@ -288,13 +305,13 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         // 更新user消息状态
         updated[userMessageIndex] = {
           ...updated[userMessageIndex],
-          id: userMsg?.id || uuidv4(),
+          id: userMsg?.id || `local_${uuidv4()}`,
           isDone: true
         }
         // 更新ai消息状态
         updated[aiMessageIndex] = {
           ...updated[aiMessageIndex],
-          id: aiMsg?.id || uuidv4(),
+          id: aiMsg?.id || `local_${uuidv4()}`,
           isDone: true
         }
       }
@@ -354,7 +371,6 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   // 监听子组件MessageItem删除按钮的订阅
   useEffect(() => {
     emitter.on('delete-conversation', (event: unknown) => {
-      // 确保 event 是 string 类型
       if (typeof event === 'string') {
         setMessages((prev) => prev.filter((message) => message.id !== event))
       }

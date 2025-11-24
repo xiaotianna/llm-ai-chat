@@ -8,7 +8,6 @@ import {
   insertAIConversationService,
   insertUserConversationService,
   updateConversationNextIdService,
-  insertAIToolConversationService,
   queryLastAIConversationService
 } from '@/services/conversation'
 import { ollamaGenerateSubjectService } from '@/services/chat'

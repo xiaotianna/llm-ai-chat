@@ -1,9 +1,11 @@
 import express from 'express'
-import { router as weatherRouter } from './mcp/weather.js'
+import { router as weatherMockRouter } from './mcp/weather-mock.js'
 import { router as baziRouter } from './mcp/bazi.js'
+import { router as weatherRouter } from './mcp/weather.js'
 
 const app = express()
 app.use(express.json())
+app.use('/mcp', weatherMockRouter)
 app.use('/mcp', weatherRouter)
 app.use('/mcp', baziRouter)
 

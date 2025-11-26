@@ -5,6 +5,8 @@ import { useEditorStore } from '@/store/editor'
 import { usePathname } from 'next/navigation'
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
+import MobileSidebar from '@/components/MobileSidebar'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -19,6 +21,7 @@ const InnerLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const init = useEditorStore.getState().init
   const cacheMessage = useEditorStore.getState().cacheMessage
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     if (cacheMessage === '') {
@@ -28,13 +31,20 @@ const InnerLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className='flex min-h-[600px] h-screen w-full'>
-      <motion.div
-        animate={{ width: isCollapsed ? 0 : 280 }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
-      >
-        <Aside />
-      </motion.div>
-      {children}
+      {/* 在移动端隐藏侧边栏，在桌面端根据 isCollapsed 状态显示/隐藏 */}
+      {!isMobile && (
+        <motion.div
+          animate={{ width: isCollapsed ? 0 : 280 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className="overflow-hidden"
+        >
+          <Aside />
+        </motion.div>
+      )}
+      
+      <div className="flex-1 w-full">
+        {children}
+      </div>
     </div>
   )
 }

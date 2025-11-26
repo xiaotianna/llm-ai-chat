@@ -10,12 +10,17 @@ import { useRouter } from 'next/navigation'
 import { SidebarTrigger } from '@/components/SidebarTrigger'
 import { useSidebar } from '@/components/SidebarProvider'
 import { addHistory } from '@/store/history'
+import MobileSidebar from '@/components/MobileSidebar'
+import Aside from '@/components/Aside'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 const ChatHome = () => {
   const { user } = useUserStore()
   const [content, setContent] = useState<string>('')
   const { setLoading, setCacheMessage } = useEditorStore()
   const router = useRouter()
+  const { isCollapsed } = useSidebar()
+  const isMobile = useIsMobile()
 
   const handleInput = (value: string) => {
     setContent(value)
@@ -37,7 +42,7 @@ const ChatHome = () => {
       create_time: new Date().toString()
     })
   }
-  const { isCollapsed } = useSidebar()
+
   return (
     <div
       className={`flex h-screen w-full flex-col items-center justify-center overflow-hidden relative`}
@@ -45,10 +50,20 @@ const ChatHome = () => {
       {/* 背景色 */}
       <div className='absolute top-[100px] left-[40px] right-[40px] bottom-[0] z-[-1] bg-[linear-gradient(74deg,rgba(81,71,255,0.12)_27.4%,rgba(125,246,255,0.12)_59.39%)] rounded-[1800px] blur-[130px]'></div>
       <div className='flex w-full grow p-[7px] relative'>
-        {/* 折叠按钮 */}
-        {!isCollapsed ? null : <SidebarTrigger className='mr-2' />}
+        {/* 在移动端显示抽屉触发按钮 */}
+        {isMobile && (
+          <div className="absolute top-4 left-4 z-10">
+            <MobileSidebar>
+              <Aside />
+            </MobileSidebar>
+          </div>
+        )}
+        
+        {/* 在桌面端显示折叠按钮 */}
+        {!isMobile && isCollapsed && <SidebarTrigger className='mr-2' />}
+        
         {/* 显示容器 */}
-        <div className='relative min-h-[600px] flex-1 flex flex-col items-center justify-center p-8 rounded'>
+        <div className='relative min-h-[600px] flex-1 flex flex-col items-center justify-center p-8 rounded w-full'>
           <div className='z-0 flex -mt-10 flex-col justify-center items-center w-full max-w-[800px] mx-auto relative'>
             {/* 欢迎语 和 果冻小图 */}
             <div className='flex items-center justify-between w-full'>

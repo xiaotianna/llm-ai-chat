@@ -9,12 +9,14 @@ import SettingDropdown from './SettingDropdown'
 import { useUserStore } from '@/store/user'
 import { useSidebar } from './SidebarProvider'
 import { SidebarTrigger } from './SidebarTrigger'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 const Aside = () => {
   const [avatarLoaded, setAvatarLoaded] = useState(true)
   const router = useRouter()
   const { user } = useUserStore()
   const { isCollapsed } = useSidebar()
+  const isMobile = useIsMobile()
 
   return (
     <div
@@ -36,8 +38,8 @@ const Aside = () => {
           />
           <span className='text-2xl font-bold'>AI Chat</span>
         </h1>
-        {/* 折叠按钮 */}
-        <SidebarTrigger />
+        {/* 折叠按钮 - 在移动端隐藏 */}
+        {!isMobile && <SidebarTrigger />}
       </div>
       {/* 新任务 按钮 */}
       <Button

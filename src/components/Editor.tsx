@@ -84,7 +84,7 @@ const Editor = ({
           }}
         ></p>
       </div>
-      <div className='flex pt-2 items-center justify-between'>
+      <div className='flex pt-2 items-center justify-between gap-2'>
         {/* 左侧功能按钮 */}
         <EditorFunctional />
         {/* 右侧发送按钮 */}

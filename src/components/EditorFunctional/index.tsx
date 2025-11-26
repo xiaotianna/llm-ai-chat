@@ -6,7 +6,7 @@ import { FunctionalConfig, FunctionalConfigKey } from './FunctionalConfig'
 const EditorFunctional: React.FC = () => {
   const { currentModel } = useModel()
   return (
-    <div className='flex space-x-2'>
+    <div className='flex space-x-2 overflow-auto scrollbar-hide'>
       {/* 模型切换 */}
       <FunctionalModel />
       {/* 其他配置 */}

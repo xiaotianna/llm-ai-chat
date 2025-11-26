@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation'
 import { Switch } from '@/components/ui/switch'
 import MCPConfigModal from '@/components/MCPConfigModal'
 import { fetchClient } from '@/utils/fetch-client'
-import { MCPConfig, ResponseMCPConfig } from '@/app/api/mcp/route'
+import { MCPConfig } from '@/app/api/mcp/route'
 import DotLoading from '@/components/DotLoading'
 import {
   Dialog,

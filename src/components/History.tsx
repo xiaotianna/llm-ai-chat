@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils'
 import { emitter } from '@/utils/emitter'
 import { toast } from 'sonner'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 const History = () => {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
@@ -39,6 +40,7 @@ const History = () => {
   const router = useRouter()
   const user = useUserStore((state) => state.user)
   const histories = useHistoryStore(state => state.histories)
+  const isMobile = useIsMobile()
 
   // 添加点击事件监听器，用于关闭菜单
   useEffect(() => {
@@ -239,7 +241,14 @@ const History = () => {
                   className={cn('rounded-lg p-3 mb-3 cursor-pointer group relative hover:bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))]', 
                     item.id === nowId && 'bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))]'
                   )}
-                  onClick={() => router.push(`/chat/${item.id}`)}
+                  onClick={() => {
+                    router.push(`/chat/${item.id}`)
+                    // 在移动端点击后关闭侧边栏
+                    if (isMobile) {
+                      const closeEvent = new CustomEvent('close-mobile-sidebar')
+                      window.dispatchEvent(closeEvent)
+                    }
+                  }}
                 >
                   <div className='text-sm mb-1 truncate font-medium text[rgba(var(--coze-fg-4),var(--coze-fg-4-alpha))]'>
                     {item.subject}
@@ -295,8 +304,8 @@ const History = () => {
       >
         <DialogContent className='sm:max-w-[425px] bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))]'>
           <DialogHeader>
-            <DialogTitle>重命名对话</DialogTitle>
-            <DialogDescription>请输入新的对话主题</DialogDescription>
+            <DialogTitle className='sr-only'>重命名对话</DialogTitle>
+            <DialogDescription className='sr-only'>请输入新的对话主题</DialogDescription>
           </DialogHeader>
           <div className='grid gap-4 py-4'>
             <div className='grid grid-cols-4 items-center gap-4'>
@@ -341,11 +350,12 @@ const History = () => {
       >
         <DialogContent className='sm:max-w-[425px] bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))]'>
           <DialogHeader>
-            <DialogTitle>删除对话</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className='sr-only'>删除对话</DialogTitle>
+            <DialogDescription className='sr-only'>
               确定要删除这个对话吗？此操作无法撤销。
             </DialogDescription>
           </DialogHeader>
+          <div className="text-sm font-medium mb-4">确定要删除这个对话吗？此操作无法撤销。</div>
           <DialogFooter>
             <Button
               variant='outline'

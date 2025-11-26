@@ -37,6 +37,10 @@ import React, {
 } from 'react'
 import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
+import MobileSidebar from '@/components/MobileSidebar'
+import Aside from '@/components/Aside'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 
 // 聊天消息为空展示内容
 const ChatLoading = () => {
@@ -154,6 +158,7 @@ const ChatMessageWrapper = forwardRef<
       toast.success('删除成功')
     }
   }
+  const isMobile = useIsMobile()
 
   return (
     <ScrollArea
@@ -161,7 +166,12 @@ const ChatMessageWrapper = forwardRef<
       ref={innerRef}
       onScroll={onScroll}
     >
-      <div className='relative flex-1 p-4 pb-7 max-w-[800px] max-md:w-[100vw] mx-auto opacity-100'>
+      <div
+        className={cn([
+          'relative flex-1 p-4 pb-7 max-w-[800px] mx-auto opacity-100',
+          isMobile && 'w-full'
+        ])}
+      >
         {messages.length > 0 &&
           messages.map((message) => (
             <MessageItem
@@ -201,6 +211,8 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const setLoading = useEditorStore.getState().setLoading
   const [autoScroll, setAutoScroll] = useState(true)
   const [subject, setSubject] = useState('')
+  const { isCollapsed } = useSidebar()
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     emitter.on('update-subject', (subject: any) => {
@@ -521,8 +533,6 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   }, [])
 
-  const { isCollapsed } = useSidebar()
-
   // 取消请求
   const handleStop = async () => {
     updateMessageDone()
@@ -531,13 +541,31 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
   return (
     <div className='flex h-screen min-h-[600px] w-full relative p-[10px] duration-200 ease-[cubic-bezier(0.65,0,0.35,0)]'>
+      {/* 在移动端显示抽屉触发按钮 */}
+      {isMobile && (
+        <div className='absolute top-4 left-4 z-10 pt-[1px]'>
+          <MobileSidebar>
+            <Aside />
+          </MobileSidebar>
+        </div>
+      )}
+
       <div className='flex relative bg-[rgba(var(--coze-bg-11),var(--coze-bg-11-alpha))] flex-1 flex-col items-center rounded-xl shadow overflow-hidden'>
         {/* 头部 */}
-        <div className='relative flex w-full items-center p-4 h-16.5'>
+        <div
+          className={cn([
+            'relative flex w-full items-center p-4 h-16.5',
+            isMobile && 'pt-0'
+          ])}
+        >
           {subject && (
             <div className='flex items-center gap-[8px] max-w-[100%]'>
               <div className='overflow-hidden flex items-center'>
-                {!isCollapsed ? null : <SidebarTrigger className='mr-2' />}
+                {/* 在桌面端显示折叠按钮 */}
+                {!isMobile && isCollapsed && (
+                  <SidebarTrigger className='mr-2' />
+                )}
+                {isMobile && <div className='mr-6'></div>}
                 <Tooltip>
                   <TooltipTrigger>
                     <h1 className='truncate max-w-2xs text-base text-[rgba(var(--coze-fg-4),var(--coze-fg-4-alpha))] font-medium'>

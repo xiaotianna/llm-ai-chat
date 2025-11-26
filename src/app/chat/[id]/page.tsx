@@ -203,6 +203,15 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [subject, setSubject] = useState('')
 
   useEffect(() => {
+    emitter.on('update-subject', (subject: any) => {
+      setSubject(subject)
+    })
+    return () => {
+      emitter.off('update-subject')
+    }
+  }, [])
+
+  useEffect(() => {
     if (id) {
       setHistoryId(id)
     }

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { MoreHorizontal, Pin, Trash2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { getHistories, HistoryItem, setHistories, useHistoryStore } from '@/store/history'
+import { HistoryItem, setHistories, useHistoryStore } from '@/store/history'
 import { fetchClient } from '@/utils/fetch-client'
 import { useUserStore } from '@/store/user'
 import {
@@ -133,6 +133,7 @@ const History = () => {
         )
         setHistories(updatedHistories)
         setShowRenameDialog(false)
+        emitter.emit('update-subject', renameInput.trim())
       }
     } catch (error) {
       console.error('重命名历史记录失败:', error)

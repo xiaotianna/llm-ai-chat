@@ -146,6 +146,7 @@ export async function POST(request: NextRequest) {
         let fullReasoning = ''
         let fullToolCalls: ToolCall[] = []
         let previousMessageId: string | null = null // 用于存储上一条消息的ID，以便更新其next_id
+        let isAbortSave = true // 是否保存中止的消息
         let iteration = 0
         const maxIterations = 10 // 防止无限循环
 
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
           'abort',
           () => {
             // 如果已经有部分内容，则保存
-            if (fullContent || fullReasoning) {
+            if (isAbortSave && (fullContent || fullReasoning)) {
               // 使用 Promise 处理异步操作，但不等待结果
               insertAIConversationService(
                 fullContent,
@@ -193,7 +194,6 @@ export async function POST(request: NextRequest) {
             fullToolCalls = []
 
             // 检查客户端是否已断开连接
-            // TODO 停止逻辑没有测试
             if (request.signal.aborted) {
               controller.close()
               return
@@ -239,6 +239,7 @@ export async function POST(request: NextRequest) {
               content: fullContent,
               tool_calls: fullToolCalls
             })
+            isAbortSave = false
             // 插入ai数据，不设置next_id（将在插入下一条消息时更新）
             const llm_conversationsData = await insertAIConversationService(
               fullContent,
@@ -248,7 +249,9 @@ export async function POST(request: NextRequest) {
               fullToolCalls
               // 不传next_id参数
             )
-
+            isAbortSave = true
+            fullContent = ''
+            fullReasoning = ''
             // 如果有前一条消息，更新其next_id为当前消息的ID
             if (
               previousMessageId &&
@@ -286,6 +289,7 @@ export async function POST(request: NextRequest) {
                     input: toolArgs,
                     output: toolResult
                   }
+                  if (request.signal.aborted) return
                   let toolPreviousMessageId = await executeUpdateToolService({
                     toolName,
                     content: JSON.stringify(content),
@@ -312,6 +316,7 @@ export async function POST(request: NextRequest) {
                     input: toolArgs,
                     error: (error as Error).message
                   })
+                  if (request.signal.aborted) return
                   let toolPreviousMessageId = await executeUpdateToolService({
                     toolName,
                     content: errorContent,

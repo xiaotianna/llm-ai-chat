@@ -9,6 +9,7 @@ import UserInitializer from '@/components/UserInitializer'
 import GlobalLoading from '@/components/GlobalLoading'
 import { SidebarProvider } from '@/components/SidebarProvider'
 import { ModelProvider } from '@/components/ModelProvider'
+import Bannner from '@/components/Bannner'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -40,6 +41,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased transition-theme bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))]`}
       >
+        <Bannner />
         {/* 
           attribute="class"：将主题作为 HTML 元素的 class 属性添加
           defaultTheme="system"：默认跟随系统设置

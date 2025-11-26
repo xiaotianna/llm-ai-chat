@@ -47,7 +47,7 @@ const FunctionalDropdown = ({
       <DropdownMenuContent
         align='start'
         avoidCollisions={false}
-        className='flex border cursor-pointer w-[420px] rounded-lg flex-col p-1 gap-0.5 max-h-60'
+        className='flex border cursor-pointer max-w-[420px] rounded-lg flex-col p-1 gap-0.5 max-h-60'
       >
         {dropdownMenu.map((item) => (
           <DropdownMenuItem

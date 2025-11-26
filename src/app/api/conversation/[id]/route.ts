@@ -1,7 +1,4 @@
-import {
-  deleteConversationService,
-  queryAllConversationService
-} from '@/services/conversation'
+import { queryAllConversationService } from '@/services/conversation'
 import { Database, Json } from '@/types/db/supabase'
 import { ResponseData } from '@/utils/response-message'
 import { cookies } from 'next/headers'
@@ -50,27 +47,4 @@ export type ResponseMessage = {
   }[]
   historyId: string
   subject: string
-}
-
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params
-  const cookieStore = await cookies()
-  const userInfoCookie = cookieStore.get('user-info')
-  if (!userInfoCookie) {
-    return NextResponse.json(ResponseData.error(401, 'Not authenticated'), {
-      status: 401
-    })
-  }
-  const userInfo = JSON.parse(userInfoCookie.value)
-  const userId = userInfo.id
-
-  try {
-    await deleteConversationService(id, userId)
-    return NextResponse.json(ResponseData.success(200, '删除成功'))
-  } catch (error: any) {
-    return NextResponse.json(ResponseData.error(500, error.message))
-  }
 }

@@ -15,9 +15,6 @@ import {
 } from './ui/shadcn-io/ai/reasoning'
 import ShinyText from './ui/shadcn-io/shiny-text'
 import DotLoading from './DotLoading'
-import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
-import { toast } from 'sonner'
-import { fetchClient } from '@/utils/fetch-client'
 import {
   Dialog,
   DialogContent,
@@ -62,7 +59,6 @@ export const MessageItem = (props: MessageItemProps) => {
   const isUser = role === 'user'
   const isAI = role === 'assistant'
   const isTool = role === 'tool'
-  const [copy] = useCopyToClipboard()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const actions = [
@@ -72,9 +68,7 @@ export const MessageItem = (props: MessageItemProps) => {
       className:
         'w-[24px] h-[24px] cursor-pointer hover:bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex items-center justify-center rounded-[4px]',
       onClick: () => {
-        copy(content).then(() => {
-          toast.success('复制成功')
-        })
+        emitter.emit('copy', id)
       }
     },
     {
@@ -88,21 +82,9 @@ export const MessageItem = (props: MessageItemProps) => {
     }
   ]
 
-  // 删除会话
-  const deleteConversation = async (id: string) => {
-    let res = await fetchClient(`/api/conversation/${id}`, {
-      method: 'DELETE'
-    })
-    if (res.code === 200) {
-      emitter.emit('delete-conversation', id)
-      toast.success('删除成功')
-    }
-  }
-
   // 确认删除
   const confirmDelete = () => {
-    // TODO agent下删除逻辑有问题
-    deleteConversation(id)
+    emitter.emit('delete-message', id)
     setShowDeleteConfirm(false)
   }
 

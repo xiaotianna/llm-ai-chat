@@ -13,6 +13,7 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { ModelUrlMap } from '@/config/model'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useSSE } from '@/hooks/useSSE'
 import { useEditorStore } from '@/store/editor'
 import { addHistory } from '@/store/history'
@@ -34,6 +35,7 @@ import React, {
   useRef,
   useState
 } from 'react'
+import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
 
 // 聊天消息为空展示内容
@@ -96,6 +98,62 @@ const ChatMessageWrapper = forwardRef<
       scrollContainer.removeEventListener('scroll', handleScrollEvent)
     }
   }, [onScroll])
+
+  const findMessageByNextId = (id: string) => {
+    let currentMessage = messages.find((msg) => msg.id === id)
+    const result = [currentMessage]
+    let prevMessage = messages.find((msg) => msg.next_id === id)
+    while (prevMessage) {
+      result.push(prevMessage)
+      prevMessage = messages.find((msg) => msg.next_id === prevMessage?.id)
+    }
+    return result.filter(Boolean).reverse()
+  }
+
+  const [copy] = useCopyToClipboard()
+
+  // emitter监听copy
+  useEffect(() => {
+    emitter.on('copy', handleCopy)
+    return () => {
+      emitter.off('copy')
+    }
+  }, [])
+
+  const handleCopy = (id: any) => {
+    const content = findMessageByNextId(id)
+      .filter((msg) => msg?.role !== 'tool')
+      .map((msg) => msg?.content)
+      .join('\n')
+    copy(content).then(() => {
+      toast.success('复制成功')
+    })
+  }
+
+  // emitter监听delete-message
+  useEffect(() => {
+    emitter.on('delete-message', handleDelete)
+    return () => {
+      emitter.off('delete-message')
+    }
+  }, [])
+
+  const handleDelete = (id: any) => {
+    const ids = findMessageByNextId(id).map((msg) => msg!.id)
+    deleteConversation(ids)
+  }
+
+  // 删除message
+  const deleteConversation = async (ids: string[]) => {
+    let res = await fetchClient(`/api/conversation`, {
+      method: 'DELETE',
+      body: JSON.stringify({ ids })
+    })
+    if (res.code === 200) {
+      emitter.emit('delete-conversation', ids)
+      toast.success('删除成功')
+    }
+  }
 
   return (
     <ScrollArea
@@ -441,8 +499,10 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   // 监听子组件MessageItem删除按钮的订阅
   useEffect(() => {
     emitter.on('delete-conversation', (event: unknown) => {
-      if (typeof event === 'string') {
-        setMessages((prev) => prev.filter((message) => message.id !== event))
+      if (typeof event === 'object' && Array.isArray(event)) {
+        setMessages((prev) =>
+          prev.filter((message) => !event.includes(message.id))
+        )
       }
     })
 

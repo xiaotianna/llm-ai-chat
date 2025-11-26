@@ -143,13 +143,13 @@ export const queryAllConversationService = async (
 
 // 删除某一条会话记录
 export const deleteConversationService = async (
-  conversationId: string,
+  conversationIds: string[],
   userId: string
 ) => {
   const { error } = await supabase
     .from('llm_conversations')
     .delete()
-    .eq('id', conversationId)
+    .in('id', conversationIds)
     .eq('user_id', userId)
 
   if (error) {

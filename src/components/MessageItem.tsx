@@ -45,7 +45,7 @@ interface MessageItemProps {
 }
 
 // 渲染每一条message
-export const MessageItem = (props: MessageItemProps) => {
+export const MessageItem = React.memo((props: MessageItemProps) => {
   const {
     id,
     role,
@@ -176,7 +176,7 @@ export const MessageItem = (props: MessageItemProps) => {
       </Dialog>
     </div>
   )
-}
+})
 
 // 用户发出的消息
 const UserMessage = ({ content }: { content: string }) => {

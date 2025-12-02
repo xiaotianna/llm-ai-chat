@@ -1,3 +1,4 @@
+import { useModel } from '@/components/ModelProvider'
 import { useEditorStore } from '@/store/editor'
 import { ModelConfigKey } from '@/types/model/model-config'
 import {
@@ -13,10 +14,11 @@ import { toast } from 'sonner'
 export const useSSE = (
   url: string,
   modelName: ModelConfigKey,
-  historyId?: string
+  historyId?: string,
 ) => {
   const [error, setError] = useState<string>('')
   const [isDone, setIsDone] = useState<boolean>(true)
+  const { modelFunctional } = useModel()
   const abortControllerRef = useRef<AbortController | null>(null)
   const init = useEditorStore.getState().init
 
@@ -55,7 +57,8 @@ export const useSSE = (
         body: JSON.stringify({
           message,
           model: modelName,
-          historyId: historyId?.startsWith('local_') ? undefined : historyId
+          historyId: historyId?.startsWith('local_') ? undefined : historyId,
+          modelFunctional // 将模型功能配置发送到后端
         }),
         signal: abortController.signal
       })

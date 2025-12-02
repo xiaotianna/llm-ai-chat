@@ -11,7 +11,7 @@ import {
   queryLastAIConversationService
 } from '@/services/conversation'
 import { ollamaGenerateSubjectService } from '@/services/chat'
-import { Message, ToolCall } from 'ollama'
+import { Message, Tool, ToolCall } from 'ollama'
 import { ollama } from '@/utils/ollama'
 import {
   executeUpdateToolService,
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  let { model: modelName, message, historyId } = body
+  let { model: modelName, message, historyId, modelFunctional } = body
   if (!modelName) {
     return NextResponse.json({ error: '模型名缺少' }, { status: 400 })
   }
@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const { isAgent } = modelFunctional
+
     const userInfo = JSON.parse(userInfoCookie.value)
     const userId = userInfo.id
 
@@ -120,18 +122,22 @@ export async function POST(request: NextRequest) {
       }
     ]
 
-    // 查询mcp配置
-    const mcpConfigs = await queryMcpConfigService(userId)
-    // 创建MCPConnect实例用于工具调用
-    const configs = mcpConfigs.map((config) => ({
-      id: config.id,
-      name: config.name,
-      type: config.mcp_type,
-      url: config.url
-    }))
-    const mcp = new MCPConnect(configs)
-    // 建立连接，查询所有的mcp的tools
-    const tools = await getAllToolsService(mcp)
+    let mcp: MCPConnect
+    let tools: Tool[] = []
+    if (isAgent) {
+      // 查询mcp配置
+      const mcpConfigs = await queryMcpConfigService(userId)
+      // 创建MCPConnect实例用于工具调用
+      const configs = mcpConfigs.map((config) => ({
+        id: config.id,
+        name: config.name,
+        type: config.mcp_type,
+        url: config.url
+      }))
+      mcp = new MCPConnect(configs)
+      // 建立连接，查询所有的mcp的tools
+      tools = await getAllToolsService(mcp)
+    }
 
     // 创建 ReadableStream 来处理流式响应
     const readableStream = new ReadableStream({
@@ -201,7 +207,7 @@ export async function POST(request: NextRequest) {
 
             const stream = await ollama.stream(modelName, messages, {
               think: true,
-              tools: tools
+              tools: isAgent ? tools : undefined
             })
 
             for await (const chunk of stream!) {
@@ -271,7 +277,7 @@ export async function POST(request: NextRequest) {
             }
 
             // 检查是否有工具调用
-            if (fullToolCalls && fullToolCalls.length > 0) {
+            if (isAgent && fullToolCalls && fullToolCalls.length > 0) {
               for (const toolCall of fullToolCalls) {
                 const toolName = toolCall.function.name
                 const toolArgs = toolCall.function.arguments as Record<
@@ -338,7 +344,8 @@ export async function POST(request: NextRequest) {
               // 没有更多工具调用，结束循环
               // 发送用户historyId和user、ai会话消息的ai（进行替换）
               // 多轮对话消息，只需要补齐最后一次对话id即可，之前的链表消息id已经通过prev_id传回
-              const llm_lastConversationsData = await queryLastAIConversationService(userId, historyId)
+              const llm_lastConversationsData =
+                await queryLastAIConversationService(userId, historyId)
               streamMessage.done([
                 ...userConversationData,
                 llm_lastConversationsData

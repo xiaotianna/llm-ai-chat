@@ -60,7 +60,7 @@ export const queryHistoryService = async (
     .select('*')
     .eq('history_id', chatHistory.id)
     .eq('user_id', userId)
-    .order('create_time', { ascending: false })
+    .order('create_time', { ascending: true })
     .limit(50) // 只保留最新的50条记录
 
   if (conversationError) {

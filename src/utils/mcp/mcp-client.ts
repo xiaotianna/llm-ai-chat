@@ -68,7 +68,7 @@ class MCPConnect {
         version: '1.0.0'
       })
       client.onerror = (error) => {
-        console.error(`[${serverConfig.id}] 客户端错误:`, error)
+        console.error(`[${serverConfig.name}-${serverConfig.id}] 客户端错误:`, error)
       }
 
       let transport: StreamableHTTPClientTransport | SSEClientTransport

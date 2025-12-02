@@ -454,13 +454,13 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         // 更新user消息状态
         updated[userMessageIndex] = {
           ...updated[userMessageIndex],
-          id: userMsg?.id || `local_${uuidv4()}`,
+          id: userMsg?.id || updated[userMessageIndex].id || `local_${uuidv4()}`,
           isDone: true
         }
         // 更新ai消息状态
         updated[aiMessageIndex] = {
           ...updated[aiMessageIndex],
-          id: aiMsg?.id || `local_${uuidv4()}`,
+          id: aiMsg?.id || updated[aiMessageIndex].id || `local_${uuidv4()}`,
           isDone: true
         }
       }

@@ -26,9 +26,10 @@ export const ModelProvider: React.FC<{ children: ReactNode }> = ({
   children
 }) => {
   const [currentModelIndex, setCurrentModelIndex] = useState(0)
-  const [modelFunctional, setModelFunctionalState] = useState<ModelFunctionalState>({
-    isAgent: true // 默认启用智能体
-  })
+  const [modelFunctional, setModelFunctionalState] =
+    useState<ModelFunctionalState>({
+      isAgent: false // 默认启用智能体
+    })
 
   const currentModel = models[currentModelIndex]
 
@@ -41,7 +42,7 @@ export const ModelProvider: React.FC<{ children: ReactNode }> = ({
 
   // 更新模型功能状态的方法
   const updateModelFunctional = (updates: Partial<ModelFunctionalState>) => {
-    setModelFunctionalState(prev => ({
+    setModelFunctionalState((prev) => ({
       ...prev,
       ...updates
     }))

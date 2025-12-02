@@ -14,7 +14,7 @@ import { toast } from 'sonner'
 export const useSSE = (
   url: string,
   modelName: ModelConfigKey,
-  historyId?: string,
+  historyId?: string
 ) => {
   const [error, setError] = useState<string>('')
   const [isDone, setIsDone] = useState<boolean>(true)
@@ -112,6 +112,7 @@ export const useSSE = (
     }
 
     setIsDone(true)
+    init()
   }
 
   return { error, isDone, play, stop }

@@ -43,7 +43,7 @@ NEXT_PUBLIC_OLLAMA_HOST=http://localhost:11434
 
 - Node.js >= 20
 - pnpm 包管理器
-- 如需使用 Ollama 服务，需要先安装并启动 Ollama
+- 如需使用 Ollama 服务，需要先安装并启动 [Ollama](https://ollama.com/)
 
 ### 安装依赖
 

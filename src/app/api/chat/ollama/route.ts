@@ -122,9 +122,6 @@ export async function POST(request: NextRequest) {
       }
     ]
 
-    console.log(messages);
-    
-
     let mcp: MCPConnect
     let tools: Tool[] = []
     if (isAgent) {

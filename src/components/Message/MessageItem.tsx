@@ -1,20 +1,12 @@
 import React, { useState } from 'react'
 import { MessageRoleType } from '@/types'
-import MarkdownRender from './MarkdownRender'
 import { Copy, Trash2 } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger
-} from './ui/tooltip'
-import {
-  Reasoning,
-  ReasoningContent,
-  ReasoningTrigger
-} from './ui/shadcn-io/ai/reasoning'
-import ShinyText from './ui/shadcn-io/shiny-text'
-import DotLoading from './DotLoading'
+} from '../ui/tooltip'
 import {
   Dialog,
   DialogContent,
@@ -25,13 +17,9 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { emitter } from '@/utils/emitter'
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolInput,
-  ToolOutput
-} from './ui/shadcn-io/ai/tool'
+import { ToolMessage } from './ToolMessage'
+import { UserMessage } from './UserMessage'
+import { AIMessage } from './AIMessage'
 
 interface MessageItemProps {
   id: string
@@ -177,116 +165,3 @@ export const MessageItem = React.memo((props: MessageItemProps) => {
     </div>
   )
 })
-
-// 用户发出的消息
-const UserMessage = ({ content }: { content: string }) => {
-  return (
-    <div className='bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] px-4 py-3 min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all ml-auto'>
-      {content}
-    </div>
-  )
-}
-
-// AI回复的消息
-const AIMessage = ({
-  content,
-  reasoning,
-  isDone = false,
-  error
-}: {
-  content: string
-  reasoning?: string
-  isDone?: boolean
-  error?: string
-}) => {
-  if (error) {
-    return (
-      <div className='bg-[rgba(var(--coze-bg-5),var(--coze-bg-5-alpha))] flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] px-4 py-3 min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
-        <div className='text-red-500'>出错啦：{error}</div>
-      </div>
-    )
-  }
-  return (
-    <>
-      {content || reasoning ? (
-        <>
-          {/* 显示思考过程 */}
-          {reasoning && (
-            <Reasoning
-              isStreaming={false}
-              defaultOpen={true}
-            >
-              <ReasoningTrigger title='Thinking' />
-              <ReasoningContent>{reasoning}</ReasoningContent>
-            </Reasoning>
-          )}
-          <div className='flex-wrap max-w-[90%]'>
-            {/* 渲染 Markdown */}
-            {content && <MarkdownRender>{content}</MarkdownRender>}
-            {/* 加载中 */}
-            {!isDone && (
-              <div className='flex-wrap mt-2 max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
-                <DotLoading />
-              </div>
-            )}
-          </div>
-        </>
-      ) : (
-        !isDone && (
-          <div className='flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
-            <ShinyText
-              text='正在思考中'
-              disabled={false}
-              speed={3}
-              className='text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] mr-1'
-            />
-            <DotLoading />
-          </div>
-        )
-      )}
-    </>
-  )
-}
-
-// AI调用工具的消息
-const ToolMessage = ({
-  id,
-  content,
-  tool_name,
-  isDone = false
-}: {
-  id: string
-  content: string
-  tool_name: string
-  isDone?: boolean
-}) => {
-  const { input, output, error } = JSON.parse(content)
-  const toolCall = {
-    type: tool_name,
-    toolCallId: id,
-    input: input,
-    output: output ? '```json\n' + output[0].text : undefined,
-    errorText: error
-  }
-
-  const state = isDone
-    ? error
-      ? 'output-error'
-      : 'output-available'
-    : 'input-available'
-  return (
-    <Tool defaultOpen={false}>
-      <ToolHeader
-        state={state}
-        type={toolCall.type}
-      />
-      <ToolContent>
-        <ToolInput input={toolCall.input} />
-        <ToolOutput
-          errorText={toolCall.errorText}
-          output={<MarkdownRender>{toolCall.output}</MarkdownRender>}
-        />
-      </ToolContent>
-    </Tool>
-  )
-}

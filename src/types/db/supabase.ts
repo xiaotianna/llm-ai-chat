@@ -45,18 +45,21 @@ export type Database = {
           id: string
           subject: string
           user_id: string | null
+          is_share: boolean | null
         }
         Insert: {
           create_time?: string
           id?: string
           subject: string
           user_id?: string | null
+          is_share?: boolean | null
         }
         Update: {
           create_time?: string
           id?: string
           subject?: string
           user_id?: string | null
+          is_share?: boolean | null
         }
         Relationships: []
       }

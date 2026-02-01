@@ -23,3 +23,15 @@ export const formatDate = (dateString: string): string => {
   // 往年的日期显示年月日
   return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
 }
+
+/** 格式化日期时间，用于「更新时间」等场景 */
+export const formatDateTime = (dateString: string): string => {
+  const date = new Date(dateString)
+  const datePart = formatDate(dateString)
+  const timePart = date.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+  return `${datePart} ${timePart}`
+}

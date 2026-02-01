@@ -2,7 +2,7 @@
 import { ResponseMessage } from '@/app/api/conversation/[id]/route'
 import Editor from '@/components/Editor'
 import { StartIcon } from '@/components/icon/start-icon'
-import { MessageItem } from '@/components/MessageItem'
+import { MessageItem } from '@/components/Message/MessageItem'
 import { useModel } from '@/components/ModelProvider'
 import { useSidebar } from '@/components/SidebarProvider'
 import { SidebarTrigger } from '@/components/SidebarTrigger'
@@ -41,6 +41,7 @@ import MobileSidebar from '@/components/MobileSidebar'
 import Aside from '@/components/Aside'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
+import ShareButton from '@/components/Share/ShareButton'
 
 // 聊天消息为空展示内容
 const ChatLoading = () => {
@@ -454,7 +455,8 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         // 更新user消息状态
         updated[userMessageIndex] = {
           ...updated[userMessageIndex],
-          id: userMsg?.id || updated[userMessageIndex].id || `local_${uuidv4()}`,
+          id:
+            userMsg?.id || updated[userMessageIndex].id || `local_${uuidv4()}`,
           isDone: true
         }
         // 更新ai消息状态
@@ -583,6 +585,12 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
                   内容由 AI 生成，请仔细甄别
                 </span>
               </div>
+            </div>
+          )}
+          {/* 分享 */}
+          {subject && (
+            <div className='ml-auto'>
+              <ShareButton sessionId={id} />
             </div>
           )}
         </div>

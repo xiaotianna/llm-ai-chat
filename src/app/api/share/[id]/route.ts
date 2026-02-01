@@ -7,7 +7,10 @@ import { HttpError } from '@/utils/http-error'
 /**
  * 更新聊天历史的分享状态
  */
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const cookieStore = await cookies()
   const userInfoCookie = cookieStore.get('user-info')
   if (!userInfoCookie) {
@@ -18,7 +21,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
   const userInfo = JSON.parse(userInfoCookie.value)
   const userId = userInfo.id
-  const historyId = params.id
+  const { id: historyId } = await params
 
   if (!historyId) {
     return NextResponse.json(ResponseData.error(400, 'History ID is required'), {
@@ -74,7 +77,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 /**
  * 获取聊天历史的分享状态
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const cookieStore = await cookies()
   const userInfoCookie = cookieStore.get('user-info')
   if (!userInfoCookie) {
@@ -85,7 +91,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   const userInfo = JSON.parse(userInfoCookie.value)
   const userId = userInfo.id
-  const historyId = params.id
+  const { id: historyId } = await params
 
   if (!historyId) {
     return NextResponse.json(ResponseData.error(400, 'History ID is required'), {
@@ -132,7 +138,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 /**
  * 取消分享（DELETE 请求用于取消分享）
  */
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const cookieStore = await cookies()
   const userInfoCookie = cookieStore.get('user-info')
   if (!userInfoCookie) {
@@ -143,7 +152,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
   const userInfo = JSON.parse(userInfoCookie.value)
   const userId = userInfo.id
-  const historyId = params.id
+  const { id: historyId } = await params
 
   if (!historyId) {
     return NextResponse.json(ResponseData.error(400, 'History ID is required'), {

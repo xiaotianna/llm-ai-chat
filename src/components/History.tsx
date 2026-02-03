@@ -304,7 +304,7 @@ const History = () => {
       >
         <DialogContent className='sm:max-w-[425px] bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))]'>
           <DialogHeader>
-            <DialogTitle className='sr-only'>重命名对话</DialogTitle>
+            <DialogTitle className='text-left text-lg font-semibold'>重命名对话</DialogTitle>
             <DialogDescription className='sr-only'>请输入新的对话主题</DialogDescription>
           </DialogHeader>
           <div className='grid gap-4 py-4'>
@@ -345,12 +345,12 @@ const History = () => {
 
       {/* 删除确认对话框 */}
       <Dialog
-        open={showDeleteDialog}
+        open={showDeleteDialog} 
         onOpenChange={setShowDeleteDialog}
       >
         <DialogContent className='sm:max-w-[425px] bg-[rgba(var(--coze-bg-10),var(--coze-bg-10-alpha))] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))]'>
           <DialogHeader>
-            <DialogTitle className='sr-only'>删除对话</DialogTitle>
+            <DialogTitle className='text-left text-lg font-semibold'>删除对话</DialogTitle>
             <DialogDescription className='sr-only'>
               确定要删除这个对话吗？此操作无法撤销。
             </DialogDescription>

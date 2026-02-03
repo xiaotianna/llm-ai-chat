@@ -8,6 +8,7 @@ import {
   ParseInitChunkType
 } from '@/utils/parse-chunk'
 import { ParseToolChunkType } from '@/utils/parse-chunk/parse-tool-plugin'
+import { StreamBuffer } from '@/utils/stream-buffer'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
@@ -21,6 +22,7 @@ export const useSSE = (
   const { modelFunctional } = useModel()
   const abortControllerRef = useRef<AbortController | null>(null)
   const init = useEditorStore.getState().init
+  let streamBuffer: StreamBuffer | null = null
 
   useEffect(() => {
     return () => {
@@ -48,6 +50,17 @@ export const useSSE = (
     // 创建 AbortController 用于取消请求
     const abortController = new AbortController()
     abortControllerRef.current = abortController
+
+    // 创建流式响应缓冲区
+    streamBuffer = new StreamBuffer((buffer: string) => {
+      const parsedChunk = parseChunk(buffer)
+      const { data, done: parseDone, init, tool } = parsedChunk
+      data.length && onData(data)
+      parseDone.length && onDone(parseDone)
+      init && onInit(init)
+      tool && onTool(tool)
+    })
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -84,12 +97,10 @@ export const useSSE = (
         }
 
         const chunk = decoder.decode(value, { stream: true })
-        const parsedChunk = parseChunk(chunk)
-        const { data, done: parseDone, init, tool } = parsedChunk
-        data.length && onData(data)
-        parseDone.length && onDone(parseDone)
-        init && onInit(init)
-        tool && onTool(tool)
+        // 处理chunk，将chunk放入流式响应缓冲区
+        if (chunk.length) {
+          streamBuffer.append(chunk)
+        }
       }
     } catch (error: any) {
       // 忽略取消请求的错误
@@ -98,6 +109,7 @@ export const useSSE = (
         setError(error.message || 'An error occurred')
       }
     } finally {
+      streamBuffer?.forceRefresh()
       abortControllerRef.current = null
       setIsDone(true)
       init()
@@ -109,6 +121,10 @@ export const useSSE = (
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
       abortControllerRef.current = null
+    }
+
+    if (streamBuffer) {
+      streamBuffer.forceRefresh()
     }
 
     setIsDone(true)

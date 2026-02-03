@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Copy, Check, X, ExternalLink, Link2, Share2 } from 'lucide-react'
+import { Copy, Check, X, ExternalLink, Link2, Share2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -27,6 +27,7 @@ export default function ShareModal({
   const [copied, setCopied] = useState(false)
   const [isShared, setIsShared] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [statusLoaded, setStatusLoaded] = useState(false) // 分享状态是否已加载完成
 
   // 生成分享链接
   const shareUrl =
@@ -37,6 +38,7 @@ export default function ShareModal({
   // 组件挂载时获取当前分享状态
   useEffect(() => {
     if (isOpen && sessionId) {
+      setStatusLoaded(false);
       checkShareStatus();
     }
   }, [isOpen, sessionId]);
@@ -58,6 +60,7 @@ export default function ShareModal({
       toast.error('获取分享状态失败');
     } finally {
       setLoading(false);
+      setStatusLoaded(true);
     }
   };
 
@@ -144,6 +147,13 @@ export default function ShareModal({
           </DialogDescription>
         </DialogHeader>
 
+        {!statusLoaded ? (
+          <div className='flex items-center justify-center py-8 text-muted-foreground'>
+            <Loader2 className='size-6 animate-spin mr-2' />
+            <span>加载分享状态中...</span>
+          </div>
+        ) : (
+          <>
         {isShared && (
           <div className='flex items-center gap-2 mt-2'>
             <Input
@@ -207,6 +217,8 @@ export default function ShareModal({
             </>
           )}
         </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )

@@ -7,7 +7,7 @@ import { MessagesType } from '@/types/model/model-config'
 
 export type ShareConversationType = Omit<
   Required<MessagesType>,
-  'isDone' | 'next_id' | 'error' | 'created_time'
+  'status' | 'isDone' | 'next_id' | 'error' | 'created_time'
 >
 
 export default async function SharePage({

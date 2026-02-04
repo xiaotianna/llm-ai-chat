@@ -18,7 +18,7 @@ import { useSSE } from '@/hooks/useSSE'
 import { useEditorStore } from '@/store/editor'
 import { addHistory } from '@/store/history'
 import { MessageRoleType } from '@/types'
-import { MessagesType } from '@/types/model/model-config'
+import { MessagesType, MessageStatus } from '@/types/model/model-config'
 import { emitter } from '@/utils/emitter'
 import { fetchClient } from '@/utils/fetch-client'
 import {
@@ -181,7 +181,7 @@ const ChatMessageWrapper = forwardRef<
               role={message.role as MessageRoleType}
               content={message.content}
               reasoning={message.reasoning}
-              isDone={message.isDone}
+              status={message.status}
               error={message.error}
               next_id={message.next_id || null}
               tool_name={message.tool_name}
@@ -199,7 +199,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params)
   const [historyId, setHistoryId] = useState('')
   const { currentModel } = useModel()
-  const { isDone, play, stop, error } = useSSE(
+  const { status: sseStatus, play, stop, error } = useSSE(
     ModelUrlMap[currentModel.provider],
     currentModel.name,
     historyId
@@ -283,6 +283,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
             role: type,
             content: content || '',
             reasoning: reasoning || '',
+            status: 'completed' as MessageStatus,
             isDone: true,
             next_id: item.next_id || null,
             tool_name: item.tool_name || ''
@@ -305,6 +306,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         role: 'user',
         content: message,
         id: `local_${uuidv4()}`,
+        status: 'streaming' as MessageStatus,
         isDone: false
       },
       {
@@ -312,6 +314,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
         content: '',
         reasoning: '',
         id: `local_${uuidv4()}`,
+        status: 'streaming' as MessageStatus,
         isDone: false
       }
     ]
@@ -366,7 +369,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
   // 通用函数：处理prev_id相关的消息更新逻辑
   const handlePrevIdMessageUpdate = (
     prev_id: string,
-    newMessage: Omit<MessagesType, 'id' | 'isDone'> & { id?: string }
+    newMessage: Omit<MessagesType, 'id' | 'isDone' | 'status'> & { id?: string }
   ) => {
     setMessages((prev) => {
       const updated = [...prev]
@@ -383,12 +386,14 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
           ...lastMessage,
           id: prev_id,
           next_id: nextMessageId,
+          status: 'completed',
           isDone: true
         }
 
         // 新增一条新消息
         updated.push({
           id: nextMessageId,
+          status: 'streaming',
           isDone: false,
           ...newMessage
         })
@@ -457,12 +462,14 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
           ...updated[userMessageIndex],
           id:
             userMsg?.id || updated[userMessageIndex].id || `local_${uuidv4()}`,
+          status: 'completed',
           isDone: true
         }
         // 更新ai消息状态
         updated[aiMessageIndex] = {
           ...updated[aiMessageIndex],
           id: aiMsg?.id || updated[aiMessageIndex].id || `local_${uuidv4()}`,
+          status: 'completed',
           isDone: true
         }
       }
@@ -505,11 +512,13 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
           // 更新user消息状态
           updated[userMessageIndex] = {
             ...updated[userMessageIndex],
+            status: 'completed',
             isDone: true
           }
           // 更新ai消息状态
           updated[aiMessageIndex] = {
             ...updated[aiMessageIndex],
+            status: 'error',
             isDone: true,
             error: error
           }
@@ -609,7 +618,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
               <Editor
                 onSend={handleSendMessage}
                 showStop
-                isDone={isDone}
+                status={sseStatus}
                 onStop={handleStop}
               />
             </div>

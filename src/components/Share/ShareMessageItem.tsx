@@ -25,14 +25,14 @@ export const ShareMessageItem = (props: MessageItemProps) => {
           <AIMessage
             content={content}
             reasoning={reasoning}
-            isDone={true}
+            status='completed'
           />
         )}
         {isTool && (
           <ToolMessage
             id={id}
             content={content}
-            isDone={true}
+            status='completed'
             tool_name={tool_name || 'tool_name'}
           />
         )}

@@ -12,13 +12,41 @@ import { StreamBuffer } from '@/utils/stream-buffer'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
+// 状态机：SSE 请求状态
+export type SSEState = 'idle' | 'loading' | 'success' | 'error' | 'canceled'
+
+type SSEEvent = 'START' | 'FINISH' | 'ERROR' | 'CANCEL' | 'RESET'
+
+const transition = (state: SSEState, event: SSEEvent): SSEState => {
+  switch (state) {
+    case 'idle':
+      if (event === 'START') return 'loading'
+      return state
+    case 'loading':
+      if (event === 'ERROR') return 'error'
+      if (event === 'CANCEL') return 'canceled'
+      if (event === 'FINISH') return 'success'
+      return state
+    case 'success':
+    case 'error':
+    case 'canceled':
+      if (event === 'START') return 'loading'
+      if (event === 'RESET') return 'idle'
+      return state
+    default:
+      return state
+  }
+}
+
 export const useSSE = (
   url: string,
   modelName: ModelConfigKey,
   historyId?: string
 ) => {
   const [error, setError] = useState<string>('')
-  const [isDone, setIsDone] = useState<boolean>(true)
+  // 用状态机管理 loading / 完成 / 错误等状态
+  const [state, setState] = useState<SSEState>('idle')
+  const isDone = state !== 'loading'
   const { modelFunctional } = useModel()
   const abortControllerRef = useRef<AbortController | null>(null)
   const init = useEditorStore.getState().init
@@ -31,7 +59,7 @@ export const useSSE = (
         abortControllerRef.current.abort()
       }
       // 确保在组件卸载时设置为完成状态
-      setIsDone(true)
+      setState((prev) => transition(prev, 'FINISH'))
     }
   }, [])
 
@@ -45,7 +73,7 @@ export const useSSE = (
   ) => {
     // 初始化状态
     setError('')
-    setIsDone(false)
+    setState((prev) => transition(prev, 'START'))
 
     // 创建 AbortController 用于取消请求
     const abortController = new AbortController()
@@ -107,11 +135,13 @@ export const useSSE = (
       if (error.name !== 'AbortError') {
         toast.error(error.message || 'An error occurred')
         setError(error.message || 'An error occurred')
+        setState((prev) => transition(prev, 'ERROR'))
       }
     } finally {
       streamBuffer?.forceRefresh()
       abortControllerRef.current = null
-      setIsDone(true)
+      // 若已是 error/canceled 则保持不变；loading 正常结束则转为 success
+      setState((prev) => transition(prev, 'FINISH'))
       init()
     }
   }
@@ -127,9 +157,10 @@ export const useSSE = (
       streamBuffer.forceRefresh()
     }
 
-    setIsDone(true)
+    setState((prev) => transition(prev, 'CANCEL'))
     init()
   }
 
-  return { error, isDone, play, stop }
+  // 向外暴露状态机状态，UI 使用 status 而不是布尔 isDone（isDone目前在外部没有被使用）
+  return { error, isDone, status: state, play, stop }
 }

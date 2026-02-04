@@ -20,13 +20,14 @@ import { emitter } from '@/utils/emitter'
 import { ToolMessage } from './ToolMessage'
 import { UserMessage } from './UserMessage'
 import { AIMessage } from './AIMessage'
+import type { MessageStatus } from '@/types/model/model-config'
 
 interface MessageItemProps {
   id: string
   role: MessageRoleType
   content: string
   reasoning?: string
-  isDone?: boolean
+  status?: MessageStatus
   error?: string
   next_id: string | null
   tool_name?: string
@@ -39,7 +40,7 @@ export const MessageItem = React.memo((props: MessageItemProps) => {
     role,
     content,
     reasoning,
-    isDone = false,
+    status = 'completed',
     error,
     next_id,
     tool_name
@@ -89,7 +90,7 @@ export const MessageItem = React.memo((props: MessageItemProps) => {
           <AIMessage
             content={content}
             reasoning={reasoning}
-            isDone={isDone}
+            status={status}
             error={error}
           />
         )}
@@ -97,7 +98,7 @@ export const MessageItem = React.memo((props: MessageItemProps) => {
           <ToolMessage
             id={id}
             content={content}
-            isDone={isDone}
+            status={status}
             tool_name={tool_name || 'tool_name'}
           />
         )}
@@ -110,7 +111,7 @@ export const MessageItem = React.memo((props: MessageItemProps) => {
                 isAI ? 'justify-start' : 'justify-end'
               } w-full gap-[10px] text-[rgba(var(--coze-fg-2),var(--coze-fg-2-alpha))]`}
             >
-              {isDone && !error && (
+              {status === 'completed' && !error && (
                 <TooltipProvider>
                   {actions.map((action) => (
                     <Tooltip key={action.label}>

@@ -5,12 +5,14 @@ import EditorFunctional from './EditorFunctional'
 import SendMessageIcon from './icon/sendMessage-icon'
 import { useEditorStore } from '@/store/editor'
 import { Sparkles } from 'lucide-react'
+import type { SSEState } from '@/hooks/useSSE'
 
 interface EditorProps {
   onInput?: (value: string) => void
   onSend?: (message: string) => void
   showStop?: boolean // 是否展示停止按钮
-  isDone?: boolean
+  // 由状态机驱动的请求状态（可选）
+  status?: SSEState
   onStop?: () => void
 }
 
@@ -18,7 +20,7 @@ const Editor = ({
   onInput,
   onSend,
   showStop = false,
-  isDone = false,
+  status = 'idle',
   onStop
 }: EditorProps) => {
   const editableRef = useRef<HTMLDivElement>(null)
@@ -34,7 +36,7 @@ const Editor = ({
   return (
     <div className='border w-full p-4 relative rounded-2xl bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] shadow-[0px_2px_6px_0px_rgba(var(--coze-shadow-0),.04),0px_4px_12px_0px_rgba(var(--coze-shadow-0),.02)] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))'>
       {/* 停止按钮 */}
-      {showStop && !isDone && (
+      {showStop && status === 'loading' && (
         <div
           onClick={onStop}
           className='absolute border-2 cursor-pointer gap-2 select-none -top-12 left-1/2 rounded-2xl transform -translate-x-1/2 px-6 py-1 flex items-center bg-[rgba(var(--coze-bg-3),var(--coze-bg-3-alpha))] shadow-[0px_2px_6px_0px_rgba(var(--coze-shadow-0),.04),0px_4px_12px_0px_rgba(var(--coze-shadow-0),.02)] border-[rgba(var(--coze-stroke-5),var(--coze-stroke-5-alpha))'

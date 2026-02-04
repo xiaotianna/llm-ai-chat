@@ -6,18 +6,19 @@ import {
   ToolInput,
   ToolOutput
 } from '../ui/shadcn-io/ai/tool'
+import type { MessageStatus } from '@/types/model/model-config'
 
 // AI调用工具的消息
 export const ToolMessage = ({
   id,
   content,
   tool_name,
-  isDone = false
+  status = 'completed'
 }: {
   id: string
   content: string
   tool_name: string
-  isDone?: boolean
+  status?: MessageStatus
 }) => {
   const { input, output, error } = JSON.parse(content)
   const toolCall = {
@@ -28,11 +29,12 @@ export const ToolMessage = ({
     errorText: error
   }
 
-  const state = isDone
-    ? error
-      ? 'output-error'
-      : 'output-available'
-    : 'input-available'
+  const state =
+    status === 'completed'
+      ? error
+        ? 'output-error'
+        : 'output-available'
+      : 'input-available'
   return (
     <Tool defaultOpen={false}>
       <ToolHeader

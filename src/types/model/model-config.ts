@@ -8,6 +8,9 @@ export type ModelConfigType = {
   [key in ModelConfigKey]: ModelType
 }
 
+// 消息状态机状态
+export type MessageStatus = 'pending' | 'streaming' | 'completed' | 'error'
+
 // 模型消息类型
 export type MessagesType = {
   id: string
@@ -16,7 +19,10 @@ export type MessagesType = {
   reasoning?: string // ai: 是否带有思考内容
   next_id?: string // ai: 是否有下一条消息
   tool_name?: string // ai: 工具调用名称
-  isDone: boolean // ai: 是否结束
+  // 状态机驱动：消息当前状态
+  status: MessageStatus
+  // 兼容老逻辑：是否结束（由 status 推导）
+  isDone: boolean
   error?: string // ai: 错误信息
   created_time?: string
 }

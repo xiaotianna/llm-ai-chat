@@ -6,17 +6,18 @@ import {
 import ShinyText from '../ui/shadcn-io/shiny-text'
 import DotLoading from '../DotLoading'
 import MarkdownRender from '../MarkdownRender'
+import type { MessageStatus } from '@/types/model/model-config'
 
 // AI回复的消息
 export const AIMessage = ({
   content,
   reasoning,
-  isDone = false,
+  status = 'completed',
   error
 }: {
   content: string
   reasoning?: string
-  isDone?: boolean
+  status?: MessageStatus
   error?: string
 }) => {
   if (error) {
@@ -43,8 +44,8 @@ export const AIMessage = ({
           <div className='flex-wrap max-w-[90%]'>
             {/* 渲染 Markdown */}
             {content && <MarkdownRender>{content}</MarkdownRender>}
-            {/* 加载中 */}
-            {!isDone && (
+            {/* 加载中：流式中显示动效 */}
+            {status === 'streaming' && (
               <div className='flex-wrap mt-2 max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
                 <DotLoading />
               </div>
@@ -52,7 +53,7 @@ export const AIMessage = ({
           </div>
         </>
       ) : (
-        !isDone && (
+        status === 'streaming' && (
           <div className='flex-wrap max-w-[90%] flex items-center text-[rgba(var(--coze-fg-3),var(--coze-fg-4-alpha))] min-w-2 rounded-[16px] text-left whitespace-pre-wrap break-all mr-auto'>
             <ShinyText
               text='正在思考中'

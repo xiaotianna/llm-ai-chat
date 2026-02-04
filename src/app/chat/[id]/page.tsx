@@ -117,23 +117,32 @@ const ChatMessageWrapper = forwardRef<
 
   const [copy] = useCopyToClipboard()
 
+  const handleCopy = React.useCallback(
+    (id: any) => {
+      const content = findMessageByNextId(id)
+        .filter((msg) => msg?.role !== 'tool')
+        .map((msg) => msg?.content)
+        .join('\n')
+
+      copy(content).then(() => {
+        toast.success('复制成功')
+      })
+    },
+    [copy, messages]
+  )
+
   // emitter监听copy
   useEffect(() => {
     emitter.on('copy', handleCopy)
     return () => {
-      emitter.off('copy')
+      emitter.off('copy', handleCopy)
     }
-  }, [])
+  }, [handleCopy])
 
-  const handleCopy = (id: any) => {
-    const content = findMessageByNextId(id)
-      .filter((msg) => msg?.role !== 'tool')
-      .map((msg) => msg?.content)
-      .join('\n')
-    copy(content).then(() => {
-      toast.success('复制成功')
-    })
-  }
+  const handleDelete = React.useCallback((id: any) => {
+    const ids = findMessageByNextId(id).map((msg) => msg!.id)
+    deleteConversation(ids)
+  }, [messages])
 
   // emitter监听delete-message
   useEffect(() => {
@@ -141,12 +150,7 @@ const ChatMessageWrapper = forwardRef<
     return () => {
       emitter.off('delete-message')
     }
-  }, [])
-
-  const handleDelete = (id: any) => {
-    const ids = findMessageByNextId(id).map((msg) => msg!.id)
-    deleteConversation(ids)
-  }
+  }, [handleDelete])
 
   // 删除message
   const deleteConversation = async (ids: string[]) => {

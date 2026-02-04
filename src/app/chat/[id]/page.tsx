@@ -599,7 +599,7 @@ const ChatHomeIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
           {/* 分享 */}
           {subject && (
             <div className='ml-auto'>
-              <ShareButton sessionId={id} />
+              <ShareButton sessionId={historyId} />
             </div>
           )}
         </div>

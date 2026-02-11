@@ -9,8 +9,9 @@ export class OllamaClient {
   }
 
   private init() {
-    // 需要执行 ollama serve 启动服务
-    this.ollama = new Ollama()
+    // 需要执行 ollama serve 启动服务；Docker 内通过 OLLAMA_HOST 指向宿主机（如 host.docker.internal:11434）
+    const host = process.env.OLLAMA_HOST ?? 'http://127.0.0.1:11434'
+    this.ollama = new Ollama({ host })
   }
 
   private getModel(modelName: string) {

@@ -8,7 +8,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "npx @modelcontextprotocol/inspector"
+    "test": "npx @modelcontextprotocol/inspector",
+    "docker:prebuild": "docker builder prune -f",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:ps": "docker compose ps",
+    "docker:logs-mcp": "docker compose logs -f mcp-server",
+    "docker:logs-ai-chat": "docker compose logs -f ai-chat",
+    "docker:rm": "docker compose rm -f",
+    "docker:unpull": "docker builder prune -a -f"
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.2",

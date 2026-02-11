@@ -18,7 +18,7 @@ import {
   getAllToolsService,
   queryMcpConfigService
 } from '@/services/mcp'
-import { MCPConnect } from '@/utils/mcp/mcp-client'
+import { MCPConnect, getMcpServerUrl } from '@/utils/mcp/mcp-client'
 import { StreamMessage } from '@/utils/stream-message'
 
 export async function POST(request: NextRequest) {
@@ -127,12 +127,12 @@ export async function POST(request: NextRequest) {
     if (isAgent) {
       // 查询mcp配置
       const mcpConfigs = await queryMcpConfigService(userId)
-      // 创建MCPConnect实例用于工具调用
+      // 创建MCPConnect实例用于工具调用（Docker 内通过 getMcpServerUrl 将 localhost 转为 mcp-server）
       const configs = mcpConfigs.map((config) => ({
         id: config.id,
         name: config.name,
         type: config.mcp_type,
-        url: config.url
+        url: getMcpServerUrl(config.url)
       }))
       mcp = new MCPConnect(configs)
       // 建立连接，查询所有的mcp的tools

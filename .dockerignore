@@ -1,0 +1,10 @@
+node_modules
+.next/cache
+.git
+.gitignore
+Dockerfile
+.dockerignore
+docker-compose.yml
+node_modules/.pnpm
+build
+.next

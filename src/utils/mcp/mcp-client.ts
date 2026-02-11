@@ -2,6 +2,25 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
 
+/**
+ * Docker 内 ai-chat 访问 MCP 时需把 localhost 换成服务名（如 mcp-server）。
+ * 设置 MCP_SERVER_HOST 时会把 URL 中的 localhost/127.0.0.1 替换为该 host。
+ */
+export function getMcpServerUrl(url: string): string {
+  const host = process.env.MCP_SERVER_HOST
+  if (!host) return url
+  try {
+    const u = new URL(url)
+    if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
+      u.hostname = host
+      return u.toString()
+    }
+    return url
+  } catch {
+    return url
+  }
+}
+
 interface ServerConfig {
   id: string
   name: string

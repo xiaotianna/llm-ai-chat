@@ -1,0 +1,25 @@
+services:
+  ai-chat:
+    image: ai-chat:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # 使用本机已运行的 Ollama（Docker 内通过 host.docker.internal 访问宿主机）
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      # MCP 配置里填 localhost:4000 时，在容器内替换为服务名，才能连上 mcp-server
+      - MCP_SERVER_HOST=mcp-server
+    restart: always
+  mcp-server:
+    image: mcp-server:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner-mcp
+    ports:
+      - "4000:4000"
+    restart: always

@@ -21,22 +21,36 @@ export async function generateMetadata({
     }
   }
 
-  const { history } = data
+  const { history, creator } = data
   const description = `查看用户分享的对话：${history.subject}`
   const title = `${history.subject} - AI Chat 分享`
+
+  const openGraph: Metadata['openGraph'] = {
+    title,
+    description,
+    type: 'article',
+    publishedTime: history.create_time,
+    authors: ['用户'],
+    siteName: 'AI Chat',
+    locale: 'zh_CN',
+  }
+
+  // 添加用户头像到 OpenGraph 图片
+  if (creator?.avatar) {
+    openGraph.images = [
+      {
+        url: creator.avatar,
+        width: 200,
+        height: 200,
+        alt: creator.name || '用户头像'
+      }
+    ]
+  }
 
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      type: 'article',
-      publishedTime: history.create_time,
-      authors: ['用户'],
-      siteName: 'AI Chat',
-      locale: 'zh_CN'
-    },
+    openGraph,
     robots: {
       index: true,
       follow: true,

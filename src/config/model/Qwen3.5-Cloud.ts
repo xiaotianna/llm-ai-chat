@@ -1,7 +1,7 @@
-export const Qwen3Model = {
-  name: 'Qwen3-0.6b',
-  description: 'Ollama本地部署Qwen3模型',
-  model: 'qwen3:0.6b',
+export const Qwen3_5CloudModel = {
+  name: 'Qwen3.5-Cloud',
+  description: 'Ollama云端Qwen3.5满血模型',
+  model: 'qwen3.5:397b-cloud',
   requestConfig: {
     method: 'POST',
     headers: {
@@ -9,7 +9,7 @@ export const Qwen3Model = {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'qwen3:0.6b',
+      model: 'qwen3.5:397b-cloud',
       stream: true
     })
   },

@@ -20,6 +20,7 @@ import {
 } from '@/services/mcp'
 import { MCPConnect, getMcpServerUrl } from '@/utils/mcp/mcp-client'
 import { StreamMessage } from '@/utils/stream-message'
+import { reactAgentPrompt } from '@/config/prompt'
 
 export async function POST(request: NextRequest) {
   // 设置 SSE 响应头
@@ -115,6 +116,7 @@ export async function POST(request: NextRequest) {
      * @description 核心 next_id -> 用于标识下一条消息
      */
     messages = [
+      ...(isAgent ? [{ role: 'system', content: reactAgentPrompt }] : []),
       ...messages,
       {
         role: 'user',

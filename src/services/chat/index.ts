@@ -66,6 +66,23 @@ export const ollamaGenerateSubjectService = async (
   const subject = await ollama.chat(model.name, prompts(message) as Message[], {
     format: jsonSchema
   })
-  // {"subject": "xxx"}
-  return subjectSchema.parse(JSON.parse(subject.message.content))
+
+  const content = subject.message.content.trim()
+
+  // 尝试解析 JSON 格式
+  try {
+    const parsed = JSON.parse(content)
+    return subjectSchema.parse(parsed)
+  } catch {
+    // 如果解析失败，尝试直接提取标题（模型可能没有按 JSON 格式返回）
+    // 去掉可能的 ```json ``` 包裹
+    const cleanContent = content.replace(/^```json\s*/, '').replace(/```$/, '').trim()
+    try {
+      const parsed = JSON.parse(cleanContent)
+      return subjectSchema.parse(parsed)
+    } catch {
+      // 如果还是失败，直接把内容作为 subject
+      return { subject: cleanContent.replace(/^"|"$/g, '') }
+    }
+  }
 }

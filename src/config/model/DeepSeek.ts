@@ -1,9 +1,7 @@
-// DeepSeek-R1模型采用Open Router的接口
-export const DeepSeekR1Model = {
-  name: 'DeepSeek-R1',
+export const DeepSeekModel = {
+  name: 'DeepSeek-v3.2',
   description: '深度求索研发的高性能模型，逻辑推理和代码生成能力强',
-  url: 'https://openrouter.ai/api/v1/chat/completions',
-  model: 'tngtech/deepseek-r1t2-chimera:free',
+  model: 'deepseek-v3.2:cloud',
   requestConfig: {
     method: 'POST',
     headers: {
@@ -11,12 +9,12 @@ export const DeepSeekR1Model = {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'tngtech/deepseek-r1t2-chimera:free',
+      model: 'deepseek-v3.2:cloud',
       stream: true
     })
   },
   system_message: {},
   // 模型提供商
-  provider: 'open-router',
-  function: {}
+  provider: 'ollama',
+  function: { tools: true, agent: true }
 } as const
